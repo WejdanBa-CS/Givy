@@ -160,7 +160,7 @@ class GivyLogo extends StatelessWidget {
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: 'givy', style: givyDisplay(size: fontSize)),
+              TextSpan(text: 'Givy', style: givyDisplay(size: fontSize)),
             ],
           ),
         ),
