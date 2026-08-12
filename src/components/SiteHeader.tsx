@@ -42,7 +42,11 @@ export function SiteHeader() {
               </span>
               <span className="text-sm text-ink-soft">{user.name}</span>
             </div>
-            <button type="button" className="btn btn-secondary" onClick={signOut}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void signOut()}
+            >
               Sign out
             </button>
           </>

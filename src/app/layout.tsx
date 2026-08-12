@@ -14,9 +14,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Givy — gift lists worth sharing",
+  title: "givy — gifts without the guesswork",
   description:
-    "Create a Givy for birthdays, weddings, and holidays. Share it. Friends claim gifts anonymously.",
+    "Build a wishlist, share one link, and let friends claim gifts in private — no duplicates, no awkward moments.",
 };
 
 export default function RootLayout({

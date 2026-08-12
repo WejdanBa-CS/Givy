@@ -18,6 +18,7 @@ export interface User {
   email: string;
   provider: AuthProvider;
   avatarHue: number;
+  betaUnlocked?: boolean;
 }
 
 export interface GiftItem {

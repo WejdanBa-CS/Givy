@@ -6,25 +6,40 @@ import { useEffect, useState } from "react";
 import { Countdown } from "@/components/Countdown";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { SiteHeader } from "@/components/SiteHeader";
+import { formatMoney } from "@/lib/api";
 import { useGivy } from "@/lib/givy-context";
-import { formatMoney } from "@/lib/store";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
 
 export default function SharedGivyPage() {
   const params = useParams<{ code: string }>();
-  const { ready, getByShare, claimItem, refresh } = useGivy();
+  const { ready, configured, user, getByShare, claimItem } = useGivy();
   const [list, setList] = useState<GivyList | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeItem, setActiveItem] = useState<GiftItem | null>(null);
   const [ship, setShip] = useState<ShipPreference>("to_giver");
   const [doneMsg, setDoneMsg] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready) return;
-    setList(getByShare(params.code));
-  }, [ready, params.code, getByShare]);
+    void (async () => {
+      setLoading(true);
+      try {
+        if (!configured) {
+          setList(null);
+          return;
+        }
+        setList(await getByShare(params.code));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [ready, configured, params.code, getByShare]);
 
-  if (!ready) {
+  if (!ready || loading) {
     return <div className="shell py-20 text-center text-ink-soft">Loading…</div>;
   }
 
@@ -35,8 +50,7 @@ export default function SharedGivyPage() {
         <div className="panel mx-auto mt-10 max-w-lg p-8 text-center">
           <p className="font-display text-3xl text-ink">Hmm, no Givy here</p>
           <p className="mt-2 text-sm text-ink-soft">
-            This link may be old, or the list hasn&apos;t been created on this device yet
-            (MVP stores lists in local browser storage).
+            This link may be old, unpublished, or the server isn&apos;t configured yet.
           </p>
           <Link href="/" className="btn btn-primary mt-5">
             Go to Givy
@@ -48,18 +62,29 @@ export default function SharedGivyPage() {
 
   const openCount = list.items.filter((i) => !i.purchased).length;
 
-  function confirmClaim() {
+  async function confirmClaim() {
     if (!activeItem || !list) return;
-    const updated = claimItem(list.id, activeItem.id, ship);
-    if (updated) {
-      setList(updated);
-      refresh();
-      setDoneMsg(
-        ship === "to_giver"
-          ? `Nice — "${activeItem.title}" is yours to wrap. Ship it to your place.`
-          : `Nice — "${activeItem.title}" is marked claimed. Ship it to ${list.ownerName}.`,
-      );
+    if (!user) {
+      window.location.href = `/login?next=/g/${params.code}`;
+      return;
     }
+    setBusy(true);
+    setClaimError(null);
+    const result = await claimItem(list.id, activeItem.id, ship);
+    setBusy(false);
+    if (!result.ok) {
+      setClaimError(result.error ?? "Could not claim this gift");
+      return;
+    }
+    if (ship === "to_recipient" && result.recipientAddress) {
+      setRevealedAddress(result.recipientAddress);
+    }
+    setDoneMsg(
+      ship === "to_giver"
+        ? `Nice — "${activeItem.title}" is yours to wrap. Ship it to your place.`
+        : `Nice — "${activeItem.title}" is marked claimed. Ship it to ${list.ownerName}.`,
+    );
+    setList(await getByShare(params.code));
     setActiveItem(null);
   }
 
@@ -93,87 +118,80 @@ export default function SharedGivyPage() {
             </p>
           </div>
 
-        {doneMsg && (
-          <div className="panel mt-4 border-leaf/30 bg-leaf/10 p-4 text-sm font-semibold text-ink">
-            {doneMsg}
-          </div>
-        )}
+          {doneMsg && (
+            <div className="panel mt-4 border-leaf/30 bg-leaf/10 p-4 text-sm font-semibold text-ink">
+              <p>{doneMsg}</p>
+              {revealedAddress && (
+                <p className="mt-2 font-normal text-ink-soft">
+                  Ship to: <span className="font-semibold text-ink">{revealedAddress}</span>
+                </p>
+              )}
+            </div>
+          )}
 
-        <ul className="stagger mt-6 space-y-3">
-          {list.items.map((item) => (
-            <li
-              key={item.id}
-              className={`panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${
-                item.purchased ? "gift-claimed" : ""
-              }`}
-            >
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <GiftGlyph hint={item.imageHint} />
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <p className="gift-title text-lg font-semibold text-ink">
-                      {item.title}
-                    </p>
-                    <span className="text-sm font-semibold text-ink-soft">
-                      {item.purchased ? "Already claimed" : null}
-                    </span>
-                    {!item.purchased && (
-                      <span className="price-badge">{formatMoney(item.price)}</span>
+          <ul className="stagger mt-6 space-y-3">
+            {list.items.map((item) => (
+              <li
+                key={item.id}
+                className={`panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${
+                  item.purchased ? "gift-claimed" : ""
+                }`}
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <GiftGlyph hint={item.imageHint} />
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <p className="gift-title text-lg font-semibold text-ink">
+                        {item.title}
+                      </p>
+                      <span className="text-sm font-semibold text-ink-soft">
+                        {item.purchased ? "Already claimed" : null}
+                      </span>
+                      {!item.purchased && (
+                        <span className="price-badge">{formatMoney(item.price)}</span>
+                      )}
+                    </div>
+                    {item.notes && (
+                      <p className="mt-1 text-sm text-ink-soft">{item.notes}</p>
                     )}
                   </div>
-                  {item.notes && (
-                    <p className="mt-1 text-sm text-ink-soft">{item.notes}</p>
-                  )}
                 </div>
-              </div>
 
-              {!item.purchased ? (
-                <div className="flex flex-wrap gap-2 sm:justify-end">
-                  {item.url && (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary"
+                {!item.purchased ? (
+                  <div className="flex flex-wrap gap-2 sm:justify-end">
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary"
+                      >
+                        Buy link
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-primary !rounded-full"
+                      onClick={() => {
+                        setActiveItem(item);
+                        setShip("to_giver");
+                        setDoneMsg(null);
+                        setClaimError(null);
+                        setRevealedAddress(null);
+                      }}
                     >
-                      Buy link
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    className="btn btn-primary !rounded-full"
-                    onClick={() => {
-                      setActiveItem(item);
-                      setShip("to_giver");
-                      setDoneMsg(null);
-                    }}
-                  >
-                    Claim this gift 🎁
-                  </button>
-                </div>
-              ) : (
-                <span className="text-sm font-semibold text-ink-soft sm:ml-auto">
-                  {item.claimedByMe ? "You claimed this" : "Taken"}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-
-        <aside className="panel mt-6 flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink">
-              Sponsored
-            </p>
-            <p className="font-semibold text-ink">
-              Pair any gift with a handwritten note kit — 15% off this week.
-            </p>
-          </div>
-          <button type="button" className="btn btn-secondary shrink-0">
-            View offer
-          </button>
-        </aside>
-      </main>
+                      Claim this gift 🎁
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-sm font-semibold text-ink-soft sm:ml-auto">
+                    {item.claimedByMe ? "You claimed this" : "Taken"}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </main>
       </div>
 
       {activeItem && (
@@ -183,6 +201,11 @@ export default function SharedGivyPage() {
             <p className="mt-2 text-sm text-ink-soft">
               Others will see it as taken — they won&apos;t see it was you.
             </p>
+            {!user && (
+              <p className="mt-3 rounded-2xl bg-paper p-3 text-sm text-ink-soft">
+                You&apos;ll sign in with Google to claim (keeps claims secure and anonymous to the list owner).
+              </p>
+            )}
 
             <div className="mt-5 space-y-2">
               <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-paper p-3">
@@ -211,17 +234,24 @@ export default function SharedGivyPage() {
                     Ship to {list.ownerName}
                   </span>
                   <span className="block text-sm text-ink-soft">
-                    {list.recipientAddress
-                      ? list.recipientAddress
-                      : "They haven’t added an address yet — you can still claim and ask them."}
+                    Address is revealed only after you claim — never on the public list.
                   </span>
                 </span>
               </label>
             </div>
 
+            {claimError && (
+              <p className="mt-3 text-sm font-semibold text-coral-deep">{claimError}</p>
+            )}
+
             <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" className="btn btn-primary" onClick={confirmClaim}>
-                Confirm claim
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={busy}
+                onClick={() => void confirmClaim()}
+              >
+                {busy ? "Claiming…" : user ? "Confirm claim" : "Sign in to claim"}
               </button>
               <button
                 type="button"

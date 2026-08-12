@@ -10,25 +10,27 @@ import {
   type ReactNode,
 } from "react";
 import {
-  addItem as addItemStore,
-  claimItem as claimItemStore,
+  addItemRemote,
+  claimItemRemote,
+  createListRemote,
+  deleteListRemote,
+  fetchMyLists,
+  fetchPublicList,
+  fetchSessionUser,
+  isSupabaseConfigured,
+  publishListRemote,
+  removeItemRemote,
+  signInWithGoogle,
+  signOutRemote,
+  updateListRemote,
+  type ClaimResult,
+} from "./api";
+import {
   createGiveaway as createGiveawayStore,
-  createList as createListStore,
-  deleteList as deleteListStore,
   drawGiveaway as drawGiveawayStore,
-  ensureSeedData,
   getActivity,
-  getCurrentUser,
   getGiveaways,
-  getListById,
-  getListByShareCode,
-  getListsForUser,
   joinGiveaway as joinGiveawayStore,
-  publishList as publishListStore,
-  removeItem as removeItemStore,
-  signIn as signInStore,
-  signOut as signOutStore,
-  updateList as updateListStore,
 } from "./store";
 import type {
   ActivityEvent,
@@ -42,13 +44,14 @@ import type {
 
 type GivyContextValue = {
   ready: boolean;
+  configured: boolean;
   user: User | null;
   lists: GivyList[];
   giveaways: Giveaway[];
   activity: ActivityEvent[];
-  signIn: (provider: AuthProvider) => void;
-  signOut: () => void;
-  refresh: () => void;
+  signIn: (provider: AuthProvider, next?: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  refresh: () => Promise<void>;
   createList: (input: {
     title: string;
     occasion: GivyList["occasion"];
@@ -56,20 +59,20 @@ type GivyContextValue = {
     eventDate: string;
     recipientAddress?: string;
     withDemoItems?: boolean;
-  }) => GivyList | null;
-  updateList: (id: string, patch: Partial<GivyList>) => GivyList | null;
-  deleteList: (id: string) => void;
+  }) => Promise<GivyList | null>;
+  updateList: (id: string, patch: Partial<GivyList>) => Promise<GivyList | null>;
+  deleteList: (id: string) => Promise<void>;
   addItem: (
     listId: string,
     item: Omit<GiftItem, "id" | "purchased" | "purchasedAt" | "claimedByMe">,
-  ) => GiftItem | null;
-  removeItem: (listId: string, itemId: string) => void;
-  publishList: (listId: string) => GivyList | null;
+  ) => Promise<GiftItem | null>;
+  removeItem: (listId: string, itemId: string) => Promise<void>;
+  publishList: (listId: string) => Promise<GivyList | null>;
   claimItem: (
     listId: string,
     itemId: string,
     shipPreference: ShipPreference,
-  ) => GivyList | null;
+  ) => Promise<ClaimResult>;
   createGiveaway: (input: {
     title: string;
     description: string;
@@ -80,7 +83,7 @@ type GivyContextValue = {
   joinGiveaway: (id: string) => Giveaway | null;
   drawGiveaway: (id: string) => Giveaway | null;
   getList: (id: string) => GivyList | null;
-  getByShare: (code: string) => GivyList | null;
+  getByShare: (code: string) => Promise<GivyList | null>;
 };
 
 const GivyContext = createContext<GivyContextValue | null>(null);
@@ -91,97 +94,114 @@ export function GivyProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useState<GivyList[]>([]);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const configured = isSupabaseConfigured();
 
-  const refresh = useCallback(() => {
-    const u = getCurrentUser();
-    if (u) ensureSeedData(u);
+  const refresh = useCallback(async () => {
+    if (!configured) {
+      setUser(null);
+      setLists([]);
+      setGiveaways([]);
+      setActivity([]);
+      return;
+    }
+    const u = await fetchSessionUser();
     setUser(u);
-    setLists(u ? getListsForUser(u.id) : []);
+    if (u?.betaUnlocked) {
+      setLists(await fetchMyLists(u.id, u.name));
+    } else {
+      setLists([]);
+    }
     setGiveaways(getGiveaways());
     setActivity(getActivity());
-  }, []);
+  }, [configured]);
 
   useEffect(() => {
-    refresh();
-    setReady(true);
+    void (async () => {
+      try {
+        await refresh();
+      } finally {
+        setReady(true);
+      }
+    })();
   }, [refresh]);
 
   const value = useMemo<GivyContextValue>(
     () => ({
       ready,
+      configured,
       user,
       lists,
       giveaways,
       activity,
       refresh,
-      signIn: (provider) => {
-        signInStore(provider);
-        refresh();
+      signIn: async (provider, next = "/app") => {
+        if (provider !== "google") {
+          throw new Error("Closed beta uses Google sign-in only");
+        }
+        if (!configured) {
+          throw new Error("Supabase is not configured");
+        }
+        await signInWithGoogle(next);
       },
-      signOut: () => {
-        signOutStore();
-        refresh();
+      signOut: async () => {
+        await signOutRemote();
+        await refresh();
       },
-      createList: (input) => {
-        const u = getCurrentUser();
-        if (!u) return null;
-        const list = createListStore({ owner: u, ...input });
-        refresh();
+      createList: async (input) => {
+        if (!user) return null;
+        const list = await createListRemote({ owner: user, ...input });
+        await refresh();
         return list;
       },
-      updateList: (id, patch) => {
-        const list = updateListStore(id, patch);
-        refresh();
-        return list;
+      updateList: async (id, patch) => {
+        await updateListRemote(id, patch);
+        await refresh();
+        return lists.find((l) => l.id === id) ?? null;
       },
-      deleteList: (id) => {
-        deleteListStore(id);
-        refresh();
+      deleteList: async (id) => {
+        await deleteListRemote(id);
+        await refresh();
       },
-      addItem: (listId, item) => {
-        const gift = addItemStore(listId, item);
-        refresh();
+      addItem: async (listId, item) => {
+        const gift = await addItemRemote(listId, item);
+        await refresh();
         return gift;
       },
-      removeItem: (listId, itemId) => {
-        removeItemStore(listId, itemId);
-        refresh();
+      removeItem: async (listId, itemId) => {
+        await removeItemRemote(listId, itemId);
+        await refresh();
       },
-      publishList: (listId) => {
-        const list = publishListStore(listId);
-        refresh();
-        return list;
+      publishList: async (listId) => {
+        await publishListRemote(listId);
+        await refresh();
+        return lists.find((l) => l.id === listId) ?? null;
       },
-      claimItem: (listId, itemId, shipPreference) => {
-        const list = claimItemStore(listId, itemId, shipPreference);
-        refresh();
-        return list;
+      claimItem: async (_listId, itemId, shipPreference) => {
+        const result = await claimItemRemote(itemId, shipPreference);
+        return result;
       },
       createGiveaway: (input) => {
-        const u = getCurrentUser();
-        if (!u) return null;
-        const g = createGiveawayStore({ owner: u, ...input });
-        refresh();
+        if (!user) return null;
+        const g = createGiveawayStore({ owner: user, ...input });
+        setGiveaways(getGiveaways());
         return g;
       },
       joinGiveaway: (id) => {
-        const u = getCurrentUser();
-        if (!u) return null;
-        const g = joinGiveawayStore(id, u.id);
-        refresh();
+        if (!user) return null;
+        const g = joinGiveawayStore(id, user.id);
+        setGiveaways(getGiveaways());
         return g;
       },
       drawGiveaway: (id) => {
-        const u = getCurrentUser();
-        if (!u) return null;
-        const g = drawGiveawayStore(id, u.id);
-        refresh();
+        if (!user) return null;
+        const g = drawGiveawayStore(id, user.id);
+        setGiveaways(getGiveaways());
         return g;
       },
-      getList: (id) => getListById(id),
-      getByShare: (code) => getListByShareCode(code),
+      getList: (id) => lists.find((l) => l.id === id) ?? null,
+      getByShare: async (code) => fetchPublicList(code),
     }),
-    [ready, user, lists, giveaways, activity, refresh],
+    [ready, configured, user, lists, giveaways, activity, refresh],
   );
 
   return <GivyContext.Provider value={value}>{children}</GivyContext.Provider>;
