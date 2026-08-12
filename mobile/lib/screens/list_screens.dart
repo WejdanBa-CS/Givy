@@ -276,67 +276,96 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         body: ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
           children: [
+            Text(
+              '${occasionEmoji[list.occasion]} ${occasionLabels[list.occasion]}',
+              style: const TextStyle(color: GivyColors.coral, fontWeight: FontWeight.w800, fontSize: 12),
+            ),
+            Text(list.title, style: givyDisplay(size: 32)),
+            if (list.description != null)
+              Text(list.description!, style: const TextStyle(color: GivyColors.inkSoft)),
+            const SizedBox(height: 14),
+            GivyPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'COUNTDOWN',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2,
+                      color: GivyColors.inkSoft,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  CountdownDisplay(eventDate: list.eventDate),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${occasionEmoji[list.occasion]} ${occasionLabels[list.occasion]}',
-                        style: const TextStyle(color: GivyColors.leaf, fontWeight: FontWeight.w800, fontSize: 12),
-                      ),
-                      Text(list.title, style: givyDisplay(size: 32)),
-                      if (list.description != null)
-                        Text(list.description!, style: const TextStyle(color: GivyColors.inkSoft)),
-                    ],
-                  ),
-                ),
-                CountdownChip(eventDate: list.eventDate),
-              ],
-            ),
-            const SizedBox(height: 14),
-            for (final item in list.items)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Opacity(
-                  opacity: item.purchased ? 0.55 : 1,
                   child: GivyPanel(
-                    child: Row(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
                       children: [
-                        GiftEmoji(hint: item.imageHint),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  decoration: item.purchased ? TextDecoration.lineThrough : null,
-                                ),
-                              ),
-                              if (item.notes != null)
-                                Text(item.notes!, style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13)),
-                              const SizedBox(height: 4),
-                              if (item.purchased)
-                                const Text('Claimed', style: TextStyle(color: GivyColors.inkSoft, fontSize: 13))
-                              else
-                                PriceBadge(price: formatMoney(item.price)),
-                            ],
-                          ),
-                        ),
-                        if (!item.purchased)
-                          IconButton(
-                            onPressed: () => c.removeItem(list.id, item.id),
-                            icon: const Icon(Icons.close),
-                          ),
+                        Text('${list.items.length}', style: givyDisplay(size: 22)),
+                        const Text('Total', style: TextStyle(fontSize: 11, color: GivyColors.inkSoft, fontWeight: FontWeight.w700)),
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GivyPanel(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      children: [
+                        Text('${list.openCount}', style: givyDisplay(size: 22, color: GivyColors.coral)),
+                        const Text('Available', style: TextStyle(fontSize: 11, color: GivyColors.inkSoft, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GivyPanel(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      children: [
+                        Text('${list.claimedCount}', style: givyDisplay(size: 22, color: GivyColors.leaf)),
+                        const Text('Claimed', style: TextStyle(fontSize: 11, color: GivyColors.inkSoft, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'GIFT IDEAS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                color: GivyColors.inkSoft,
               ),
+            ),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: list.items.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.68,
+              ),
+              itemBuilder: (context, i) => GiftProductCard(item: list.items[i], isOwner: true),
+            ),
+            const SizedBox(height: 14),
             GivyPanel(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

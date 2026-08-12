@@ -293,8 +293,8 @@ class _SharedScreenState extends State<SharedScreen> {
         backgroundColor: Colors.transparent,
         body: Column(
           children: [
-            const FriendBanner(
-              text: 'Friend view — claimed gifts stay anonymous',
+            FriendBanner(
+              text: 'Friend view — claims stay private from ${list.ownerName.split(' ').first}',
             ),
             Expanded(
               child: Scaffold(
@@ -328,7 +328,7 @@ class _SharedScreenState extends State<SharedScreen> {
                               style: const TextStyle(color: GivyColors.inkSoft),
                             ),
                           const SizedBox(height: 12),
-                          CountdownChip(eventDate: list.eventDate, compact: false),
+                          CountdownDisplay(eventDate: list.eventDate),
                         ],
                       ),
                     ),
@@ -343,61 +343,35 @@ class _SharedScreenState extends State<SharedScreen> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    for (final item in list.items)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Opacity(
-                          opacity: item.purchased ? 0.55 : 1,
-                          child: GivyPanel(
-                            child: Row(
-                              children: [
-                                GiftEmoji(hint: item.imageHint),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.title,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          decoration: item.purchased
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      if (item.purchased)
-                                        const Text(
-                                          'Already claimed',
-                                          style: TextStyle(
-                                            color: GivyColors.inkSoft,
-                                            fontSize: 13,
-                                          ),
-                                        )
-                                      else
-                                        PriceBadge(price: formatMoney(item.price)),
-                                    ],
-                                  ),
-                                ),
-                                if (!item.purchased)
-                                  FilledButton(
-                                    onPressed: () => _claim(context, list.id, item),
-                                    child: const Text('Claim'),
-                                  )
-                                else
-                                  Text(
-                                    item.claimedByMe ? 'You claimed this' : 'Taken',
-                                    style: const TextStyle(
-                                      color: GivyColors.inkSoft,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
+                    if (list.items.isNotEmpty)
+                      GivyPanel(
+                        child: ClaimProgressBar(
+                          claimed: list.claimedCount,
+                          total: list.items.length,
                         ),
                       ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: list.items.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.68,
+                      ),
+                      itemBuilder: (context, i) {
+                        final item = list.items[i];
+                        return GiftProductCard(
+                          item: item,
+                          isOwner: false,
+                          onClaim: item.purchased
+                              ? null
+                              : () => _claim(context, list.id, item),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

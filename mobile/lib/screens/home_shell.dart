@@ -117,111 +117,104 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.watch<GivyController>();
     final lists = c.lists;
-    final upcoming = [...lists]..sort((a, b) => a.eventDate.compareTo(b.eventDate));
-    final next = upcoming.isEmpty ? null : upcoming.first;
     final claimed = lists.fold<int>(0, (n, l) => n + l.claimedCount);
     final openGives = c.giveaways.where((g) => g.status == GiveawayStatus.open).take(2);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        const Text('Welcome back', style: TextStyle(color: GivyColors.inkSoft, fontWeight: FontWeight.w600)),
         Text(
-          '${c.user!.name.split(' ').first}, ready to Givy?',
+          '${c.user!.name.split(' ').first}',
           style: givyDisplay(size: 34),
         ),
+        const SizedBox(height: 4),
+        const Text('Welcome back', style: TextStyle(color: GivyColors.inkSoft, fontWeight: FontWeight.w600)),
         const SizedBox(height: 14),
         Row(
           children: [
-            _stat('${lists.length}', 'Lists'),
+            _stat('${lists.length}', 'Your lists'),
             const SizedBox(width: 8),
-            _stat('$claimed', 'Claimed'),
+            _stat('$claimed', 'Gifts claimed'),
             const SizedBox(width: 8),
-            _stat('${c.giveaways.where((g) => g.status == GiveawayStatus.open).length}', 'Gives'),
+            _stat('${lists.fold<int>(0, (n, l) => n + (l.published ? 12 : 0))}', 'People viewing'),
           ],
         ),
-        if (next != null) ...[
-          const SizedBox(height: 16),
-          GivyPanel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Next up · ${occasionEmoji[next.occasion]} ${occasionLabels[next.occasion]}',
-                        style: const TextStyle(
-                          color: GivyColors.leaf,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    CountdownChip(eventDate: next.eventDate),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(next.title, style: givyDisplay(size: 26)),
-                Text(
-                  '${next.openCount} still open · ${formatShortDate(next.eventDate)}',
-                  style: const TextStyle(color: GivyColors.inkSoft),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    FilledButton(
-                      onPressed: () => context.push('/app/list/${next.id}'),
-                      child: const Text('Open list'),
-                    ),
-                    if (next.published)
-                      OutlinedButton(
-                        onPressed: () => context.push('/g/${next.shareCode}'),
-                        child: const Text('Shared view'),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
         const SizedBox(height: 18),
-        _sectionTitle(context, 'Your lists', () => context.go('/app/lists')),
-        ...lists.take(3).map(
+        Text(
+          'YOUR LISTS',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2,
+            color: GivyColors.inkSoft,
+          ),
+        ),
+        const SizedBox(height: 10),
+        ...lists.map(
           (list) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: GivyPanel(
               onTap: () => context.push('/app/list/${list.id}'),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${occasionEmoji[list.occasion]} ${occasionLabels[list.occasion]} · ${list.published ? 'Live' : 'Draft'}',
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: GivyColors.secondary,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${occasionEmoji[list.occasion]} ${occasionLabels[list.occasion]}',
                           style: const TextStyle(
-                            color: GivyColors.leaf,
+                            color: GivyColors.coral,
                             fontWeight: FontWeight.w800,
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                         ),
-                        Text(list.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                        Text(
-                          '${list.openCount} open',
-                          style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${daysUntil(list.eventDate)}d away',
+                        style: const TextStyle(
+                          color: GivyColors.coral,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  CountdownChip(eventDate: list.eventDate),
+                  const SizedBox(height: 10),
+                  Text(list.title, style: givyDisplay(size: 22)),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${formatShortDate(list.eventDate)} · ${list.published ? 'Shared' : 'Draft'}',
+                    style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
+                  ),
+                  if (list.items.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    ClaimProgressBar(
+                      claimed: list.claimedCount,
+                      total: list.items.length,
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
         ),
         const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: () => context.go('/app/create'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(64),
+            side: const BorderSide(color: GivyColors.border, width: 2, style: BorderStyle.solid),
+          ),
+          child: const Text('+ Start another list'),
+        ),
+        const SizedBox(height: 18),
         _sectionTitle(context, 'Nearby giveaways', () => context.go('/app/giveaways')),
         ...openGives.map(
           (g) => Padding(
@@ -231,9 +224,9 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(g.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(g.title, style: const TextStyle(fontWeight: FontWeight.w800)),
                   Text(
-                    '${g.itemName} · ${g.area} · ends ${formatShortDate(g.endsAt)}',
+                    '${g.itemName} · ${g.area}',
                     style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
                   ),
                 ],
@@ -248,27 +241,25 @@ class HomeScreen extends StatelessWidget {
   Widget _stat(String value, String label) {
     return Expanded(
       child: GivyPanel(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.all(14),
         child: Column(
           children: [
             Text(value, style: givyDisplay(size: 24)),
-            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: GivyColors.inkSoft)),
+            Text(label, style: const TextStyle(fontSize: 11, color: GivyColors.inkSoft, fontWeight: FontWeight.w700)),
           ],
         ),
       ),
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title, VoidCallback onSeeAll) {
+  Widget _sectionTitle(BuildContext context, String title, VoidCallback onTap) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: givyDisplay(size: 24))),
-          TextButton(
-            onPressed: onSeeAll,
-            child: const Text('See all', style: TextStyle(color: GivyColors.coralDeep)),
-          ),
+          Text(title, style: givyDisplay(size: 22)),
+          const Spacer(),
+          TextButton(onPressed: onTap, child: const Text('See all')),
         ],
       ),
     );
