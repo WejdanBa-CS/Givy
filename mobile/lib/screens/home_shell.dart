@@ -78,8 +78,11 @@ class AppShell extends StatelessWidget {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: index,
-          backgroundColor: GivyColors.paper.withValues(alpha: 0.95),
-          indicatorColor: GivyColors.coral.withValues(alpha: 0.18),
+          backgroundColor: GivyColors.paper,
+          indicatorColor: GivyColors.goldSoft,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          elevation: 0,
           onDestinationSelected: (i) {
             switch (i) {
               case 0:

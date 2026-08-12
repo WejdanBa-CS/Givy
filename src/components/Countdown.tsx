@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { daysUntil } from "@/lib/store";
 
-export function Countdown({ eventDate }: { eventDate: string }) {
+export function Countdown({
+  eventDate,
+  compact = true,
+}: {
+  eventDate: string;
+  compact?: boolean;
+}) {
   const [days, setDays] = useState(() => daysUntil(eventDate));
 
   useEffect(() => {
@@ -12,19 +18,20 @@ export function Countdown({ eventDate }: { eventDate: string }) {
     return () => window.clearInterval(id);
   }, [eventDate]);
 
-  const label =
-    days > 1
-      ? `${days} days to go`
-      : days === 1
-        ? "Tomorrow"
-        : days === 0
-          ? "Today"
-          : `${Math.abs(days)} days ago`;
+  if (!compact) {
+    return (
+      <div className="countdown-card">
+        <span className="num">{days}</span>
+        <span className="mt-1 text-xs font-bold text-ink-soft">
+          {days === 1 ? "day to go" : "days to go"}
+        </span>
+      </div>
+    );
+  }
 
   return (
-    <div className="animate-tick inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1.5 text-sm font-semibold text-ink-soft backdrop-blur">
-      <span aria-hidden className="h-2 w-2 rounded-full bg-coral" />
-      {label}
+    <div className="countdown-card !flex-row !py-2 !px-3">
+      <span className="num !text-xl">{days}</span>
     </div>
   );
 }

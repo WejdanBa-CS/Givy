@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Figma Make v3 — Warm Editorial (keep existing Givy logo mark)
 class GivyColors {
-  static const ink = Color(0xFF10261C);
-  static const inkSoft = Color(0xFF2C4A3A);
-  static const mist = Color(0xFFE7F1EA);
-  static const mistDeep = Color(0xFFD3E5DA);
-  static const paper = Color(0xFFF4FAF6);
-  static const coral = Color(0xFFFF5A3C);
-  static const coralDeep = Color(0xFFE84328);
-  static const leaf = Color(0xFF2F7A55);
-  static const amber = Color(0xFFF0B429);
-  static const line = Color(0x1F10261C);
+  static const ink = Color(0xFF1A120E);
+  static const inkSoft = Color(0xFF6B5748);
+  static const background = Color(0xFFFEF6EE);
+  static const paper = Color(0xFFFFFFFF);
+  static const border = Color(0xFFE8D9CC);
+  static const coral = Color(0xFFE8391E);
+  static const coralDeep = Color(0xFFC92E16);
+  static const gold = Color(0xFFFFCD3C);
+  static const goldSoft = Color(0xFFFFE9A8);
+  static const mist = Color(0xFFFEF6EE);
+  static const mistDeep = Color(0xFFF3E6D8);
+  static const leaf = Color(0xFF3D6B4F);
+  static const amber = Color(0xFFFFCD3C);
+  static const line = Color(0xFFE8D9CC);
 }
 
 ThemeData buildGivyTheme() {
@@ -20,22 +25,23 @@ ThemeData buildGivyTheme() {
     colorScheme: ColorScheme.fromSeed(
       seedColor: GivyColors.coral,
       primary: GivyColors.coral,
-      secondary: GivyColors.leaf,
-      surface: Colors.white,
+      secondary: GivyColors.gold,
+      surface: GivyColors.paper,
       onPrimary: Colors.white,
       onSurface: GivyColors.ink,
     ),
-    scaffoldBackgroundColor: Colors.transparent,
+    scaffoldBackgroundColor: GivyColors.background,
   );
 
   return base.copyWith(
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
+    textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).apply(
       bodyColor: GivyColors.ink,
       displayColor: GivyColors.ink,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: GivyColors.background,
       elevation: 0,
+      scrolledUnderElevation: 0,
       foregroundColor: GivyColors.ink,
       titleTextStyle: GoogleFonts.fraunces(
         fontSize: 22,
@@ -47,46 +53,57 @@ ThemeData buildGivyTheme() {
       style: FilledButton.styleFrom(
         backgroundColor: GivyColors.coral,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        shape: const StadiumBorder(),
-        textStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w700, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: GivyColors.ink,
+        elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        side: const BorderSide(color: GivyColors.line),
-        shape: const StadiumBorder(),
-        backgroundColor: Colors.white.withValues(alpha: 0.72),
-        textStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+        side: const BorderSide(color: GivyColors.border, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        backgroundColor: GivyColors.paper,
+        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w700, fontSize: 15),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.78),
+      fillColor: GivyColors.paper,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: GivyColors.line),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: GivyColors.border, width: 2),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: GivyColors.line),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: GivyColors.border, width: 2),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: GivyColors.coral, width: 1.4),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: GivyColors.coral, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     cardTheme: CardThemeData(
-      color: Colors.white.withValues(alpha: 0.72),
+      color: GivyColors.paper,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: GivyColors.line),
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: GivyColors.border, width: 2),
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: GivyColors.paper,
+      indicatorColor: GivyColors.goldSoft,
+      elevation: 0,
+      labelTextStyle: WidgetStatePropertyAll(
+        GoogleFonts.dmSans(fontWeight: FontWeight.w700, fontSize: 12),
+      ),
+    ),
+    dividerColor: GivyColors.border,
   );
 }
 
@@ -94,11 +111,13 @@ TextStyle givyDisplay({
   double size = 32,
   FontWeight weight = FontWeight.w600,
   Color color = GivyColors.ink,
+  double height = 1.05,
 }) {
   return GoogleFonts.fraunces(
     fontSize: size,
     fontWeight: weight,
     color: color,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
+    height: height,
   );
 }

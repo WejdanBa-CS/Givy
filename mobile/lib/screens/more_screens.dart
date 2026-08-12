@@ -278,89 +278,132 @@ class _SharedScreenState extends State<SharedScreen> {
     final c = context.watch<GivyController>();
     final list = c.listByShare(widget.code);
 
+    if (list == null) {
+      return GivyScaffold(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(title: const GivyLogo(size: 28, fontSize: 20)),
+          body: const Center(child: Text('Hmm, no Givy here')),
+        ),
+      );
+    }
+
     return GivyScaffold(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const GivyLogo(size: 28, fontSize: 20),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => context.canPop() ? context.pop() : context.go('/'),
-          ),
-        ),
-        body: list == null
-            ? const Center(child: Text('Hmm, no Givy here'))
-            : ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  GivyPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${occasionLabels[list.occasion]} · ${list.ownerName}',
-                          style: const TextStyle(color: GivyColors.leaf, fontWeight: FontWeight.w800, fontSize: 12),
-                        ),
-                        Text(list.title, style: givyDisplay(size: 32)),
-                        if (list.description != null)
-                          Text(list.description!, style: const TextStyle(color: GivyColors.inkSoft)),
-                        const SizedBox(height: 8),
-                        CountdownChip(eventDate: list.eventDate),
-                      ],
-                    ),
+        body: Column(
+          children: [
+            const FriendBanner(
+              text: 'Friend view — claimed gifts stay anonymous',
+            ),
+            Expanded(
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  title: const GivyLogo(size: 28, fontSize: 20),
+                  leading: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => context.canPop() ? context.pop() : context.go('/'),
                   ),
-                  if (doneMsg != null) ...[
-                    const SizedBox(height: 10),
+                ),
+                body: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
                     GivyPanel(
-                      child: Text(doneMsg!, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${occasionLabels[list.occasion]} · ${list.ownerName}',
+                            style: const TextStyle(
+                              color: GivyColors.leaf,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(list.title, style: givyDisplay(size: 32)),
+                          if (list.description != null)
+                            Text(
+                              list.description!,
+                              style: const TextStyle(color: GivyColors.inkSoft),
+                            ),
+                          const SizedBox(height: 12),
+                          CountdownChip(eventDate: list.eventDate, compact: false),
+                        ],
+                      ),
                     ),
-                  ],
-                  const SizedBox(height: 12),
-                  for (final item in list.items)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Opacity(
-                        opacity: item.purchased ? 0.55 : 1,
-                        child: GivyPanel(
-                          child: Row(
-                            children: [
-                              GiftEmoji(hint: item.imageHint),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        decoration: item.purchased ? TextDecoration.lineThrough : null,
+                    if (doneMsg != null) ...[
+                      const SizedBox(height: 10),
+                      GivyPanel(
+                        color: GivyColors.goldSoft,
+                        child: Text(
+                          doneMsg!,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    for (final item in list.items)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Opacity(
+                          opacity: item.purchased ? 0.55 : 1,
+                          child: GivyPanel(
+                            child: Row(
+                              children: [
+                                GiftEmoji(hint: item.imageHint),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          decoration: item.purchased
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      item.purchased ? 'Already claimed' : formatMoney(item.price),
-                                      style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 4),
+                                      if (item.purchased)
+                                        const Text(
+                                          'Already claimed',
+                                          style: TextStyle(
+                                            color: GivyColors.inkSoft,
+                                            fontSize: 13,
+                                          ),
+                                        )
+                                      else
+                                        PriceBadge(price: formatMoney(item.price)),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              if (!item.purchased)
-                                FilledButton(
-                                  onPressed: () => _claim(context, list.id, item),
-                                  child: const Text("I'll get this"),
-                                )
-                              else
-                                Text(
-                                  item.claimedByMe ? 'You claimed this' : 'Taken',
-                                  style: const TextStyle(color: GivyColors.inkSoft, fontWeight: FontWeight.w700),
-                                ),
-                            ],
+                                if (!item.purchased)
+                                  FilledButton(
+                                    onPressed: () => _claim(context, list.id, item),
+                                    child: const Text('Claim'),
+                                  )
+                                else
+                                  Text(
+                                    item.claimedByMe ? 'You claimed this' : 'Taken',
+                                    style: const TextStyle(
+                                      color: GivyColors.inkSoft,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
