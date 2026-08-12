@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #10261c;
+  --ink-soft: #2c4a3a;
+  --mist: #e7f1ea;
+  --mist-deep: #d3e5da;
+  --paper: #f4faf6;
+  --coral: #ff5a3c;
+  --coral-deep: #e84328;
+  --leaf: #2f7a55;
+  --leaf-soft: #6fad8a;
+  --amber: #f0b429;
+  --line: rgba(16, 38, 28, 0.12);
+  --shadow: 0 18px 50px rgba(16, 38, 28, 0.12);
+  --radius: 1.25rem;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-mist: var(--mist);
+  --color-mist-deep: var(--mist-deep);
+  --color-paper: var(--paper);
+  --color-coral: var(--coral);
+  --color-coral-deep: var(--coral-deep);
+  --color-leaf: var(--leaf);
+  --color-leaf-soft: var(--leaf-soft);
+  --color-amber: var(--amber);
+  --color-line: var(--line);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --shadow-givy: var(--shadow);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(1200px 700px at 12% -10%, rgba(255, 90, 60, 0.18), transparent 55%),
+    radial-gradient(900px 600px at 90% 8%, rgba(47, 122, 85, 0.16), transparent 50%),
+    linear-gradient(165deg, #f7fcf8 0%, var(--mist) 42%, #dfece4 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    radial-gradient(rgba(16, 38, 28, 0.05) 0.8px, transparent 0.8px);
+  background-size: 18px 18px;
+  z-index: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--coral);
+  color: white;
+  box-shadow: 0 10px 24px rgba(255, 90, 60, 0.28);
+}
+
+.btn-primary:hover {
+  background: var(--coral-deep);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  padding-inline: 0.85rem;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field:focus {
+  border-color: rgba(255, 90, 60, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 90, 60, 0.12);
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--ink-soft);
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes tick-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-rise {
+  animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-float {
+  animation: floaty 5.5s ease-in-out infinite;
+}
+
+.animate-tick {
+  animation: tick-pulse 2.4s ease-in-out infinite;
+}
+
+.logo-mark {
+  filter: drop-shadow(0 8px 16px rgba(255, 90, 60, 0.28));
+}
+
+.stagger > * {
+  animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 100ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 160ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 220ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 280ms;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 340ms;
+}
+
+.gift-claimed {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+
+.gift-claimed .gift-title {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(16, 38, 28, 0.45);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(244, 250, 246, 0.96), rgba(244, 250, 246, 0.82));
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+}
+
+.app-nav-inner {
+  width: min(560px, 100%);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.15rem;
+  align-items: end;
+}
+
+.app-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.2rem;
+  border-radius: 1rem;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.app-nav-item.is-active {
+  color: var(--ink);
+}
+
+.app-nav-item.is-primary .app-nav-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: var(--coral);
+  color: white;
+  box-shadow: 0 10px 22px rgba(255, 90, 60, 0.32);
+  margin-top: -1.1rem;
+}
+
+.app-nav-item.is-primary.is-active .app-nav-icon,
+.app-nav-item.is-primary:hover .app-nav-icon {
+  background: var(--coral-deep);
+}
+
+.app-nav-icon {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.app-nav-item:hover {
+  color: var(--ink);
+}
