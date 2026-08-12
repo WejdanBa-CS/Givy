@@ -51,9 +51,9 @@ export default function ProfilePage() {
       <section className="panel p-5">
         <p className="font-display text-xl text-ink">Coming later</p>
         <ul className="mt-2 space-y-1 text-sm text-ink-soft">
-          <li>Real Google / Apple / Facebook OAuth</li>
           <li>Retail partnerships & checkout</li>
           <li>Wedding registry upgrades</li>
+          <li>Giveaways in cloud beta</li>
         </ul>
       </section>
 
@@ -61,8 +61,7 @@ export default function ProfilePage() {
         type="button"
         className="btn btn-secondary w-full"
         onClick={() => {
-          signOut();
-          router.replace("/");
+          void signOut().then(() => router.replace("/"));
         }}
       >
         Sign out

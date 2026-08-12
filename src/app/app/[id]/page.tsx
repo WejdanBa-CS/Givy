@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Countdown } from "@/components/Countdown";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { useGivy } from "@/lib/givy-context";
-import { formatMoney } from "@/lib/store";
+import { formatMoney } from "@/lib/api";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function ManageListPage() {
@@ -23,6 +23,11 @@ export default function ManageListPage() {
   const [urlInput, setUrlInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
   const [copied, setCopied] = useState(false);
+  const [addressDraft, setAddressDraft] = useState("");
+
+  useEffect(() => {
+    setAddressDraft(list?.recipientAddress ?? "");
+  }, [list?.id, list?.recipientAddress]);
 
   if (!list) {
     return (
@@ -40,10 +45,10 @@ export default function ManageListPage() {
       ? `${window.location.origin}/g/${list.shareCode}`
       : `/g/${list.shareCode}`;
 
-  function onAdd(e: FormEvent) {
+  async function onAdd(e: FormEvent) {
     e.preventDefault();
     if (!titleInput.trim()) return;
-    addItem(list!.id, {
+    await addItem(list!.id, {
       title: titleInput.trim(),
       price: priceInput ? Number(priceInput) : undefined,
       url: urlInput.trim() || undefined,
@@ -120,7 +125,7 @@ export default function ManageListPage() {
                   <button
                     type="button"
                     className="btn btn-ghost text-sm"
-                    onClick={() => removeItem(list.id, item.id)}
+                    onClick={() => void removeItem(list.id, item.id)}
                   >
                     Remove
                   </button>
@@ -180,7 +185,7 @@ export default function ManageListPage() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => publishList(list.id)}
+                  onClick={() => void publishList(list.id)}
                 >
                   Finalize & share
                 </button>
@@ -205,10 +210,13 @@ export default function ManageListPage() {
             </p>
             <textarea
               className="field mt-3 min-h-24"
-              value={list.recipientAddress ?? ""}
-              onChange={(e) =>
-                updateList(list.id, { recipientAddress: e.target.value })
-              }
+              value={addressDraft}
+              onChange={(e) => setAddressDraft(e.target.value)}
+              onBlur={() => {
+                if (addressDraft !== (list.recipientAddress ?? "")) {
+                  void updateList(list.id, { recipientAddress: addressDraft });
+                }
+              }}
               placeholder="123 Gift Lane…"
             />
           </div>
@@ -218,8 +226,7 @@ export default function ManageListPage() {
             className="btn btn-ghost text-sm text-coral-deep"
             onClick={() => {
               if (confirm("Delete this Givy?")) {
-                deleteList(list.id);
-                router.push("/app/lists");
+                void deleteList(list.id).then(() => router.push("/app/lists"));
               }
             }}
           >

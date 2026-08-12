@@ -24,9 +24,9 @@ export default function CreatePage() {
   const [address, setAddress] = useState("");
   const [withDemo, setWithDemo] = useState(true);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const list = createList({
+    const list = await createList({
       title: title.trim() || "Untitled Givy",
       occasion,
       description: description.trim() || undefined,
