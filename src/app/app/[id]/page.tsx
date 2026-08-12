@@ -96,9 +96,11 @@ export default function ManageListPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="gift-title font-semibold text-ink">{item.title}</p>
-                    <p className="text-sm font-semibold text-ink-soft">
-                      {item.purchased ? "Claimed" : formatMoney(item.price)}
-                    </p>
+                    {item.purchased ? (
+                      <p className="text-sm font-semibold text-ink-soft">Claimed</p>
+                    ) : (
+                      <span className="price-badge">{formatMoney(item.price)}</span>
+                    )}
                   </div>
                   {item.notes && (
                     <p className="mt-1 text-sm text-ink-soft">{item.notes}</p>

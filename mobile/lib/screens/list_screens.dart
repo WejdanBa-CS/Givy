@@ -317,12 +317,13 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                                   decoration: item.purchased ? TextDecoration.lineThrough : null,
                                 ),
                               ),
-                              Text(
-                                item.purchased ? 'Claimed' : formatMoney(item.price),
-                                style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
-                              ),
                               if (item.notes != null)
                                 Text(item.notes!, style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13)),
+                              const SizedBox(height: 4),
+                              if (item.purchased)
+                                const Text('Claimed', style: TextStyle(color: GivyColors.inkSoft, fontSize: 13))
+                              else
+                                PriceBadge(price: formatMoney(item.price)),
                             ],
                           ),
                         ),

@@ -64,30 +64,34 @@ export default function SharedGivyPage() {
   }
 
   return (
-    <div className="shell pb-20">
-      <SiteHeader />
+    <div className="pb-20">
+      <div className="friend-banner">
+        🤫 Friend view — gifts you claim stay anonymous. No duplicates, no spoilers.
+      </div>
+      <div className="shell">
+        <SiteHeader />
 
-      <main className="mt-6">
-        <div className="animate-rise overflow-hidden rounded-[2rem] border border-line bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(231,241,234,0.45))] p-6 shadow-givy sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
-                {OCCASION_LABELS[list.occasion]} · {list.ownerName}
-              </p>
-              <h1 className="mt-2 font-display text-4xl tracking-tight text-ink sm:text-5xl">
-                {list.title}
-              </h1>
-              {list.description && (
-                <p className="mt-3 max-w-xl text-ink-soft">{list.description}</p>
-              )}
+        <main className="mt-6">
+          <div className="panel animate-rise p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-leaf">
+                  {OCCASION_LABELS[list.occasion]} · {list.ownerName}
+                </p>
+                <h1 className="mt-2 font-display text-4xl tracking-tight text-ink sm:text-5xl">
+                  {list.title}
+                </h1>
+                {list.description && (
+                  <p className="mt-3 max-w-xl text-ink-soft">{list.description}</p>
+                )}
+              </div>
+              <Countdown eventDate={list.eventDate} compact={false} />
             </div>
-            <Countdown eventDate={list.eventDate} />
+            <p className="mt-5 text-sm font-semibold text-ink-soft">
+              {openCount} idea{openCount === 1 ? "" : "s"} still open · claimed gifts are
+              crossed out (buyer stays anonymous)
+            </p>
           </div>
-          <p className="mt-5 text-sm font-semibold text-ink-soft">
-            {openCount} idea{openCount === 1 ? "" : "s"} still open · claimed gifts are
-            crossed out (buyer stays anonymous)
-          </p>
-        </div>
 
         {doneMsg && (
           <div className="panel mt-4 border-leaf/30 bg-leaf/10 p-4 text-sm font-semibold text-ink">
@@ -111,8 +115,11 @@ export default function SharedGivyPage() {
                       {item.title}
                     </p>
                     <span className="text-sm font-semibold text-ink-soft">
-                      {item.purchased ? "Already claimed" : formatMoney(item.price)}
+                      {item.purchased ? "Already claimed" : null}
                     </span>
+                    {!item.purchased && (
+                      <span className="price-badge">{formatMoney(item.price)}</span>
+                    )}
                   </div>
                   {item.notes && (
                     <p className="mt-1 text-sm text-ink-soft">{item.notes}</p>
@@ -134,14 +141,14 @@ export default function SharedGivyPage() {
                   )}
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary !rounded-full"
                     onClick={() => {
                       setActiveItem(item);
                       setShip("to_giver");
                       setDoneMsg(null);
                     }}
                   >
-                    I&apos;ll get this
+                    Claim this gift 🎁
                   </button>
                 </div>
               ) : (
@@ -155,7 +162,7 @@ export default function SharedGivyPage() {
 
         <aside className="panel mt-6 flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-amber">
+            <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink">
               Sponsored
             </p>
             <p className="font-semibold text-ink">
@@ -167,17 +174,18 @@ export default function SharedGivyPage() {
           </button>
         </aside>
       </main>
+      </div>
 
       {activeItem && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-ink/35 p-4 sm:place-items-center">
-          <div className="panel w-full max-w-md animate-rise p-5 sm:p-6">
+          <div className="panel w-full max-w-md animate-rise border-2 p-5 sm:p-6">
             <p className="font-display text-2xl text-ink">Claim {activeItem.title}</p>
             <p className="mt-2 text-sm text-ink-soft">
               Others will see it as taken — they won&apos;t see it was you.
             </p>
 
             <div className="mt-5 space-y-2">
-              <label className="flex cursor-pointer gap-3 rounded-2xl border border-line bg-paper/80 p-3">
+              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-paper p-3">
                 <input
                   type="radio"
                   name="ship"
@@ -191,7 +199,7 @@ export default function SharedGivyPage() {
                   </span>
                 </span>
               </label>
-              <label className="flex cursor-pointer gap-3 rounded-2xl border border-line bg-paper/80 p-3">
+              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-paper p-3">
                 <input
                   type="radio"
                   name="ship"

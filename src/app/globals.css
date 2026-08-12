@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #10261c;
-  --ink-soft: #2c4a3a;
-  --mist: #e7f1ea;
-  --mist-deep: #d3e5da;
-  --paper: #f4faf6;
-  --coral: #ff5a3c;
-  --coral-deep: #e84328;
-  --leaf: #2f7a55;
-  --leaf-soft: #6fad8a;
-  --amber: #f0b429;
-  --line: rgba(16, 38, 28, 0.12);
-  --shadow: 0 18px 50px rgba(16, 38, 28, 0.12);
-  --radius: 1.25rem;
+  --ink: #1a120e;
+  --ink-soft: #6b5748;
+  --mist: #fef6ee;
+  --mist-deep: #f3e6d8;
+  --paper: #ffffff;
+  --coral: #e8391e;
+  --coral-deep: #c92e16;
+  --leaf: #3d6b4f;
+  --leaf-soft: #6f9879;
+  --amber: #ffcd3c;
+  --gold: #ffcd3c;
+  --line: #e8d9cc;
+  --shadow: none;
+  --radius: 1.125rem;
   --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -48,23 +49,11 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
-  background:
-    radial-gradient(1200px 700px at 12% -10%, rgba(255, 90, 60, 0.18), transparent 55%),
-    radial-gradient(900px 600px at 90% 8%, rgba(47, 122, 85, 0.16), transparent 50%),
-    linear-gradient(165deg, #f7fcf8 0%, var(--mist) 42%, #dfece4 100%);
-  background-attachment: fixed;
+  background: var(--mist);
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image:
-    radial-gradient(rgba(16, 38, 28, 0.05) 0.8px, transparent 0.8px);
-  background-size: 18px 18px;
-  z-index: 0;
+  display: none;
 }
 
 a {
@@ -97,12 +86,12 @@ select {
   justify-content: center;
   gap: 0.5rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0.875rem;
   padding: 0.85rem 1.35rem;
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  transition: transform 180ms ease, background 180ms ease;
 }
 
 .btn:hover {
@@ -116,7 +105,7 @@ select {
 .btn-primary {
   background: var(--coral);
   color: white;
-  box-shadow: 0 10px 24px rgba(255, 90, 60, 0.28);
+  box-shadow: none;
 }
 
 .btn-primary:hover {
@@ -124,10 +113,9 @@ select {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--paper);
   color: var(--ink);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(8px);
+  border: 2px solid var(--line);
 }
 
 .btn-ghost {
@@ -138,34 +126,34 @@ select {
 
 .field {
   width: 100%;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.78);
-  border-radius: 1rem;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  border-radius: 0.875rem;
   padding: 0.85rem 1rem;
   color: var(--ink);
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease;
 }
 
 .field:focus {
-  border-color: rgba(255, 90, 60, 0.55);
-  box-shadow: 0 0 0 4px rgba(255, 90, 60, 0.12);
+  border-color: var(--coral);
+  box-shadow: none;
 }
 
 .label {
   display: block;
   margin-bottom: 0.4rem;
   font-size: 0.85rem;
-  font-weight: 650;
+  font-weight: 700;
   color: var(--ink-soft);
 }
 
 .panel {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid var(--line);
+  background: var(--paper);
+  border: 2px solid var(--line);
   border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--shadow);
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 @keyframes rise-in {
@@ -212,7 +200,45 @@ select {
 }
 
 .logo-mark {
-  filter: drop-shadow(0 8px 16px rgba(255, 90, 60, 0.28));
+  filter: none;
+}
+
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--gold);
+  border: 1.5px solid rgba(26, 18, 14, 0.12);
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.friend-banner {
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 800;
+  text-align: center;
+  padding: 0.75rem 1rem;
+}
+
+.countdown-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  border-radius: 0.875rem;
+  padding: 0.65rem 1rem;
+}
+
+.countdown-card .num {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--coral);
+  line-height: 1;
 }
 
 .stagger > * {
@@ -260,9 +286,9 @@ select {
   bottom: 0;
   z-index: 40;
   padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, rgba(244, 250, 246, 0.96), rgba(244, 250, 246, 0.82));
+  background: rgba(254, 246, 238, 0.96);
   backdrop-filter: blur(14px);
-  border-top: 1px solid var(--line);
+  border-top: 2px solid var(--line);
 }
 
 .app-nav-inner {

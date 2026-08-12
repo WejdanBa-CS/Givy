@@ -24,8 +24,8 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
       aria-hidden
     >
       {/* box */}
-      <rect x="8" y="28" width="48" height="28" rx="10" fill="#FF5A3C" />
-      <rect x="6" y="24" width="52" height="11" rx="5.5" fill="#E84328" />
+      <rect x="8" y="28" width="48" height="28" rx="10" fill="#E8391E" />
+      <rect x="6" y="24" width="52" height="11" rx="5.5" fill="#C92E16" />
       {/* cream ribbon */}
       <rect x="29" y="24" width="6" height="32" rx="2" fill="#FFF7F4" />
       <rect x="8" y="38" width="48" height="6" rx="2" fill="#FFF7F4" />
@@ -35,7 +35,7 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
         cy="15.5"
         rx="12"
         ry="7.5"
-        fill="#2F7A55"
+        fill="#3D6B4F"
         transform="rotate(-22 21 15.5)"
       />
       <ellipse
@@ -43,14 +43,14 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
         cy="15.5"
         rx="12"
         ry="7.5"
-        fill="#2F7A55"
+        fill="#3D6B4F"
         transform="rotate(22 43 15.5)"
       />
       {/* knot + gold center */}
-      <rect x="26.5" y="13" width="11" height="13" rx="4" fill="#1F5C3E" />
-      <circle cx="32" cy="19.5" r="2.8" fill="#F0B429" />
+      <rect x="26.5" y="13" width="11" height="13" rx="4" fill="#2A4D38" />
+      <circle cx="32" cy="19.5" r="2.8" fill="#FFCD3C" />
       {/* short tails */}
-      <path d="M29 26l-5 9 5-2.5 3 4.5 3-4.5 5 2.5-5-9H29z" fill="#2F7A55" />
+      <path d="M29 26l-5 9 5-2.5 3 4.5 3-4.5 5 2.5-5-9H29z" fill="#3D6B4F" />
     </svg>
   );
 }
@@ -73,13 +73,10 @@ export function Logo({ size = "md", showWordmark = true, className = "" }: LogoP
       </span>
       {showWordmark && (
         <span
-          className={`font-display font-semibold tracking-tight text-ink ${wordClass}`}
+          className={`font-display font-semibold tracking-tight lowercase text-ink ${wordClass}`}
           style={{ letterSpacing: size === "hero" ? "-0.03em" : "-0.02em" }}
         >
-          Givy
-          <span className="text-coral" aria-hidden>
-            .
-          </span>
+          givy
         </span>
       )}
     </span>

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'store.dart';
 import 'theme.dart';
 
 class GivyScaffold extends StatelessWidget {
@@ -9,18 +10,8 @@ class GivyScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF7FCF8),
-            GivyColors.mist,
-            Color(0xFFDFECE4),
-          ],
-        ),
-      ),
+    return ColoredBox(
+      color: GivyColors.background,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 980),
@@ -37,11 +28,15 @@ class GivyPanel extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.onTap,
+    this.color = GivyColors.paper,
+    this.borderColor = GivyColors.border,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final VoidCallback? onTap;
+  final Color color;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +44,20 @@ class GivyPanel extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: GivyColors.line),
-        boxShadow: [
-          BoxShadow(
-            color: GivyColors.ink.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        color: color,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor, width: 2),
       ),
       child: child,
     );
     if (onTap == null) return content;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: content,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: content,
+      ),
     );
   }
 }
@@ -94,8 +85,8 @@ class _LogoPainter extends CustomPainter {
     final coralDeep = Paint()..color = GivyColors.coralDeep;
     final cream = Paint()..color = const Color(0xFFFFF7F4);
     final leaf = Paint()..color = GivyColors.leaf;
-    final leafDeep = Paint()..color = const Color(0xFF1F5C3E);
-    final gold = Paint()..color = GivyColors.amber;
+    final leafDeep = Paint()..color = const Color(0xFF2A4D38);
+    final gold = Paint()..color = GivyColors.gold;
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -168,11 +159,7 @@ class GivyLogo extends StatelessWidget {
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: 'Givy', style: givyDisplay(size: fontSize)),
-              TextSpan(
-                text: '.',
-                style: givyDisplay(size: fontSize, color: GivyColors.coral),
-              ),
+              TextSpan(text: 'givy', style: givyDisplay(size: fontSize)),
             ],
           ),
         ),
@@ -182,36 +169,41 @@ class GivyLogo extends StatelessWidget {
 }
 
 class CountdownChip extends StatelessWidget {
-  const CountdownChip({super.key, required this.eventDate});
+  const CountdownChip({super.key, required this.eventDate, this.compact = true});
 
   final String eventDate;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: GivyColors.line),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    final days = daysUntil(eventDate);
+    if (compact) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: GivyColors.paper,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: GivyColors.border, width: 2),
+        ),
+        child: Text(
+          '$days',
+          style: givyDisplay(size: 22, color: GivyColors.coral, weight: FontWeight.w700),
+        ),
+      );
+    }
+
+    return GivyPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Column(
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: GivyColors.coral,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
           Text(
-            countdownLabelFromDate(eventDate),
+            '$days',
+            style: givyDisplay(size: 48, color: GivyColors.coral, weight: FontWeight.w700),
+          ),
+          Text(
+            days == 1 ? 'day to go' : 'days to go',
             style: const TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 13,
               color: GivyColors.inkSoft,
             ),
           ),
@@ -221,14 +213,54 @@ class CountdownChip extends StatelessWidget {
   }
 }
 
-String countdownLabelFromDate(String eventDate) {
-  final days = DateTime.parse('${eventDate}T12:00:00')
-      .difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day))
-      .inDays;
-  if (days > 1) return '$days days to go';
-  if (days == 1) return 'Tomorrow';
-  if (days == 0) return 'Today';
-  return '${days.abs()} days ago';
+class PriceBadge extends StatelessWidget {
+  const PriceBadge({super.key, required this.price});
+
+  final String price;
+
+  @override
+  Widget build(BuildContext context) {
+    if (price.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: GivyColors.gold,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: GivyColors.ink.withValues(alpha: 0.12), width: 1.5),
+      ),
+      child: Text(
+        price,
+        style: const TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+          color: GivyColors.ink,
+        ),
+      ),
+    );
+  }
+}
+
+class FriendBanner extends StatelessWidget {
+  const FriendBanner({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: GivyColors.gold,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontWeight: FontWeight.w800,
+          color: GivyColors.ink,
+        ),
+      ),
+    );
+  }
 }
 
 class GiftEmoji extends StatelessWidget {
@@ -251,7 +283,8 @@ class GiftEmoji extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: GivyColors.mistDeep,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: GivyColors.border, width: 2),
       ),
       child: Text(map[hint] ?? '✨', style: const TextStyle(fontSize: 22)),
     );

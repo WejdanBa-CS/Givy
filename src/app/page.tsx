@@ -3,9 +3,27 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Logo } from "@/components/Logo";
-import { SiteHeader } from "@/components/SiteHeader";
+import { LogoMark } from "@/components/Logo";
 import { useGivy } from "@/lib/givy-context";
+
+const OCCASIONS = [
+  { emoji: "🎂", label: "Birthdays" },
+  { emoji: "💍", label: "Weddings" },
+  { emoji: "🎄", label: "Holidays" },
+  { emoji: "🎁", label: "Giveaways" },
+  { emoji: "🐣", label: "Baby showers" },
+  { emoji: "🎓", label: "Graduations" },
+  { emoji: "🏠", label: "Housewarmings" },
+  { emoji: "💝", label: "Just because" },
+] as const;
+
+function GoogleGlyph() {
+  return (
+    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-white text-[11px] font-extrabold leading-none text-[#4285F4]">
+      G
+    </span>
+  );
+}
 
 export default function HomePage() {
   const { user, ready } = useGivy();
@@ -16,106 +34,187 @@ export default function HomePage() {
   }, [ready, user, router]);
 
   return (
-    <div className="shell pb-16">
-      <SiteHeader />
+    <div className="min-h-screen bg-mist text-ink">
+      <header className="shell flex items-center justify-between py-6">
+        <Link href="/" className="group flex items-center gap-2.5" aria-label="givy home">
+          <span className="logo-mark">
+            <LogoMark size={34} />
+          </span>
+          <span className="font-display text-[1.65rem] font-semibold tracking-tight lowercase">
+            givy
+          </span>
+        </Link>
+        <Link href="/login" className="btn btn-primary !rounded-full !px-5 !py-2.5 text-sm">
+          Sign in
+        </Link>
+      </header>
 
-      <main className="relative mt-6 min-h-[78vh] overflow-hidden rounded-[2rem] border border-line bg-[linear-gradient(135deg,rgba(255,255,255,0.55),rgba(231,241,234,0.35))] shadow-givy">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-90"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse 80% 60% at 70% 45%, rgba(255,90,60,0.2), transparent 60%), radial-gradient(ellipse 50% 40% at 20% 70%, rgba(47,122,85,0.18), transparent 55%)",
-          }}
-        />
+      <section className="shell grid items-center gap-12 pb-16 pt-4 lg:grid-cols-2 lg:gap-12 lg:pb-24 lg:pt-8">
+        <div className="animate-rise max-w-xl">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gold)] px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-ink">
+            ✨ New way to wishlist
+          </span>
 
-        <div className="relative grid gap-10 px-6 py-14 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:px-14 lg:py-16">
-          <div className="animate-rise max-w-xl">
-            <Logo size="hero" className="group" />
-            <h1 className="mt-5 max-w-[18ch] text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl">
-              One shared list for the gifts people actually want.
-            </h1>
-            <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-ink-soft sm:text-lg">
-              Birthdays, weddings, holidays — create a Givy, share the link, and let friends claim gifts without the awkward double-ups.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/login" className="btn btn-primary">
-                Start a Givy
-              </Link>
-              <a href="#how" className="btn btn-secondary">
-                See how it works
-              </a>
-            </div>
+          <h1 className="mt-6 font-display text-[3.1rem] leading-[1.02] tracking-[-0.03em] text-ink sm:text-[4.25rem]">
+            Gifts they&apos;ll actually{" "}
+            <em className="text-coral" style={{ fontStyle: "italic" }}>
+              love.
+            </em>
+          </h1>
+
+          <p className="mt-5 max-w-[36ch] text-[1.05rem] leading-relaxed text-ink-soft">
+            Create a wishlist for any occasion. Share it. Friends claim gifts privately — no
+            duplicates, no guesswork, no awkward moments.
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/login"
+              className="btn btn-primary !rounded-full !px-6 inline-flex items-center gap-2.5"
+            >
+              <GoogleGlyph />
+              Get started free →
+            </Link>
+            <a href="#how" className="btn btn-secondary !rounded-full !px-6">
+              See how it works
+            </a>
           </div>
 
-          <div className="animate-float relative mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end">
-            <div className="panel overflow-hidden p-5 sm:p-6">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
-                    Birthday
-                  </p>
-                  <p className="font-display text-2xl text-ink">Alex&apos;s big day</p>
-                </div>
-                <span className="rounded-full bg-coral/10 px-3 py-1 text-xs font-bold text-coral-deep">
-                  12 days
-                </span>
+          <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t-2 border-line pt-6">
+            {[
+              { n: "10k+", l: "wishlists created" },
+              { n: "98%", l: "claim rate" },
+              { n: "Free", l: "forever" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="font-display text-2xl font-semibold text-ink">{s.n}</div>
+                <div className="mt-0.5 text-xs font-medium text-ink-soft">{s.l}</div>
               </div>
-              <ul className="mt-5 space-y-3">
-                {[
-                  { title: "Wool beanie", price: "$28", done: true },
-                  { title: "Snack care box", price: "$35", done: false },
-                  { title: "Everyday watch", price: "$120", done: false },
-                ].map((item) => (
-                  <li
-                    key={item.title}
-                    className={`flex items-center justify-between rounded-2xl border border-line bg-paper/80 px-4 py-3 ${
-                      item.done ? "gift-claimed" : ""
-                    }`}
-                  >
-                    <span className="gift-title font-semibold">{item.title}</span>
-                    <span className="text-sm text-ink-soft">
-                      {item.done ? "Claimed" : item.price}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-xs text-ink-soft">
-                Claimed gifts stay anonymous — just grayed out for everyone else.
-              </p>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative mx-auto h-[440px] w-full max-w-[460px] lg:mx-0 lg:h-[500px]">
+          <div className="absolute right-2 top-0 z-20 w-[176px] rotate-3 rounded-2xl border-2 border-line bg-[var(--gold)] p-4 shadow-[0_12px_30px_rgba(26,18,14,0.08)] sm:right-8">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink">
+              Jordan&apos;s birthday
+            </p>
+            <p className="mt-1 font-display text-4xl font-semibold leading-none text-ink">
+              34 days
+            </p>
+            <p className="mt-2 text-xs font-semibold text-ink-soft">Sept 15, 2026</p>
+          </div>
+
+          <div className="absolute bottom-6 left-0 z-30 w-[214px] -rotate-2 rounded-2xl border-2 border-line bg-paper p-3 shadow-[0_16px_40px_rgba(26,18,14,0.1)] sm:w-[236px]">
+            <div className="overflow-hidden rounded-xl bg-[#ece7e2]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80"
+                alt="Galaxy Watch 7"
+                className="h-28 w-full object-cover"
+              />
+            </div>
+            <div className="mt-3">
+              <p className="text-sm font-bold text-ink">Galaxy Watch 7</p>
+              <p className="text-xs font-semibold text-ink-soft">$199</p>
+            </div>
+            <button
+              type="button"
+              className="mt-3 w-full rounded-full border-2 border-coral bg-paper py-2 text-center text-sm font-bold text-coral"
+            >
+              Claim this gift 🎁
+            </button>
+          </div>
+
+          <div className="absolute right-0 top-28 z-10 w-[200px] rotate-2 rounded-2xl border-2 border-line bg-paper p-3 shadow-[0_16px_40px_rgba(26,18,14,0.1)] sm:right-2 sm:w-[220px]">
+            <div className="overflow-hidden rounded-xl bg-coral">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80"
+                alt="Air Max Sneakers"
+                className="h-32 w-full object-cover mix-blend-multiply"
+              />
+            </div>
+            <div className="mt-3">
+              <p className="text-sm font-bold text-ink">Air Max Sneakers</p>
+              <div className="mt-1 flex items-center justify-between">
+                <span className="text-xs font-semibold text-ink-soft">$150</span>
+                <span className="text-xs font-bold text-leaf">● Available</span>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
-      <section id="how" className="mt-16 stagger">
-        <h2 className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
-          Essentials, first.
-        </h2>
-        <p className="mt-2 max-w-xl text-ink-soft">
-          Start with birthday lists. Layer on wedding registries, holidays, and local giveaways later.
+      <section id="how" className="border-t-2 border-line bg-paper py-16">
+        <div className="shell">
+          <p className="text-center text-[11px] font-extrabold uppercase tracking-[0.22em] text-ink-soft">
+            How it works
+          </p>
+          <div className="mt-10 grid gap-10 md:grid-cols-3">
+            {[
+              {
+                icon: "✏️",
+                n: "01",
+                title: "Build your list",
+                body: "Add any gift idea — link a product, set a price, add details.",
+              },
+              {
+                icon: "🔗",
+                n: "02",
+                title: "Share the link",
+                body: "One link to share with family and friends via any channel.",
+              },
+              {
+                icon: "🤫",
+                n: "03",
+                title: "They claim secretly",
+                body: "Friends pick gifts anonymously. No one duplicates, no one spills.",
+              },
+            ].map((s) => (
+              <article key={s.n} className="text-center">
+                <div className="text-3xl">{s.icon}</div>
+                <p className="mt-4 text-xs font-bold text-ink-soft/70">{s.n}</p>
+                <h3 className="mt-1 font-display text-2xl text-ink">{s.title}</h3>
+                <p className="mx-auto mt-2 max-w-[28ch] text-sm leading-relaxed text-ink-soft">
+                  {s.body}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="shell border-t-2 border-line py-16">
+        <p className="text-center text-[11px] font-extrabold uppercase tracking-[0.22em] text-ink-soft">
+          Works for any occasion
         </p>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: "Make a Givy",
-              body: "Add the hat, socks, snacks, watch, gift card — whatever you actually want.",
-            },
-            {
-              title: "Share the link",
-              body: "Friends open it, pick something, and choose ship-to-them or ship-to-you.",
-            },
-            {
-              title: "No double gifts",
-              body: "Once claimed, the item is crossed off. Who bought it stays private.",
-            },
-          ].map((step) => (
-            <article key={step.title} className="panel p-5">
-              <h3 className="font-display text-xl text-ink">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-soft">{step.body}</p>
-            </article>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+          {OCCASIONS.map((o) => (
+            <span
+              key={o.label}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-line bg-paper px-4 py-2.5 text-sm font-bold text-ink"
+            >
+              <span aria-hidden>{o.emoji}</span>
+              {o.label}
+            </span>
           ))}
         </div>
+      </section>
+
+      <section className="bg-coral px-6 py-16 text-center text-white">
+        <h2 className="font-display text-3xl tracking-tight sm:text-4xl" style={{ fontStyle: "italic" }}>
+          Ready to make gift-giving easy?
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-white/90">
+          Free for personal wishlists. Always.
+        </p>
+        <Link
+          href="/login"
+          className="btn mt-7 !rounded-full !bg-[var(--gold)] !px-7 !text-ink hover:!bg-[var(--gold)]"
+        >
+          Create your first Givy →
+        </Link>
       </section>
     </div>
   );

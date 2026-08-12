@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import { GivyProvider } from "@/lib/givy-context";
 import "./globals.css";
 
@@ -8,7 +8,7 @@ const display = Fraunces({
   variable: "--font-display",
 });
 
-const body = Plus_Jakarta_Sans({
+const body = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
 });
