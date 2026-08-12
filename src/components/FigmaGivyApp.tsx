@@ -142,7 +142,7 @@ function NavBar({ onBack, isPublic, showUser }: { onBack?: () => void; isPublic?
         <span className="inline-flex items-center gap-2.5">
           <LogoMark size={28} />
           <span className="text-xl font-black tracking-tight" style={{ fontFamily: "'Fraunces', serif", color: "#1C1108" }}>
-            givy
+            Givy
           </span>
         </span>
         {isPublic && (
@@ -576,7 +576,7 @@ function Landing({
       </div>
 
       <footer className="text-center py-6 text-xs text-[#8A6F5E]">
-        © 2026 givy — gifts without the guesswork
+        © 2026 Givy — gifts without the guesswork
       </footer>
     </div>
   );
@@ -798,7 +798,7 @@ function PublicView({ list }: { list: GiftList }) {
         <div className="mt-10 text-center border-t-2 border-[#E8D9CC] pt-8">
           <p className="text-xs text-[#8A6F5E] mb-2">Shared with</p>
           <p className="text-xl font-black text-[#1C1108]" style={{ fontFamily: "'Fraunces', serif" }}>
-            givy
+            Givy
           </p>
           <p className="text-xs text-[#8A6F5E] mt-1">Make your own free list anytime</p>
         </div>

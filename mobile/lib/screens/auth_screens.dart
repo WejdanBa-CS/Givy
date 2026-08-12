@@ -34,7 +34,7 @@ class LandingScreen extends StatelessWidget {
                   children: [
                     const LogoMark(size: 34),
                     const SizedBox(width: 10),
-                    Text('givy', style: givyDisplay(size: 26)),
+                    Text('Givy', style: givyDisplay(size: 26)),
                     const Spacer(),
                     FilledButton(
                       style: FilledButton.styleFrom(
@@ -492,7 +492,7 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     const LogoMark(size: 32),
                     const SizedBox(width: 10),
-                    Text('givy', style: givyDisplay(size: 24)),
+                    Text('Givy', style: givyDisplay(size: 24)),
                   ],
                 ),
                 const Spacer(),

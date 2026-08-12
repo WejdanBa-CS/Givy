@@ -73,10 +73,10 @@ export function Logo({ size = "md", showWordmark = true, className = "" }: LogoP
       </span>
       {showWordmark && (
         <span
-          className={`font-display font-semibold tracking-tight lowercase text-ink ${wordClass}`}
+          className={`font-display font-semibold tracking-tight text-ink ${wordClass}`}
           style={{ letterSpacing: size === "hero" ? "-0.03em" : "-0.02em" }}
         >
-          givy
+          Givy
         </span>
       )}
     </span>
