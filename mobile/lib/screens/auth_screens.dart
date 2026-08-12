@@ -88,9 +88,9 @@ class LandingScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 28),
                           ...[
-                            ('✏️', '01', 'Build your list', 'Add any gift idea — link a product, set a price, add details.'),
-                            ('🔗', '02', 'Share the link', 'One link to share with family and friends via any channel.'),
-                            ('🤫', '03', 'They claim secretly', 'Friends pick gifts anonymously. No one duplicates, no one spills.'),
+                            ('✏️', '01', 'Make your list', 'Add gifts with a price, notes, or a product link.'),
+                            ('🔗', '02', 'Share one link', 'Send it to friends and family — any chat, any app.'),
+                            ('🤫', '03', 'They claim in private', 'Each gift can only be claimed once. You never see who bought what.'),
                           ].map(
                             (s) => Padding(
                               padding: const EdgeInsets.only(bottom: 22),
@@ -156,7 +156,7 @@ class LandingScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Ready to make gift-giving easy?',
+                      'Ready when they are.',
                       textAlign: TextAlign.center,
                       style: givyDisplay(size: 34, color: Colors.white).copyWith(
                         fontStyle: FontStyle.italic,
@@ -164,7 +164,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Free for personal wishlists. Always.',
+                      'Start a free wishlist in under a minute.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
@@ -177,7 +177,7 @@ class LandingScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
                       ),
                       onPressed: () => context.go('/login'),
-                      child: const Text('Create your first Givy →'),
+                      child: const Text('Start your list →'),
                     ),
                   ],
                 ),
@@ -205,7 +205,7 @@ class _HeroCopy extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
           ),
           child: const Text(
-            '✨ NEW WAY TO WISHLIST',
+            '✨ WISHLISTS, DONE RIGHT',
             style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8),
           ),
         ),
@@ -226,7 +226,7 @@ class _HeroCopy extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         const Text(
-          'Create a wishlist for any occasion. Share it. Friends claim gifts privately — no duplicates, no guesswork, no awkward moments.',
+          'Build a list. Share one link. Friends claim gifts in private — so nobody buys the same thing twice.',
           style: TextStyle(color: GivyColors.inkSoft, height: 1.45, fontSize: 16),
         ),
         const SizedBox(height: 22),
@@ -276,11 +276,11 @@ class _HeroCopy extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: const [
-            _Stat(n: '10k+', l: 'wishlists created'),
+            _Stat(n: '10k+', l: 'lists shared'),
             SizedBox(width: 18),
-            _Stat(n: '98%', l: 'claim rate'),
+            _Stat(n: '98%', l: 'no duplicates'),
             SizedBox(width: 18),
-            _Stat(n: 'Free', l: 'forever'),
+            _Stat(n: 'Free', l: 'to start'),
           ],
         ),
       ],
@@ -501,10 +501,10 @@ class LoginScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Link an account', style: givyDisplay(size: 30)),
+                      Text('Sign in', style: givyDisplay(size: 30)),
                       const SizedBox(height: 8),
                       const Text(
-                        'Demo sign-in — pick a provider and you’re in.',
+                        'Demo mode — choose a provider to continue.',
                         style: TextStyle(color: GivyColors.inkSoft),
                       ),
                       const SizedBox(height: 20),

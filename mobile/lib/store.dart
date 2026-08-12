@@ -18,7 +18,7 @@ class GivyStore {
   static const _listsKey = 'givy.lists';
   static const _giveawaysKey = 'givy.giveaways';
   static const _activityKey = 'givy.activity';
-  static const _seededKey = 'givy.seeded';
+  static const _seededKey = 'givy.seeded.v3';
 
   UserAccount? getCurrentUser() {
     final raw = _prefs.getString(_userKey);
@@ -149,43 +149,101 @@ class GivyStore {
     if (seeded && listsForUser(user.id).isNotEmpty) return;
 
     final now = DateTime.now();
-    final birthday = now.add(const Duration(days: 18));
     var holiday = DateTime(now.year, 12, 25);
     if (holiday.isBefore(now)) {
       holiday = DateTime(now.year + 1, 12, 25);
     }
     final giveawayEnd = now.add(const Duration(days: 5));
 
-    final demoItems = [
-      ('Wool beanie', 'Something cozy for fall walks', 28.0, 'hat'),
-      ('Fun patterned socks (3-pack)', 'Loud colors welcome', 18.0, 'socks'),
-      ('Snack care box', 'Sweet + salty mix', 35.0, 'snacks'),
-      ('Everyday watch', 'Simple face, leather strap', 120.0, 'watch'),
-      ('Gift card', 'Any bookstore or coffee shop', 50.0, 'card'),
+    // Match Figma Make demo gifts (images + emoji + yellow price badges)
+    final demoItems = <({
+      String title,
+      String notes,
+      double price,
+      String emoji,
+      String imageUrl,
+      bool claimed,
+    })>[
+      (
+        title: 'New Era 59FIFTY Cap',
+        notes: 'Black fitted, size 7¼',
+        price: 42,
+        emoji: '🧢',
+        imageUrl:
+            'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&h=500&fit=crop&auto=format',
+        claimed: true,
+      ),
+      (
+        title: 'Samsung Galaxy Watch 7',
+        notes: '44mm Graphite',
+        price: 199,
+        emoji: '⌚',
+        imageUrl:
+            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&auto=format',
+        claimed: false,
+      ),
+      (
+        title: 'Cozy Sock Bundle',
+        notes: '12-pack assorted',
+        price: 28,
+        emoji: '🧦',
+        imageUrl:
+            'https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=500&h=500&fit=crop&auto=format',
+        claimed: false,
+      ),
+      (
+        title: 'Amazon Gift Card',
+        notes: '\$50 digital',
+        price: 50,
+        emoji: '💳',
+        imageUrl:
+            'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&h=500&fit=crop&auto=format',
+        claimed: true,
+      ),
+      (
+        title: 'Monthly Snack Box',
+        notes: '3-month subscription',
+        price: 35,
+        emoji: '🍿',
+        imageUrl:
+            'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=500&h=500&fit=crop&auto=format',
+        claimed: false,
+      ),
+      (
+        title: 'Air Max Sneakers',
+        notes: 'Size 11, Red/White',
+        price: 150,
+        emoji: '👟',
+        imageUrl:
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&auto=format',
+        claimed: false,
+      ),
     ];
 
     final birthdayList = GivyList(
       id: 'givy_${_uuid.v4().substring(0, 8)}',
       ownerId: user.id,
       ownerName: user.name,
-      title: "${user.name.split(' ').first}'s birthday",
+      title: "${user.name.split(' ').first}'s Birthday Wishlist",
       occasion: Occasion.birthday,
       description: "A few things I'd love — no pressure, just ideas.",
-      eventDate: _ymd(birthday),
+      eventDate: '2026-09-15',
       recipientAddress: '184 Maple Street, Apt 4B',
       shareCode: 'demo${_uuid.v4().substring(0, 6)}',
       published: true,
       items: [
-        for (var i = 0; i < demoItems.length; i++)
+        for (final d in demoItems)
           GiftItem(
             id: 'gift_${_uuid.v4().substring(0, 8)}',
-            title: demoItems[i].$1,
-            notes: demoItems[i].$2,
-            price: demoItems[i].$3,
-            imageHint: demoItems[i].$4,
-            url: 'https://www.example.com/${demoItems[i].$4}',
-            purchased: i == 0,
-            purchasedAt: i == 0 ? now.toIso8601String() : null,
+            title: d.title,
+            notes: d.notes,
+            price: d.price,
+            emoji: d.emoji,
+            imageUrl: d.imageUrl,
+            imageHint: d.emoji,
+            url: d.imageUrl,
+            purchased: d.claimed,
+            purchasedAt: d.claimed ? now.toIso8601String() : null,
           ),
       ],
       createdAt: now.toIso8601String(),

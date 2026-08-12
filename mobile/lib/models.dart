@@ -46,6 +46,8 @@ class GiftItem {
     this.url,
     this.price,
     this.imageHint,
+    this.imageUrl,
+    this.emoji,
     this.purchased = false,
     this.purchasedAt,
     this.claimedByMe = false,
@@ -58,10 +60,14 @@ class GiftItem {
   final String? url;
   final double? price;
   final String? imageHint;
+  final String? imageUrl;
+  final String? emoji;
   final bool purchased;
   final String? purchasedAt;
   final bool claimedByMe;
   final ShipPreference? shipPreference;
+
+  String get displayEmoji => emoji ?? _emojiFromHint(imageHint) ?? '🎁';
 
   GiftItem copyWith({
     bool? purchased,
@@ -76,6 +82,8 @@ class GiftItem {
       url: url,
       price: price,
       imageHint: imageHint,
+      imageUrl: imageUrl,
+      emoji: emoji,
       purchased: purchased ?? this.purchased,
       purchasedAt: purchasedAt ?? this.purchasedAt,
       claimedByMe: claimedByMe ?? this.claimedByMe,
@@ -90,6 +98,8 @@ class GiftItem {
         'url': url,
         'price': price,
         'imageHint': imageHint,
+        'imageUrl': imageUrl,
+        'emoji': emoji,
         'purchased': purchased,
         'purchasedAt': purchasedAt,
         'claimedByMe': claimedByMe,
@@ -103,6 +113,8 @@ class GiftItem {
         url: json['url'] as String?,
         price: (json['price'] as num?)?.toDouble(),
         imageHint: json['imageHint'] as String?,
+        imageUrl: json['imageUrl'] as String?,
+        emoji: json['emoji'] as String?,
         purchased: json['purchased'] as bool? ?? false,
         purchasedAt: json['purchasedAt'] as String?,
         claimedByMe: json['claimedByMe'] as bool? ?? false,
@@ -110,6 +122,23 @@ class GiftItem {
             ? null
             : ShipPreference.values.byName(json['shipPreference'] as String),
       );
+}
+
+String? _emojiFromHint(String? hint) {
+  switch (hint) {
+    case 'hat':
+      return '🧢';
+    case 'socks':
+      return '🧦';
+    case 'snacks':
+      return '🍿';
+    case 'watch':
+      return '⌚';
+    case 'card':
+      return '💳';
+    default:
+      return null;
+  }
 }
 
 class GivyList {
