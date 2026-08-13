@@ -115,7 +115,7 @@ function LoginInner() {
         <div className="panel p-7 sm:p-8">
           <Logo size="lg" />
           <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">
-            Sign in to Givito
+            Sign in to Givy
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             {cloud

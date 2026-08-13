@@ -32,7 +32,7 @@ export default function CreatePage() {
     setBusy(true);
     try {
       const list = await createList({
-        title: title.trim() || "Untitled Givito",
+        title: title.trim() || "Untitled Givy",
         occasion,
         description: description.trim() || undefined,
         eventDate,
@@ -60,7 +60,7 @@ export default function CreatePage() {
 
   return (
     <div className="mx-auto max-w-xl animate-rise">
-      <h1 className="font-display text-4xl tracking-tight text-ink">New Givito</h1>
+      <h1 className="font-display text-4xl tracking-tight text-ink">New Givy</h1>
       <p className="mt-2 text-ink-soft">
         Pick an occasion, set the date, and start collecting ideas.
       </p>
@@ -196,7 +196,7 @@ export default function CreatePage() {
         </label>
 
         <button type="submit" className="btn btn-primary w-full" disabled={busy}>
-          {busy ? "Creating…" : "Create Givito"}
+          {busy ? "Creating…" : "Create Givy"}
         </button>
       </form>
     </div>

@@ -568,7 +568,7 @@ export default function ManageListPage() {
             type="button"
             className="btn btn-ghost text-sm text-coral-deep"
             onClick={() => {
-              if (!confirm("Delete this Givito?")) return;
+              if (!confirm("Delete this Givy?")) return;
               void deleteList(list.id)
                 .then(() => {
                   toast.success("List deleted");
@@ -641,7 +641,7 @@ export default function ManageListPage() {
           type="button"
           className="btn btn-ghost text-sm text-coral-deep"
           onClick={() => {
-            if (!confirm("Delete this Givito?")) return;
+            if (!confirm("Delete this Givy?")) return;
             void deleteList(list.id).then(() => router.push("/app/lists"));
           }}
         >

@@ -19,7 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!ready || !user) {
     return (
       <div className="shell grid min-h-[70vh] place-items-center text-ink-soft">
-        Opening Givito…
+        Opening Givy…
       </div>
     );
   }
@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       <header className="shell flex items-center justify-between gap-3 py-4">
-        <Link href="/app" className="group" aria-label="Givito home">
+        <Link href="/app" className="group" aria-label="Givy home">
           <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-2">

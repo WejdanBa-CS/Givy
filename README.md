@@ -1,4 +1,4 @@
-# Givito
+# Givy
 
 Gift registry web app: create a list, share one link, friends mark gifts purchased anonymously.
 
