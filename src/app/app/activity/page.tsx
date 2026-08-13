@@ -34,7 +34,7 @@ export default function ActivityPage() {
           </li>
         ))}
         {activity.length === 0 && (
-          <li className="px-5 py-8 text-center text-sm text-ink-soft">Nothing yet. Create a Givy to get going.</li>
+          <li className="px-5 py-8 text-center text-sm text-ink-soft">Nothing yet. Create a Givito to get going.</li>
         )}
       </ul>
     </div>

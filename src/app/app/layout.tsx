@@ -19,7 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!ready || !user) {
     return (
       <div className="shell grid min-h-[70vh] place-items-center text-ink-soft">
-        Opening Givy…
+        Opening Givito…
       </div>
     );
   }
@@ -36,24 +36,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       <header className="shell flex items-center justify-between gap-3 py-4">
-        <Link href="/app" className="group" aria-label="Givy home">
+        <Link href="/app" className="group" aria-label="Givito home">
           <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/app/activity" className="btn btn-ghost text-sm">
-            Activity
-          </Link>
-          <span
+          <Link
+            href="/app/profile"
             className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
             style={{ background: `hsl(${user.avatarHue} 55% 42%)` }}
-            title={user.name}
+            title="Profile"
           >
             {user.name
               .split(" ")
               .map((p) => p[0])
               .join("")
               .slice(0, 2)}
-          </span>
+          </Link>
         </div>
       </header>
 

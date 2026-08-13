@@ -21,7 +21,9 @@ import {
   publishListRemote,
   removeItemRemote,
   signInWithGoogle,
+  signInWithOAuth,
   signOutRemote,
+  updateItemRemote,
   updateListRemote,
   type ClaimResult,
 } from "./api";
@@ -41,6 +43,7 @@ import {
   removeItem as removeItemLocal,
   signIn as signInLocal,
   signOut as signOutLocal,
+  updateItem as updateItemLocal,
   updateList as updateListLocal,
   createGiveaway as createGiveawayStore,
   joinGiveaway as joinGiveawayStore,
@@ -83,6 +86,13 @@ type GivyContextValue = {
     listId: string,
     item: Omit<GiftItem, "id" | "purchased" | "purchasedAt" | "claimedByMe">,
   ) => Promise<GiftItem | null>;
+  updateItem: (
+    listId: string,
+    itemId: string,
+    patch: Partial<
+      Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint">
+    >,
+  ) => Promise<GiftItem | null>;
   removeItem: (listId: string, itemId: string) => Promise<void>;
   publishList: (listId: string) => Promise<GivyList | null>;
   claimItem: (
@@ -119,12 +129,39 @@ export function GivyProvider({ children }: { children: ReactNode }) {
       setUser(u);
       if (u) {
         // Invite unlock only enforced when profile flag is used; MVP allows all signed-in users
-        setLists(await fetchMyLists(u.id, u.name));
+        const mine = await fetchMyLists(u.id, u.name);
+        setLists(mine);
+        // Derive simple activity from claimed gifts so cloud owners see progress
+        const derived: ActivityEvent[] = [];
+        for (const list of mine) {
+          for (const item of list.items) {
+            if (item.purchased) {
+              derived.push({
+                id: `claim_${item.id}`,
+                type: "claim",
+                message: `Someone claimed “${item.title}” (anonymous)`,
+                at: item.purchasedAt ?? list.updatedAt,
+                listId: list.id,
+              });
+            }
+          }
+          if (list.published) {
+            derived.push({
+              id: `pub_${list.id}`,
+              type: "publish",
+              message: `Shared “${list.title}”`,
+              at: list.updatedAt,
+              listId: list.id,
+            });
+          }
+        }
+        derived.sort((a, b) => b.at.localeCompare(a.at));
+        setActivity(derived.slice(0, 40));
       } else {
         setLists([]);
+        setActivity([]);
       }
       setGiveaways([]);
-      setActivity([]);
       return;
     }
 
@@ -157,12 +194,12 @@ export function GivyProvider({ children }: { children: ReactNode }) {
       refresh,
       signIn: async (provider, next = "/app") => {
         if (cloud) {
-          if (provider !== "google") {
+          if (provider === "apple") {
             throw new Error(
-              "Cloud mode currently supports Google. Apple and Facebook come next.",
+              "Apple sign-in comes next. Use Google or Facebook for now.",
             );
           }
-          await signInWithGoogle(next);
+          await signInWithOAuth(provider, next);
           return;
         }
         signInLocal(provider);
@@ -206,6 +243,16 @@ export function GivyProvider({ children }: { children: ReactNode }) {
           return gift;
         }
         const gift = addItemLocal(listId, item);
+        await refresh();
+        return gift;
+      },
+      updateItem: async (listId, itemId, patch) => {
+        if (cloud) {
+          const gift = await updateItemRemote(listId, itemId, patch);
+          await refresh();
+          return gift;
+        }
+        const gift = updateItemLocal(listId, itemId, patch);
         await refresh();
         return gift;
       },
