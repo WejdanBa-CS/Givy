@@ -1,12 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import {
-  DayLists,
-  OccasionCalendar,
-  toDateKey,
-} from "@/components/OccasionCalendar";
 import { Countdown } from "@/components/Countdown";
 import { useGivy } from "@/lib/givy-context";
 import { formatMoney, formatShortDate } from "@/lib/store";
@@ -14,9 +8,12 @@ import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function AppHomePage() {
   const { user, lists, activity } = useGivy();
-  const [selected, setSelected] = useState(() => toDateKey(new Date()));
-  const today = toDateKey(new Date());
-
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming =
+    [...lists]
+      .filter((l) => l.eventDate >= today)
+      .sort((a, b) => a.eventDate.localeCompare(b.eventDate))[0] ??
+    [...lists].sort((a, b) => b.eventDate.localeCompare(a.eventDate))[0];
   const claimedTotal = lists.reduce(
     (n, l) => n + l.items.filter((i) => i.purchased).length,
     0,
@@ -26,79 +23,61 @@ export default function AppHomePage() {
     0,
   );
 
-  const upcoming = useMemo(
-    () =>
-      [...lists]
-        .filter((l) => l.eventDate >= today)
-        .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
-        .slice(0, 4),
-    [lists, today],
-  );
-
   return (
     <div className="animate-rise space-y-6">
       <section>
-        <p className="text-sm font-semibold text-ink-soft">
-          Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""}
-        </p>
+        <p className="text-sm font-semibold text-ink-soft">Welcome back</p>
         <h1 className="font-display text-4xl tracking-tight text-ink">
-          Calendar
+          {user?.name.split(" ")[0]}, ready to Givy?
         </h1>
-        <p className="mt-1 text-ink-soft">
-          Your occasions first. Lists and activity below.
-        </p>
       </section>
-
-      <OccasionCalendar
-        lists={lists}
-        selected={selected}
-        onSelect={setSelected}
-      />
-
-      <DayLists lists={lists} selected={selected} />
-
-      {upcoming.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="font-display text-2xl text-ink">Coming up</h2>
-          {upcoming.map((list) => (
-            <Link
-              key={list.id}
-              href={`/app/${list.id}`}
-              className="flex items-center justify-between gap-3 border-b border-line py-3"
-            >
-              <span>
-                <span className="block font-semibold text-ink">{list.title}</span>
-                <span className="text-sm text-ink-soft">
-                  {OCCASION_EMOJI[list.occasion]}{" "}
-                  {formatShortDate(list.eventDate)}
-                </span>
-              </span>
-              <Countdown eventDate={list.eventDate} />
-            </Link>
-          ))}
-        </section>
-      )}
 
       <section className="grid grid-cols-3 gap-3">
         {[
-          { label: "Lists", value: String(lists.length), href: "/app/lists" },
-          { label: "Open gifts", value: String(openTotal), href: "/app/lists" },
-          {
-            label: "Claimed",
-            value: String(claimedTotal),
-            href: "/app/activity",
-          },
+          { label: "Lists", value: String(lists.length) },
+          { label: "Open gifts", value: String(openTotal) },
+          { label: "Claimed", value: String(claimedTotal) },
         ].map((stat) => (
-          <Link
-            key={stat.label}
-            href={stat.href}
-            className="panel px-3 py-4 text-center"
-          >
+          <div key={stat.label} className="panel px-3 py-4 text-center">
             <p className="font-display text-2xl text-ink">{stat.value}</p>
             <p className="text-xs font-semibold text-ink-soft">{stat.label}</p>
-          </Link>
+          </div>
         ))}
       </section>
+
+      {upcoming && (
+        <section className="panel overflow-hidden p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
+                Next up · {OCCASION_EMOJI[upcoming.occasion]}{" "}
+                {OCCASION_LABELS[upcoming.occasion]}
+              </p>
+              <h2 className="mt-1 font-display text-2xl text-ink">
+                {upcoming.title}
+              </h2>
+              <p className="mt-1 text-sm text-ink-soft">
+                {upcoming.items.filter((i) => !i.purchased).length} still open ·{" "}
+                {formatShortDate(upcoming.eventDate)}
+              </p>
+            </div>
+            <Countdown eventDate={upcoming.eventDate} />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href={`/app/${upcoming.id}`} className="btn btn-primary">
+              Open list
+            </Link>
+            {upcoming.published && (
+              <Link
+                href={`/g/${upcoming.shareCode}`}
+                className="btn btn-secondary"
+              >
+                Shared view
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       <section>
         <div className="mb-3 flex items-end justify-between">
