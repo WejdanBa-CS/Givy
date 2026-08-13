@@ -17,7 +17,7 @@ const providers: {
   {
     id: "google",
     label: "Continue with Google",
-    blurb: "Fastest way in",
+    blurb: "Use your Google account",
   },
   {
     id: "facebook",
