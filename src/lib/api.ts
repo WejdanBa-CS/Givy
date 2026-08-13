@@ -1,5 +1,6 @@
 import { customAlphabet } from "nanoid";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { safeNextPath } from "@/lib/safe-next";
 import type {
   AuthProvider,
   GiftItem,
@@ -131,10 +132,11 @@ export async function signInWithOAuth(
 ) {
   const supabase = createClient();
   const origin = window.location.origin;
+  const safeNext = safeNextPath(next, "/app");
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
     },
   });
   if (error) throw error;
