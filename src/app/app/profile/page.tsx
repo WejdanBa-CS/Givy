@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGivy } from "@/lib/givy-context";
 
 export default function ProfilePage() {
-  const { user, lists, cloud, signOut } = useGivy();
+  const { user, lists, signOut } = useGivy();
   const router = useRouter();
 
   if (!user) return null;
@@ -27,7 +27,6 @@ export default function ProfilePage() {
           <h1 className="font-display text-3xl text-ink">{user.name}</h1>
           <p className="text-sm text-ink-soft">
             {user.email} · {user.provider}
-            {cloud ? " · cloud" : " · local demo"}
           </p>
         </div>
       </section>
@@ -54,15 +53,13 @@ export default function ProfilePage() {
           <span className="font-semibold">Privacy</span>
           <span className="text-ink-soft">→</span>
         </Link>
-      </section>
-
-      <section className="panel p-5">
-        <p className="font-display text-xl text-ink">Roadmap</p>
-        <ul className="mt-2 space-y-1 text-sm text-ink-soft">
-          <li>Apple sign-in</li>
-          <li>Retail checkout partnerships</li>
-          <li>Wedding registry upgrades</li>
-        </ul>
+        <Link
+          href="/terms"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Terms</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
       </section>
 
       <button

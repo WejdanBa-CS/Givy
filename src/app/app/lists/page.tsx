@@ -84,9 +84,16 @@ export default function ListsPage() {
         })}
         {filtered.length === 0 && (
           <div className="panel p-8 text-center">
-            <p className="font-display text-2xl">Nothing here yet</p>
+            <p className="font-display text-2xl">
+              {lists.length === 0 ? "Nothing here yet" : "No lists in this filter"}
+            </p>
+            <p className="mt-2 text-sm text-ink-soft">
+              {lists.length === 0
+                ? "Create your first gift list to get started."
+                : "Try another occasion, or create a new list."}
+            </p>
             <Link href="/app/create" className="btn btn-primary mt-4">
-              Create a Givy
+              {lists.length === 0 ? "Create a Givy" : "New Givy"}
             </Link>
           </div>
         )}

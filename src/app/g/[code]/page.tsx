@@ -19,6 +19,7 @@ function SharedGivyInner() {
   const { ready, cloud, user, getByShare, claimItem } = useGivy();
   const [list, setList] = useState<GivyList | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<GiftItem | null>(null);
   const [ship, setShip] = useState<ShipPreference>("to_giver");
   const [doneMsg, setDoneMsg] = useState<string | null>(null);
@@ -31,8 +32,12 @@ function SharedGivyInner() {
     if (!ready) return;
     void (async () => {
       setLoading(true);
+      setLoadError(null);
       try {
         setList(await getByShare(params.code));
+      } catch {
+        setList(null);
+        setLoadError("Could not load this list. Check your connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -60,15 +65,40 @@ function SharedGivyInner() {
       <div className="shell pb-16">
         <SiteHeader />
         <div className="panel mx-auto mt-10 max-w-lg p-8 text-center">
-          <p className="font-display text-3xl text-ink">Hmm, no Givy here</p>
-          <p className="mt-2 text-sm text-ink-soft">
-            {cloud
-              ? "This link may be old or the list isn’t published yet."
-              : "This list isn’t on this device. In demo mode, open the share link from the same browser that created it."}
+          <p className="font-display text-3xl text-ink">
+            {loadError ? "Couldn’t open this list" : "Hmm, no Givy here"}
           </p>
-          <Link href="/" className="btn btn-primary mt-5">
-            Go to Givy
-          </Link>
+          <p className="mt-2 text-sm text-ink-soft">
+            {loadError ??
+              "This link may be old, or the list isn’t shared yet."}
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {loadError && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setLoading(true);
+                  void getByShare(params.code)
+                    .then((l) => {
+                      setList(l);
+                      setLoadError(null);
+                    })
+                    .catch(() =>
+                      setLoadError(
+                        "Could not load this list. Check your connection and try again.",
+                      ),
+                    )
+                    .finally(() => setLoading(false));
+                }}
+              >
+                Try again
+              </button>
+            )}
+            <Link href="/" className="btn btn-secondary">
+              Go to Givy
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -146,8 +176,9 @@ function SharedGivyInner() {
               <Countdown eventDate={list.eventDate} compact={false} />
             </div>
             <p className="mt-5 text-sm font-semibold text-ink-soft">
-              {openCount} idea{openCount === 1 ? "" : "s"} still open · claimed
-              gifts are crossed out (buyer stays anonymous)
+              {openCount === 0
+                ? "Every gift on this list has been claimed."
+                : `${openCount} idea${openCount === 1 ? "" : "s"} still open · claimed gifts are crossed out (buyer stays anonymous)`}
             </p>
             {list.supportUrl && (
               <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -188,6 +219,11 @@ function SharedGivyInner() {
           )}
 
           <ul className="stagger mt-6 space-y-3">
+            {list.items.length === 0 && (
+              <li className="panel p-8 text-center text-ink-soft">
+                No gifts on this list yet. Check back soon.
+              </li>
+            )}
             {list.items.map((item) => (
               <li
                 key={item.id}
