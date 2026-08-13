@@ -30,7 +30,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/app/create") ||
     pathname.startsWith("/app/profile") ||
     pathname.startsWith("/app/activity") ||
-    pathname.startsWith("/app/calendar") ||
     pathname.startsWith("/app/giveaways") ||
     /^\/app\/[^/]+$/.test(pathname);
 
