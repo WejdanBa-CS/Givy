@@ -7,6 +7,14 @@ import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WishItem } from "@/components/WishItem";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useGivy } from "@/lib/givy-context";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
@@ -233,18 +241,14 @@ function SharedGivyInner() {
                     !item.purchased ? (
                       <>
                         {item.url && (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn btn-secondary !px-3 !py-2 text-sm"
-                          >
-                            Buy
-                          </a>
+                          <Button asChild variant="secondary" size="sm">
+                            <a href={item.url} target="_blank" rel="noreferrer">
+                              Buy
+                            </a>
+                          </Button>
                         )}
-                        <button
-                          type="button"
-                          className="btn btn-primary !px-3 !py-2 text-sm"
+                        <Button
+                          size="sm"
                           onClick={() => {
                             setActiveItem(item);
                             setShip("to_giver");
@@ -254,7 +258,7 @@ function SharedGivyInner() {
                           }}
                         >
                           Claim
-                        </button>
+                        </Button>
                       </>
                     ) : undefined
                   }
@@ -265,84 +269,82 @@ function SharedGivyInner() {
         </main>
       </div>
 
-      {activeItem && (
-        <div className="fixed inset-0 z-50 grid place-items-end bg-ink/35 p-4 sm:place-items-center">
-          <div className="panel w-full max-w-md animate-rise border-2 p-5 sm:p-6">
-            <p className="font-display text-2xl text-ink">
-              Claim {activeItem.title}
-            </p>
-            <p className="mt-2 text-sm text-ink-soft">
-              Others will see it as taken. They won&apos;t see it was you.
-            </p>
-            {cloud && !user && (
-              <p className="mt-3 rounded-2xl bg-paper p-3 text-sm text-ink-soft">
-                Sign in to mark this gift so claims stay secure across devices.
-              </p>
-            )}
+      <Dialog
+        open={Boolean(activeItem)}
+        onOpenChange={(open) => {
+          if (!open) setActiveItem(null);
+        }}
+      >
+        <DialogContent>
+          {activeItem && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Claim {activeItem.title}</DialogTitle>
+                <DialogDescription>
+                  Others will see it as taken. They won&apos;t see it was you.
+                </DialogDescription>
+              </DialogHeader>
+              {cloud && !user && (
+                <p className="mt-3 rounded-2xl bg-mist p-3 text-sm text-ink-soft">
+                  Sign in to mark this gift so claims stay secure across devices.
+                </p>
+              )}
 
-            <div className="mt-5 space-y-2">
-              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-paper p-3">
-                <input
-                  type="radio"
-                  name="ship"
-                  checked={ship === "to_giver"}
-                  onChange={() => setShip("to_giver")}
-                />
-                <span>
-                  <span className="block font-semibold">Ship to me</span>
-                  <span className="block text-sm text-ink-soft">
-                    Wrap it and give it in person.
+              <div className="mt-5 space-y-2">
+                <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
+                  <input
+                    type="radio"
+                    name="ship"
+                    checked={ship === "to_giver"}
+                    onChange={() => setShip("to_giver")}
+                  />
+                  <span>
+                    <span className="block font-semibold">Ship to me</span>
+                    <span className="block text-sm text-ink-soft">
+                      Wrap it and give it in person.
+                    </span>
                   </span>
-                </span>
-              </label>
-              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-paper p-3">
-                <input
-                  type="radio"
-                  name="ship"
-                  checked={ship === "to_recipient"}
-                  onChange={() => setShip("to_recipient")}
-                />
-                <span>
-                  <span className="block font-semibold">
-                    Ship to {list.ownerName}
+                </label>
+                <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
+                  <input
+                    type="radio"
+                    name="ship"
+                    checked={ship === "to_recipient"}
+                    onChange={() => setShip("to_recipient")}
+                  />
+                  <span>
+                    <span className="block font-semibold">
+                      Ship to {list.ownerName}
+                    </span>
+                    <span className="block text-sm text-ink-soft">
+                      Address is revealed only after you confirm.
+                    </span>
                   </span>
-                  <span className="block text-sm text-ink-soft">
-                    Address is revealed only after you confirm.
-                  </span>
-                </span>
-              </label>
-            </div>
+                </label>
+              </div>
 
-            {claimError && (
-              <p className="mt-3 text-sm font-semibold text-coral-deep">
-                {claimError}
-              </p>
-            )}
+              {claimError && (
+                <p className="mt-3 text-sm font-semibold text-coral-deep">
+                  {claimError}
+                </p>
+              )}
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={busy}
-                onClick={() => void confirmClaim()}
-              >
-                {busy
-                  ? "Saving…"
-                  : cloud && !user
-                    ? "Sign in to claim"
-                    : "Confirm"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setActiveItem(null)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Button disabled={busy} onClick={() => void confirmClaim()}>
+                  {busy
+                    ? "Saving…"
+                    : cloud && !user
+                      ? "Sign in to claim"
+                      : "Confirm"}
+                </Button>
+                <Button variant="secondary" onClick={() => setActiveItem(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
