@@ -19,7 +19,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!ready || !user) {
     return (
       <div className="shell grid min-h-[70vh] place-items-center text-ink-soft">
-        Opening Givy…
+        Opening…
       </div>
     );
   }

@@ -14,11 +14,36 @@ const body = DM_Sans({
   variable: "--font-body",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://givy.onrender.com";
+
 export const metadata: Metadata = {
-  title: "Givy · gifts without the guesswork",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Givy · gifts without the guesswork",
+    template: "%s · Givy",
+  },
   description:
     "Build a wishlist, share one link, and let friends claim gifts in private. No duplicates, no awkward moments.",
   applicationName: "Givy",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Givy",
+    title: "Givy · gifts without the guesswork",
+    description:
+      "Build a wishlist, share one link, and let friends claim gifts in private.",
+    images: [{ url: "/givy-hero.jpg", width: 1920, height: 1080, alt: "Givy" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Givy · gifts without the guesswork",
+    description:
+      "Build a wishlist, share one link, and let friends claim gifts in private.",
+    images: ["/givy-hero.jpg"],
+  },
   icons: {
     icon: [{ url: "/icon.png", type: "image/png" }],
     apple: [{ url: "/apple-icon.png", type: "image/png" }],

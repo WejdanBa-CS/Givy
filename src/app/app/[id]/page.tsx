@@ -15,7 +15,7 @@ export default function ManageListPage() {
   const params = useParams<{ id: string }>();
   const {
     lists,
-    cloud,
+    ready,
     addItem,
     updateItem,
     removeItem,
@@ -63,6 +63,12 @@ export default function ManageListPage() {
     list?.description,
     list?.eventDate,
   ]);
+
+  if (!ready) {
+    return (
+      <div className="panel p-8 text-center text-ink-soft">Opening list…</div>
+    );
+  }
 
   if (!list) {
     return (
@@ -202,12 +208,6 @@ export default function ManageListPage() {
       <p className="mt-1 text-sm text-ink-soft">
         Finalize, then send this link. Friends mark gifts purchased privately.
       </p>
-      {!cloud && (
-        <p className="mt-2 rounded-xl bg-amber/30 px-3 py-2 text-xs font-semibold text-ink">
-          Local demo: share links only work in this browser. Cloud mode shares
-          across devices.
-        </p>
-      )}
       <div className="mt-4 rounded-2xl border border-line bg-paper/80 p-3 text-sm break-all text-ink-soft">
         {shareUrl}
       </div>

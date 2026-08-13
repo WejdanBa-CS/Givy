@@ -7,7 +7,7 @@ import { formatMoney, formatShortDate } from "@/lib/store";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function AppHomePage() {
-  const { user, lists, activity, cloud } = useGivy();
+  const { user, lists, activity } = useGivy();
   const today = new Date().toISOString().slice(0, 10);
   const upcoming =
     [...lists]
@@ -30,11 +30,6 @@ export default function AppHomePage() {
         <h1 className="font-display text-4xl tracking-tight text-ink">
           {user?.name.split(" ")[0]}, ready to Givy?
         </h1>
-        {!cloud && (
-          <p className="mt-2 text-sm text-ink-soft">
-            Local demo: lists live in this browser. Connect Supabase for cloud sync.
-          </p>
-        )}
       </section>
 
       <section className="grid grid-cols-3 gap-3">
