@@ -532,3 +532,101 @@ select {
     color: #fff7f0;
   }
 }
+
+/* —— Calendar —— */
+.cal {
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 1rem;
+}
+
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.cal-cell:not(.is-empty):hover {
+  background: var(--mist-deep);
+}
+
+.cal-cell.is-empty {
+  cursor: default;
+  pointer-events: none;
+}
+
+.cal-cell.is-today .cal-day {
+  color: var(--coral);
+  font-weight: 800;
+}
+
+.cal-cell.is-selected {
+  background: var(--coral);
+  color: #fff;
+}
+
+.cal-cell.is-selected .cal-day {
+  color: #fff;
+}
+
+.cal-day {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cal-dots {
+  display: flex;
+  gap: 2px;
+  min-height: 4px;
+}
+
+.cal-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--coral);
+  display: block;
+}
+
+.cal-cell.is-selected .cal-dots i {
+  background: #ffcd3c;
+}

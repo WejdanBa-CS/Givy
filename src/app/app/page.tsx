@@ -151,10 +151,19 @@ export default function AppHomePage() {
           ))}
           {activity.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-ink-soft">
-              No activity yet. Create a list to get started.
+              No activity yet.{" "}
+              <Link href="/app/calendar" className="font-semibold text-coral-deep">
+                See calendar
+              </Link>
             </li>
           )}
         </ul>
+      </section>
+
+      <section className="pb-2">
+        <Link href="/app/calendar" className="btn btn-secondary w-full">
+          Open calendar
+        </Link>
       </section>
     </div>
   );
