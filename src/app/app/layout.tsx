@@ -24,14 +24,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const showNav = [
-    "/app",
-    "/app/lists",
-    "/app/create",
-    "/app/giveaways",
-    "/app/profile",
-    "/app/activity",
-  ].includes(pathname);
+  const showNav =
+    pathname === "/app" ||
+    pathname.startsWith("/app/lists") ||
+    pathname.startsWith("/app/create") ||
+    pathname.startsWith("/app/profile") ||
+    pathname.startsWith("/app/activity") ||
+    pathname.startsWith("/app/giveaways") ||
+    /^\/app\/[^/]+$/.test(pathname);
 
   return (
     <div className="app-shell">

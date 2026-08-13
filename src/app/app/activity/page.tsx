@@ -11,7 +11,7 @@ export default function ActivityPage() {
     <div className="animate-rise space-y-5">
       <div>
         <h1 className="font-display text-4xl tracking-tight text-ink">Activity</h1>
-        <p className="mt-1 text-ink-soft">Claims stay anonymous — you only see that something was taken.</p>
+        <p className="mt-1 text-ink-soft">Claims stay anonymous. You only see that something was taken.</p>
       </div>
 
       <ul className="panel divide-y divide-[var(--line)] overflow-hidden">
@@ -34,7 +34,7 @@ export default function ActivityPage() {
           </li>
         ))}
         {activity.length === 0 && (
-          <li className="px-5 py-8 text-center text-sm text-ink-soft">Nothing yet — create a Givy to get going.</li>
+          <li className="px-5 py-8 text-center text-sm text-ink-soft">Nothing yet. Create a Givy to get going.</li>
         )}
       </ul>
     </div>

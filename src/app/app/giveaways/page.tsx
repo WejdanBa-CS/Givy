@@ -40,7 +40,7 @@ export default function GiveawaysPage() {
         <div>
           <h1 className="font-display text-4xl tracking-tight text-ink">Giveaways</h1>
           <p className="mt-1 max-w-md text-ink-soft">
-            Free stuff nearby — join the pool, and a lucky person gets to pick it up.
+            Free stuff nearby. Join the pool, and a lucky person gets to pick it up.
           </p>
         </div>
         <button type="button" className="btn btn-primary" onClick={() => setShowForm((v) => !v)}>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useGivy } from "@/lib/givy-context";
 
 export default function ProfilePage() {
-  const { user, lists, giveaways, signOut } = useGivy();
+  const { user, lists, cloud, signOut } = useGivy();
   const router = useRouter();
 
   if (!user) return null;
@@ -26,34 +26,42 @@ export default function ProfilePage() {
         <div>
           <h1 className="font-display text-3xl text-ink">{user.name}</h1>
           <p className="text-sm text-ink-soft">
-            {user.email} · signed in with {user.provider}
+            {user.email} · {user.provider}
+            {cloud ? " · cloud" : " · local demo"}
           </p>
         </div>
       </section>
 
       <section className="panel divide-y divide-[var(--line)] overflow-hidden">
-        <Link href="/app/lists" className="flex items-center justify-between px-5 py-4">
+        <Link
+          href="/app/lists"
+          className="flex items-center justify-between px-5 py-4"
+        >
           <span className="font-semibold">Your lists</span>
           <span className="text-ink-soft">{lists.length}</span>
         </Link>
-        <Link href="/app/giveaways" className="flex items-center justify-between px-5 py-4">
-          <span className="font-semibold">Your giveaways</span>
-          <span className="text-ink-soft">
-            {giveaways.filter((g) => g.ownerId === user.id).length}
-          </span>
-        </Link>
-        <Link href="/app/activity" className="flex items-center justify-between px-5 py-4">
+        <Link
+          href="/app/activity"
+          className="flex items-center justify-between px-5 py-4"
+        >
           <span className="font-semibold">Activity</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
+        <Link
+          href="/privacy"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Privacy</span>
           <span className="text-ink-soft">→</span>
         </Link>
       </section>
 
       <section className="panel p-5">
-        <p className="font-display text-xl text-ink">Coming later</p>
+        <p className="font-display text-xl text-ink">Roadmap</p>
         <ul className="mt-2 space-y-1 text-sm text-ink-soft">
-          <li>Retail partnerships & checkout</li>
+          <li>Apple & Facebook OAuth in cloud mode</li>
+          <li>Retail checkout partnerships</li>
           <li>Wedding registry upgrades</li>
-          <li>Giveaways in cloud beta</li>
         </ul>
       </section>
 

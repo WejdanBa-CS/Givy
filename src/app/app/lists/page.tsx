@@ -31,7 +31,7 @@ export default function ListsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-4xl tracking-tight text-ink">Lists</h1>
-          <p className="mt-1 text-ink-soft">Birthdays, holidays, weddings — all your Givies.</p>
+          <p className="mt-1 text-ink-soft">Birthdays, holidays, weddings: all your Givies.</p>
         </div>
         <Link href="/app/create" className="btn btn-primary">
           New Givy

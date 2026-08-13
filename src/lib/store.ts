@@ -146,7 +146,7 @@ export function ensureSeedData(user: User) {
     ownerName: user.name,
     title: `${user.name.split(" ")[0]}'s birthday`,
     occasion: "birthday",
-    description: "A few things I'd love — no pressure, just ideas.",
+    description: "A few things I'd love. No pressure, just ideas.",
     eventDate: birthday.toISOString().slice(0, 10),
     recipientAddress: "184 Maple Street, Apt 4B",
     shareCode: "demo" + uid().slice(-6),
@@ -203,7 +203,7 @@ export function ensureSeedData(user: User) {
     ownerName: "Maya Chen",
     title: "Free coffee table",
     description:
-      "Moving next week — solid wood coffee table, minor scuffs. Pickup only.",
+      "Moving next week. Solid wood coffee table, minor scuffs. Pickup only.",
     itemName: "Mid-century coffee table",
     area: "Within 10 miles",
     endsAt: giveawayEnd.toISOString().slice(0, 10),
@@ -217,7 +217,7 @@ export function ensureSeedData(user: User) {
     ownerId: user.id,
     ownerName: user.name,
     title: "Desk lamp giveaway",
-    description: "Barely used lamp — first lucky neighbor wins.",
+    description: "Barely used lamp. First lucky neighbor wins.",
     itemName: "Adjustable desk lamp",
     area: "Same neighborhood",
     endsAt: giveawayEnd.toISOString().slice(0, 10),
@@ -262,6 +262,8 @@ export function createList(input: {
   description?: string;
   eventDate: string;
   recipientAddress?: string;
+  supportUrl?: string;
+  supportLabel?: string;
   withDemoItems?: boolean;
 }): GivyList {
   const now = new Date().toISOString();
@@ -274,6 +276,8 @@ export function createList(input: {
     description: input.description,
     eventDate: input.eventDate,
     recipientAddress: input.recipientAddress,
+    supportUrl: input.supportUrl,
+    supportLabel: input.supportLabel,
     shareCode: uid("share").replace("share_", "").slice(0, 10),
     published: false,
     items: input.withDemoItems

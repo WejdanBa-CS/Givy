@@ -4,6 +4,7 @@ export type Occasion =
   | "holiday"
   | "baby"
   | "graduation"
+  | "creator"
   | "other";
 
 export type AuthProvider = "google" | "apple" | "facebook";
@@ -43,6 +44,10 @@ export interface GivyList {
   description?: string;
   eventDate: string;
   recipientAddress?: string;
+  /** Public tip / support link for creators (Ko-fi, Buy Me a Coffee, PayPal, etc.) */
+  supportUrl?: string;
+  /** Button label on the public page. Defaults to "Support me". */
+  supportLabel?: string;
   shareCode: string;
   published: boolean;
   items: GiftItem[];
@@ -81,6 +86,7 @@ export const OCCASION_LABELS: Record<Occasion, string> = {
   holiday: "Holiday",
   baby: "Baby",
   graduation: "Graduation",
+  creator: "Creator / content",
   other: "Just because",
 };
 
@@ -90,6 +96,7 @@ export const OCCASION_EMOJI: Record<Occasion, string> = {
   holiday: "🎄",
   baby: "🍼",
   graduation: "🎓",
+  creator: "🎥",
   other: "✨",
 };
 
