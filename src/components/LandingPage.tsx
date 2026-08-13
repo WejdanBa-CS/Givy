@@ -1,176 +1,122 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  Gift,
-  Link2,
-  Lock,
-  Share2,
-  Sparkles,
-} from "lucide-react";
 import { LogoMark } from "@/components/Logo";
 import { useGivy } from "@/lib/givy-context";
 
 export function LandingPage() {
   const router = useRouter();
   const { user, ready } = useGivy();
+  const primaryHref = ready && user ? "/app" : "/login";
 
   return (
-    <div className="min-h-screen bg-mist text-ink" style={{ fontFamily: "var(--font-body)" }}>
-      <header className="shell flex items-center justify-between py-5">
-        <span className="inline-flex items-center gap-2.5">
-          <LogoMark size={32} />
-          <span className="font-display text-2xl font-semibold tracking-tight">Givy</span>
-        </span>
-        {ready && user ? (
-          <Link href="/app" className="btn btn-primary !rounded-full !py-2.5 !px-5 text-sm">
-            My lists
-          </Link>
-        ) : (
-          <Link href="/login" className="btn btn-primary !rounded-full !py-2.5 !px-5 text-sm">
-            Sign in
-          </Link>
-        )}
+    <div className="landing min-h-screen bg-mist text-ink">
+      <header className="landing-nav">
+        <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Givy home">
+          <LogoMark size={28} />
+          <span className="font-display text-xl font-semibold tracking-tight">Givy</span>
+        </Link>
+        <Link href={primaryHref} className="btn btn-ghost text-sm font-bold">
+          {ready && user ? "My lists" : "Sign in"}
+        </Link>
       </header>
 
-      <main>
-        <section className="shell grid items-center gap-12 pb-16 pt-10 lg:grid-cols-2 lg:pt-16">
-          <div className="animate-rise">
-            <span className="inline-flex items-center gap-2 rounded-full bg-amber px-3 py-1.5 text-xs font-black uppercase tracking-widest text-ink">
-              <Sparkles size={11} /> Wishlists, done right
-            </span>
-            <h1 className="mt-6 font-display text-[clamp(2.8rem,6vw,4.5rem)] font-black leading-[1.05] tracking-tight">
-              Gifts they&apos;ll actually{" "}
-              <span className="italic text-coral">love.</span>
-            </h1>
-            <p className="mt-5 max-w-md text-lg leading-relaxed text-ink-soft">
-              Build a list. Share one link. Friends claim gifts in private, so nobody
-              buys the same thing twice.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => router.push(user ? "/app" : "/login")}
-                className="btn btn-primary gap-3 !rounded-2xl !px-6 !py-4"
-              >
-                {user ? "Open my lists" : "Get started free"}
-                <ArrowRight size={16} />
-              </button>
-              <a href="#how" className="btn btn-secondary !rounded-2xl !px-6 !py-4">
-                See how it works
-              </a>
-            </div>
-          </div>
+      <section className="landing-hero" aria-label="Givy">
+        <div className="landing-hero-media" aria-hidden>
+          <Image
+            src="/givy-hero.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="landing-hero-veil" />
+        </div>
 
-          <div className="relative animate-rise">
-            <div className="panel overflow-hidden border-2 p-0 shadow-none">
-              <div className="border-b-2 border-line bg-mist-deep/60 px-5 py-4">
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-leaf">
-                  Birthday · Jordan
-                </p>
-                <p className="mt-1 font-display text-2xl font-semibold">Jordan&apos;s wishlist</p>
-              </div>
-              <ul className="divide-y-2 divide-line">
-                {[
-                  { title: "Wool beanie", price: "$28", open: true },
-                  { title: "Snack care box", price: "$35", open: false },
-                  { title: "Everyday watch", price: "$120", open: true },
-                ].map((item) => (
-                  <li
-                    key={item.title}
-                    className={`flex items-center justify-between gap-3 px-5 py-4 ${
-                      item.open ? "" : "opacity-45"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-11 w-11 place-items-center rounded-xl bg-mist-deep text-coral">
-                        <Gift size={18} />
-                      </span>
-                      <div>
-                        <p
-                          className={`font-semibold ${
-                            item.open ? "" : "line-through"
-                          }`}
-                        >
-                          {item.title}
-                        </p>
-                        <p className="text-sm text-ink-soft">
-                          {item.open ? "Open" : "Taken · anonymous"}
-                        </p>
-                      </div>
-                    </div>
-                    {item.open ? (
-                      <span className="price-badge">{item.price}</span>
-                    ) : (
-                      <Lock size={16} className="text-ink-soft" />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="landing-hero-copy shell">
+          <p className="landing-brand font-display animate-rise">Givy</p>
+          <h1 className="landing-headline animate-rise-delay-1">
+            One list. Zero awkward duplicates.
+          </h1>
+          <p className="landing-lede animate-rise-delay-2">
+            Share a private wishlist. Friends claim gifts anonymously.
+          </p>
+          <div className="landing-cta animate-rise-delay-3">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => router.push(primaryHref)}
+            >
+              {ready && user ? "Open my lists" : "Start free"}
+            </button>
+            <a href="#how" className="btn btn-secondary landing-cta-secondary">
+              How it works
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="how" className="border-y-2 border-line bg-paper/50 py-16">
-          <div className="shell">
-            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              How Givy works
-            </h2>
-            <p className="mt-2 max-w-xl text-ink-soft">
-              Three steps from empty list to zero awkward duplicates.
-            </p>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {[
-                {
-                  icon: Gift,
-                  title: "Create your list",
-                  body: "Add gift ideas with links, prices, and notes for any occasion.",
-                },
-                {
-                  icon: Share2,
-                  title: "Share one link",
-                  body: "Send a unique link to friends and family. No accounts needed to view.",
-                },
-                {
-                  icon: Link2,
-                  title: "Friends claim privately",
-                  body: "They mark a gift as taken. You only see that it’s claimed, never who.",
-                },
-              ].map(({ icon: Icon, title, body }) => (
-                <div key={title} className="panel p-6">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-coral/10 text-coral">
-                    <Icon size={20} />
-                  </span>
-                  <h3 className="mt-4 font-display text-xl font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">{body}</p>
-                </div>
-              ))}
+      <section id="how" className="landing-how shell">
+        <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+          How it works
+        </h2>
+        <p className="mt-3 max-w-lg text-ink-soft">
+          From empty list to shared gifts in three quiet steps.
+        </p>
+        <ol className="landing-steps">
+          <li className="landing-step">
+            <span className="landing-step-num">01</span>
+            <div>
+              <h3 className="font-display text-2xl">Create a list</h3>
+              <p className="mt-2 text-ink-soft">
+                Add ideas with links and prices for birthdays, weddings, and more.
+              </p>
             </div>
-          </div>
-        </section>
+          </li>
+          <li className="landing-step">
+            <span className="landing-step-num">02</span>
+            <div>
+              <h3 className="font-display text-2xl">Share one link</h3>
+              <p className="mt-2 text-ink-soft">
+                Send it to friends and family. Anyone can open it.
+              </p>
+            </div>
+          </li>
+          <li className="landing-step">
+            <span className="landing-step-num">03</span>
+            <div>
+              <h3 className="font-display text-2xl">They claim in private</h3>
+              <p className="mt-2 text-ink-soft">
+                You see what’s taken. You never see who bought it.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
 
-        <section className="shell py-16 text-center">
-          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ready for your next occasion?
+      <section className="landing-close">
+        <div className="shell text-center">
+          <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+            Ready when they are.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-ink-soft">
-            Sign in and create a registry in under a minute.
+            Make a registry in under a minute.
           </p>
           <button
             type="button"
-            onClick={() => router.push("/login")}
-            className="btn btn-primary mt-8 !rounded-2xl !bg-amber !px-8 !py-4 !text-ink hover:!opacity-90"
+            className="btn btn-primary mt-8"
+            onClick={() => router.push(primaryHref)}
           >
-            Create your Givy
-            <ArrowRight size={16} />
+            {ready && user ? "Go to my lists" : "Create your Givy"}
           </button>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      <footer className="shell border-t-2 border-line py-8 text-center text-sm text-ink-soft">
-        © {new Date().getFullYear()} Givy · gifts without the guesswork ·{" "}
+      <footer className="shell border-t border-line/80 py-8 text-center text-sm text-ink-soft">
+        © {new Date().getFullYear()} Givy ·{" "}
         <Link href="/privacy" className="underline-offset-2 hover:underline">
           Privacy
         </Link>{" "}
