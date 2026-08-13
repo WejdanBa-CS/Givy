@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useGivy } from "@/lib/givy-context";
+import { safeNextPath } from "@/lib/safe-next";
 import type { AuthProvider } from "@/lib/types";
 
 const providers: {
@@ -63,7 +64,7 @@ function LoginInner() {
   const { user, ready, cloud, signIn } = useGivy();
   const router = useRouter();
   const search = useSearchParams();
-  const next = search.get("next") ?? "/app";
+  const next = safeNextPath(search.get("next"), "/app");
   const error = search.get("error");
   const [busy, setBusy] = useState<AuthProvider | null>(null);
   const [message, setMessage] = useState<string | null>(null);
