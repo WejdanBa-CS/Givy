@@ -21,6 +21,7 @@ const tabs = [
         "/app/activity",
         "/app/profile",
         "/app/giveaways",
+        "/app/calendar",
       ];
       if (reserved.includes(p)) return false;
       return /^\/app\/[^/]+$/.test(p);
@@ -35,10 +36,10 @@ const tabs = [
     primary: true,
   },
   {
-    href: "/app/activity",
-    label: "Activity",
-    match: (p: string) => p.startsWith("/app/activity"),
-    icon: ActivityIcon,
+    href: "/app/calendar",
+    label: "Calendar",
+    match: (p: string) => p.startsWith("/app/calendar"),
+    icon: CalendarIcon,
   },
   {
     href: "/app/profile",
@@ -110,15 +111,23 @@ function CreateIcon() {
   );
 }
 
-function ActivityIcon() {
+function CalendarIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect
+        x="3.5"
+        y="5"
+        width="17"
+        height="15"
+        rx="2.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
       <path
-        d="M4 12h4l2-6 4 12 2-6h4"
+        d="M3.5 9.5h17M8 3.5v3M16 3.5v3"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
