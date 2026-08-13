@@ -112,7 +112,9 @@ export function getListById(id: string): GivyList | null {
 }
 
 export function getListByShareCode(code: string): GivyList | null {
-  return getLists().find((l) => l.shareCode === code) ?? null;
+  return (
+    getLists().find((l) => l.shareCode === code && l.published) ?? null
+  );
 }
 
 export function getGiveaways(): Giveaway[] {
@@ -336,6 +338,24 @@ export function removeItem(listId: string, itemId: string) {
   const list = getListById(listId);
   if (!list) return;
   updateList(listId, { items: list.items.filter((i) => i.id !== itemId) });
+}
+
+export function updateItem(
+  listId: string,
+  itemId: string,
+  patch: Partial<
+    Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint">
+  >,
+): GiftItem | null {
+  const list = getListById(listId);
+  if (!list) return null;
+  const target = list.items.find((i) => i.id === itemId);
+  if (!target || target.purchased) return null;
+  const next = { ...target, ...patch };
+  updateList(listId, {
+    items: list.items.map((i) => (i.id === itemId ? next : i)),
+  });
+  return next;
 }
 
 export function claimItem(

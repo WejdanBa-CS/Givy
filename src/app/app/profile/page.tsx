@@ -59,7 +59,7 @@ export default function ProfilePage() {
       <section className="panel p-5">
         <p className="font-display text-xl text-ink">Roadmap</p>
         <ul className="mt-2 space-y-1 text-sm text-ink-soft">
-          <li>Apple & Facebook OAuth in cloud mode</li>
+          <li>Apple sign-in</li>
           <li>Retail checkout partnerships</li>
           <li>Wedding registry upgrades</li>
         </ul>

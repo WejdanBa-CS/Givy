@@ -11,7 +11,7 @@ const SIZES = {
   hero: 72,
 } as const;
 
-/** Coral gift + leaf bow: brand mark for Givy */
+/** Coral gift + leaf bow: brand mark for Givito */
 export function LogoMark({ size = 36, className = "" }: { size?: number; className?: string }) {
   return (
     <svg
@@ -76,7 +76,7 @@ export function Logo({ size = "md", showWordmark = true, className = "" }: LogoP
           className={`font-display font-semibold tracking-tight text-ink ${wordClass}`}
           style={{ letterSpacing: size === "hero" ? "-0.03em" : "-0.02em" }}
         >
-          Givy
+          Givito
         </span>
       )}
     </span>

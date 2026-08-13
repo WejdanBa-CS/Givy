@@ -11,20 +11,28 @@ import {
   Sparkles,
 } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
+import { useGivy } from "@/lib/givy-context";
 
 export function LandingPage() {
   const router = useRouter();
+  const { user, ready } = useGivy();
 
   return (
     <div className="min-h-screen bg-mist text-ink" style={{ fontFamily: "var(--font-body)" }}>
       <header className="shell flex items-center justify-between py-5">
         <span className="inline-flex items-center gap-2.5">
           <LogoMark size={32} />
-          <span className="font-display text-2xl font-semibold tracking-tight">Givy</span>
+          <span className="font-display text-2xl font-semibold tracking-tight">Givito</span>
         </span>
-        <Link href="/login" className="btn btn-primary !rounded-full !py-2.5 !px-5 text-sm">
-          Sign in
-        </Link>
+        {ready && user ? (
+          <Link href="/app" className="btn btn-primary !rounded-full !py-2.5 !px-5 text-sm">
+            My lists
+          </Link>
+        ) : (
+          <Link href="/login" className="btn btn-primary !rounded-full !py-2.5 !px-5 text-sm">
+            Sign in
+          </Link>
+        )}
       </header>
 
       <main>
@@ -44,10 +52,10 @@ export function LandingPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={() => router.push("/login")}
+                onClick={() => router.push(user ? "/app" : "/login")}
                 className="btn btn-primary gap-3 !rounded-2xl !px-6 !py-4"
               >
-                Get started free
+                {user ? "Open my lists" : "Get started free"}
                 <ArrowRight size={16} />
               </button>
               <a href="#how" className="btn btn-secondary !rounded-2xl !px-6 !py-4">
@@ -108,7 +116,7 @@ export function LandingPage() {
         <section id="how" className="border-y-2 border-line bg-paper/50 py-16">
           <div className="shell">
             <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              How Givy works
+              How Givito works
             </h2>
             <p className="mt-2 max-w-xl text-ink-soft">
               Three steps from empty list to zero awkward duplicates.
@@ -155,14 +163,14 @@ export function LandingPage() {
             onClick={() => router.push("/login")}
             className="btn btn-primary mt-8 !rounded-2xl !bg-amber !px-8 !py-4 !text-ink hover:!opacity-90"
           >
-            Create your Givy
+            Create your Givito
             <ArrowRight size={16} />
           </button>
         </section>
       </main>
 
       <footer className="shell border-t-2 border-line py-8 text-center text-sm text-ink-soft">
-        © {new Date().getFullYear()} Givy · gifts without the guesswork ·{" "}
+        © {new Date().getFullYear()} Givito · gifts without the guesswork ·{" "}
         <Link href="/privacy" className="underline-offset-2 hover:underline">
           Privacy
         </Link>{" "}

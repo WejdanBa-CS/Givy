@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useGivy } from "@/lib/givy-context";
 import type { Occasion } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
@@ -15,40 +16,51 @@ export default function CreatePage() {
     return d.toISOString().slice(0, 10);
   }, []);
 
-  const [title, setTitle] = useState("My birthday wishlist");
+  const [title, setTitle] = useState("");
   const [occasion, setOccasion] = useState<Occasion>("birthday");
   const [eventDate, setEventDate] = useState(defaultDate);
-  const [description, setDescription] = useState(
-    "A few things I'd love. No pressure, just ideas.",
-  );
+  const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [enableSupport, setEnableSupport] = useState(false);
   const [supportUrl, setSupportUrl] = useState("");
   const [supportLabel, setSupportLabel] = useState("Support me");
-  const [withDemo, setWithDemo] = useState(true);
+  const [withDemo, setWithDemo] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const list = await createList({
-      title: title.trim() || "Untitled Givy",
-      occasion,
-      description: description.trim() || undefined,
-      eventDate,
-      recipientAddress: address.trim() || undefined,
-      supportUrl:
-        enableSupport && supportUrl.trim() ? supportUrl.trim() : undefined,
-      supportLabel:
-        enableSupport && supportUrl.trim()
-          ? supportLabel.trim() || "Support me"
-          : undefined,
-      withDemoItems: withDemo,
-    });
-    if (list) router.push(`/app/${list.id}`);
+    setBusy(true);
+    try {
+      const list = await createList({
+        title: title.trim() || "Untitled Givito",
+        occasion,
+        description: description.trim() || undefined,
+        eventDate,
+        recipientAddress: address.trim() || undefined,
+        supportUrl:
+          enableSupport && supportUrl.trim() ? supportUrl.trim() : undefined,
+        supportLabel:
+          enableSupport && supportUrl.trim()
+            ? supportLabel.trim() || "Support me"
+            : undefined,
+        withDemoItems: withDemo,
+      });
+      if (!list) {
+        toast.error("Could not create list. Sign in and try again.");
+        return;
+      }
+      toast.success("List created");
+      router.push(`/app/${list.id}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not create list");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="mx-auto max-w-xl animate-rise">
-      <h1 className="font-display text-4xl tracking-tight text-ink">New Givy</h1>
+      <h1 className="font-display text-4xl tracking-tight text-ink">New Givito</h1>
       <p className="mt-2 text-ink-soft">
         Pick an occasion, set the date, and start collecting ideas.
       </p>
@@ -105,13 +117,14 @@ export default function CreatePage() {
 
         <div>
           <label className="label" htmlFor="description">
-            Note for friends
+            Note for friends (optional)
           </label>
           <textarea
             id="description"
             className="field min-h-24 resize-y"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder="A few things I'd love. No pressure, just ideas."
           />
         </div>
 
@@ -141,39 +154,26 @@ export default function CreatePage() {
                 Support me (for creators)
               </span>
               <span className="block text-sm text-ink-soft">
-                Add a tip link (Ko-fi, Buy Me a Coffee, PayPal, Patreon) on your
-                public list.
+                Add a tip link on your public list.
               </span>
             </span>
           </label>
           {enableSupport && (
             <div className="mt-4 space-y-3">
-              <div>
-                <label className="label" htmlFor="supportUrl">
-                  Support link
-                </label>
-                <input
-                  id="supportUrl"
-                  className="field"
-                  type="url"
-                  value={supportUrl}
-                  onChange={(e) => setSupportUrl(e.target.value)}
-                  placeholder="https://ko-fi.com/yourname"
-                  required={enableSupport}
-                />
-              </div>
-              <div>
-                <label className="label" htmlFor="supportLabel">
-                  Button text
-                </label>
-                <input
-                  id="supportLabel"
-                  className="field"
-                  value={supportLabel}
-                  onChange={(e) => setSupportLabel(e.target.value)}
-                  placeholder="Support me"
-                />
-              </div>
+              <input
+                className="field"
+                type="url"
+                value={supportUrl}
+                onChange={(e) => setSupportUrl(e.target.value)}
+                placeholder="https://ko-fi.com/yourname"
+                required={enableSupport}
+              />
+              <input
+                className="field"
+                value={supportLabel}
+                onChange={(e) => setSupportLabel(e.target.value)}
+                placeholder="Support me"
+              />
             </div>
           )}
         </div>
@@ -187,16 +187,16 @@ export default function CreatePage() {
           />
           <span>
             <span className="block font-semibold text-ink">
-              Start with sample birthday ideas
+              Start with sample gift ideas
             </span>
             <span className="block text-sm text-ink-soft">
-              Hat, socks, snacks, watch, gift card. Edit anytime.
+              Optional. You can edit or remove them anytime.
             </span>
           </span>
         </label>
 
-        <button type="submit" className="btn btn-primary w-full">
-          Create Givy
+        <button type="submit" className="btn btn-primary w-full" disabled={busy}>
+          {busy ? "Creating…" : "Create Givito"}
         </button>
       </form>
     </div>

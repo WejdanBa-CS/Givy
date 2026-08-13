@@ -1,6 +1,7 @@
 import { customAlphabet } from "nanoid";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type {
+  AuthProvider,
   GiftItem,
   GivyList,
   Occasion,
@@ -105,26 +106,43 @@ export async function fetchSessionUser(): Promise<User | null> {
     .eq("id", user.id)
     .maybeSingle();
 
+  const providerRaw =
+    (user.app_metadata?.provider as string | undefined) ??
+    (user.identities?.[0]?.provider as string | undefined) ??
+    "google";
+  const provider: AuthProvider =
+    providerRaw === "facebook" || providerRaw === "apple" || providerRaw === "google"
+      ? providerRaw
+      : "google";
+
   return {
     id: user.id,
-    name: profile?.display_name ?? user.user_metadata?.full_name ?? "Givy user",
+    name: profile?.display_name ?? user.user_metadata?.full_name ?? "Givito user",
     email: profile?.email ?? user.email ?? "",
-    provider: "google",
+    provider,
     avatarHue: profile?.avatar_hue ?? 180,
     betaUnlocked: Boolean(profile?.beta_unlocked),
   };
 }
 
-export async function signInWithGoogle(next = "/app") {
+export async function signInWithOAuth(
+  provider: "google" | "facebook" | "apple",
+  next = "/app",
+) {
   const supabase = createClient();
   const origin = window.location.origin;
   const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
+    provider,
     options: {
       redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) throw error;
+}
+
+/** @deprecated Prefer signInWithOAuth("google") */
+export async function signInWithGoogle(next = "/app") {
+  return signInWithOAuth("google", next);
 }
 
 export async function signOutRemote() {
@@ -303,6 +321,33 @@ export async function removeItemRemote(
     .eq("id", itemId)
     .eq("list_id", listId);
   if (error) throw error;
+}
+
+export async function updateItemRemote(
+  listId: string,
+  itemId: string,
+  patch: Partial<
+    Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint">
+  >,
+): Promise<GiftItem> {
+  const supabase = createClient();
+  const payload: Record<string, unknown> = {};
+  if (patch.title !== undefined) payload.title = patch.title;
+  if (patch.notes !== undefined) payload.notes = patch.notes ?? null;
+  if (patch.url !== undefined) payload.url = patch.url ?? null;
+  if (patch.price !== undefined) payload.price = patch.price ?? null;
+  if (patch.imageHint !== undefined) payload.image_url = patch.imageHint ?? null;
+
+  const { data, error } = await supabase
+    .from("items")
+    .update(payload)
+    .eq("id", itemId)
+    .eq("list_id", listId)
+    .eq("is_claimed", false)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return mapItem(data as ItemRow);
 }
 
 export async function publishListRemote(listId: string): Promise<void> {

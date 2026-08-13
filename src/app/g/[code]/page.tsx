@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -11,8 +12,10 @@ import { useGivy } from "@/lib/givy-context";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
 
-export default function SharedGivyPage() {
+function SharedGivyInner() {
   const params = useParams<{ code: string }>();
+  const search = useSearchParams();
+  const claimTarget = search.get("claim");
   const { ready, cloud, user, getByShare, claimItem } = useGivy();
   const [list, setList] = useState<GivyList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +25,7 @@ export default function SharedGivyPage() {
   const [claimError, setClaimError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
+  const [reopenedClaim, setReopenedClaim] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
@@ -35,6 +39,16 @@ export default function SharedGivyPage() {
     })();
   }, [ready, params.code, getByShare]);
 
+  useEffect(() => {
+    if (!list || !claimTarget || reopenedClaim) return;
+    const item = list.items.find((i) => i.id === claimTarget && !i.purchased);
+    if (item) {
+      setActiveItem(item);
+      setShip("to_giver");
+      setReopenedClaim(true);
+    }
+  }, [list, claimTarget, reopenedClaim]);
+
   if (!ready || loading) {
     return (
       <div className="shell py-20 text-center text-ink-soft">Loading…</div>
@@ -46,14 +60,14 @@ export default function SharedGivyPage() {
       <div className="shell pb-16">
         <SiteHeader />
         <div className="panel mx-auto mt-10 max-w-lg p-8 text-center">
-          <p className="font-display text-3xl text-ink">Hmm, no Givy here</p>
+          <p className="font-display text-3xl text-ink">Hmm, no Givito here</p>
           <p className="mt-2 text-sm text-ink-soft">
             {cloud
               ? "This link may be old or the list isn’t published yet."
               : "This list isn’t on this device. In demo mode, open the share link from the same browser that created it."}
           </p>
           <Link href="/" className="btn btn-primary mt-5">
-            Go to Givy
+            Go to Givito
           </Link>
         </div>
       </div>
@@ -61,31 +75,50 @@ export default function SharedGivyPage() {
   }
 
   const openCount = list.items.filter((i) => !i.purchased).length;
+  const loginNext = `/g/${params.code}${activeItem ? `?claim=${activeItem.id}` : claimTarget ? `?claim=${claimTarget}` : ""}`;
 
   async function confirmClaim() {
     if (!activeItem || !list) return;
     if (cloud && !user) {
-      window.location.href = `/login?next=/g/${params.code}`;
+      window.location.href = `/login?next=${encodeURIComponent(loginNext)}`;
       return;
     }
     setBusy(true);
     setClaimError(null);
-    const result = await claimItem(list.id, activeItem.id, ship);
-    setBusy(false);
-    if (!result.ok) {
-      setClaimError(result.error ?? "Could not mark this gift");
-      return;
+    try {
+      const result = await claimItem(list.id, activeItem.id, ship);
+      if (!result.ok) {
+        setClaimError(result.error ?? "Could not mark this gift");
+        return;
+      }
+      if (ship === "to_recipient" && result.recipientAddress) {
+        setRevealedAddress(result.recipientAddress);
+      }
+      setDoneMsg(
+        ship === "to_giver"
+          ? `Nice. "${activeItem.title}" is yours to wrap.`
+          : `Nice. "${activeItem.title}" is marked purchased. Ship it to ${list.ownerName}.`,
+      );
+      toast.success("Gift marked purchased");
+      setList(await getByShare(params.code));
+      setActiveItem(null);
+    } catch (err) {
+      setClaimError(
+        err instanceof Error ? err.message : "Could not mark this gift",
+      );
+    } finally {
+      setBusy(false);
     }
-    if (ship === "to_recipient" && result.recipientAddress) {
-      setRevealedAddress(result.recipientAddress);
+  }
+
+  async function copyAddress() {
+    if (!revealedAddress) return;
+    try {
+      await navigator.clipboard.writeText(revealedAddress);
+      toast.success("Address copied");
+    } catch {
+      toast.error("Could not copy address");
     }
-    setDoneMsg(
-      ship === "to_giver"
-        ? `Nice. "${activeItem.title}" is yours to wrap.`
-        : `Nice. "${activeItem.title}" is marked purchased. Ship it to ${list.ownerName}.`,
-    );
-    setList(await getByShare(params.code));
-    setActiveItem(null);
   }
 
   return (
@@ -137,10 +170,19 @@ export default function SharedGivyPage() {
             <div className="panel mt-4 border-leaf/30 bg-leaf/10 p-4 text-sm font-semibold text-ink">
               <p>{doneMsg}</p>
               {revealedAddress && (
-                <p className="mt-2 font-normal text-ink-soft">
-                  Ship to:{" "}
-                  <span className="font-semibold text-ink">{revealedAddress}</span>
-                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 font-normal">
+                  <p className="text-ink-soft">
+                    Ship to:{" "}
+                    <span className="font-semibold text-ink">{revealedAddress}</span>
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-secondary !py-1.5 !px-3 text-xs"
+                    onClick={() => void copyAddress()}
+                  >
+                    Copy address
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -293,5 +335,17 @@ export default function SharedGivyPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SharedGivyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="shell py-20 text-center text-ink-soft">Loading…</div>
+      }
+    >
+      <SharedGivyInner />
+    </Suspense>
   );
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { useGivy } from "@/lib/givy-context";
 
 export function SiteHeader() {
   const { user, signOut, ready } = useGivy();
   const pathname = usePathname();
+  const router = useRouter();
   const isApp = pathname.startsWith("/app") || pathname.startsWith("/create");
 
   return (
@@ -15,7 +16,7 @@ export function SiteHeader() {
       <Link
         href={user ? "/app" : "/"}
         className="group"
-        aria-label="Givy home"
+        aria-label="Givito home"
       >
         <Logo size="md" />
       </Link>
@@ -28,11 +29,14 @@ export function SiteHeader() {
                 My lists
               </Link>
             )}
-            <div className="hidden items-center gap-2 sm:flex">
+            <Link
+              href="/app/profile"
+              className="hidden items-center gap-2 sm:flex"
+              title={user.email}
+            >
               <span
                 className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
                 style={{ background: `hsl(${user.avatarHue} 55% 42%)` }}
-                title={user.email}
               >
                 {user.name
                   .split(" ")
@@ -41,11 +45,13 @@ export function SiteHeader() {
                   .slice(0, 2)}
               </span>
               <span className="text-sm text-ink-soft">{user.name}</span>
-            </div>
+            </Link>
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => void signOut()}
+              onClick={() => {
+                void signOut().then(() => router.replace("/"));
+              }}
             >
               Sign out
             </button>

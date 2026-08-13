@@ -1,4 +1,4 @@
-# Givy closed beta
+# Givito closed beta
 
 ## What is live
 - Google sign-in via Supabase Auth
@@ -16,9 +16,9 @@
 3. Copy Project URL + anon key into `.env.local`
 
 ### 2. Google OAuth
-Client ID (already recorded for this beta):
+Client ID (current):
 
-`552935596182-1n0j8f9fnk7sdorn177r1m0jlrkfla0p.apps.googleusercontent.com`
+`552935596182-14oa66shjnriitcvd3glfjjmfgveec61.apps.googleusercontent.com`
 
 In **Google Cloud Console** → Credentials → your OAuth client:
 - Authorized JavaScript origins: `http://localhost:3000`, your prod domain
@@ -29,12 +29,24 @@ In **Supabase** → Authentication → Providers → Google:
 - Paste Client ID
 - Paste **Client secret** (never commit this)
 
+### 2b. Facebook OAuth
+1. Create an app at [Meta for Developers](https://developers.facebook.com/apps/)
+2. Add product **Facebook Login** → **Web**
+3. Valid OAuth Redirect URI:
+   `https://ibbqhhgdpxwnsaevqymh.supabase.co/auth/v1/callback`
+4. Copy **App ID** and **App Secret**
+5. Supabase → Authentication → Providers → **Facebook**:
+   - Enable
+   - Paste App ID + App Secret
+   - Save
+6. In Meta app settings, request email permission and set the app to **Live** (or add yourself as a tester while in Development mode)
+
 In **Supabase** → Authentication → URL configuration:
 - Site URL: `http://localhost:3000` (and prod later)
 - Redirect URLs: `http://localhost:3000/auth/callback`, prod callback
 
 ### 3. Invites
-Starter code seeded by migration: `GIVY-BETA-2026` (50 uses).
+Starter code seeded by migration: `Givito-BETA-2026` (50 uses).
 
 Add more rows in `beta_invites` as needed.
 

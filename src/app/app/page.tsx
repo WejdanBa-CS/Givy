@@ -8,9 +8,12 @@ import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function AppHomePage() {
   const { user, lists, activity, cloud } = useGivy();
-  const upcoming = [...lists].sort((a, b) =>
-    a.eventDate.localeCompare(b.eventDate),
-  )[0];
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming =
+    [...lists]
+      .filter((l) => l.eventDate >= today)
+      .sort((a, b) => a.eventDate.localeCompare(b.eventDate))[0] ??
+    [...lists].sort((a, b) => b.eventDate.localeCompare(a.eventDate))[0];
   const claimedTotal = lists.reduce(
     (n, l) => n + l.items.filter((i) => i.purchased).length,
     0,
@@ -25,7 +28,7 @@ export default function AppHomePage() {
       <section>
         <p className="text-sm font-semibold text-ink-soft">Welcome back</p>
         <h1 className="font-display text-4xl tracking-tight text-ink">
-          {user?.name.split(" ")[0]}, ready to Givy?
+          {user?.name.split(" ")[0]}, ready to Givito?
         </h1>
         {!cloud && (
           <p className="mt-2 text-sm text-ink-soft">
@@ -127,7 +130,7 @@ export default function AppHomePage() {
             <div className="panel p-6 text-center">
               <p className="font-display text-xl">No lists yet</p>
               <Link href="/app/create" className="btn btn-primary mt-4">
-                Create a Givy
+                Create a Givito
               </Link>
             </div>
           )}
