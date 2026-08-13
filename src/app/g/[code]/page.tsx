@@ -5,9 +5,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
-import { GiftGlyph } from "@/components/GiftGlyph";
 import { SiteHeader } from "@/components/SiteHeader";
-import { formatMoney } from "@/lib/api";
+import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
@@ -154,51 +153,46 @@ function SharedGivyInner() {
   return (
     <div className="pb-20">
       <div className="friend-banner">
-        Friend view: gifts you mark as purchased stay anonymous. No duplicates.
+        Claims stay anonymous · no duplicate gifts
       </div>
       <div className="shell">
         <SiteHeader />
 
-        <main className="mt-6">
-          <div className="panel animate-rise p-6 sm:p-8">
+        <main className="mt-6 animate-rise">
+          <header className="wish-hero">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-leaf">
+                <p className="wish-hero-kicker">
                   {OCCASION_LABELS[list.occasion]} · {list.ownerName}
                 </p>
-                <h1 className="mt-2 font-display text-4xl tracking-tight text-ink sm:text-5xl">
-                  {list.title}
-                </h1>
+                <h1 className="wish-hero-title">{list.title}</h1>
                 {list.description && (
-                  <p className="mt-3 max-w-xl text-ink-soft">{list.description}</p>
+                  <p className="wish-hero-meta">{list.description}</p>
                 )}
+                <p className="wish-hero-meta" style={{ marginTop: "0.5rem" }}>
+                  {openCount === 0
+                    ? "Every gift on this list has been claimed."
+                    : `${openCount} still open · claims stay anonymous`}
+                </p>
               </div>
               <Countdown eventDate={list.eventDate} compact={false} />
             </div>
-            <p className="mt-5 text-sm font-semibold text-ink-soft">
-              {openCount === 0
-                ? "Every gift on this list has been claimed."
-                : `${openCount} idea${openCount === 1 ? "" : "s"} still open · claimed gifts are crossed out (buyer stays anonymous)`}
-            </p>
             {list.supportUrl && (
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <a
                   href={list.supportUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-primary !rounded-full !bg-amber !text-ink hover:!opacity-90"
+                  className="btn btn-secondary"
                 >
                   {list.supportLabel?.trim() || "Support me"}
                 </a>
-                <p className="text-sm text-ink-soft">
-                  Tip {list.ownerName.split(" ")[0]} if you want. Totally optional.
-                </p>
               </div>
             )}
-          </div>
+          </header>
 
           {doneMsg && (
-            <div className="panel mt-4 border-leaf/30 bg-leaf/10 p-4 text-sm font-semibold text-ink">
+            <div className="mt-5 rounded-2xl border border-leaf/25 bg-leaf/10 p-4 text-sm font-semibold text-ink">
               <p>{doneMsg}</p>
               {revealedAddress && (
                 <div className="mt-3 flex flex-wrap items-center gap-2 font-normal">
@@ -218,74 +212,53 @@ function SharedGivyInner() {
             </div>
           )}
 
-          <ul className="stagger mt-6 space-y-3">
+          <ul className="wish-list stagger mt-2">
             {list.items.length === 0 && (
-              <li className="panel p-8 text-center text-ink-soft">
+              <li className="py-12 text-center text-ink-soft">
                 No gifts on this list yet. Check back soon.
               </li>
             )}
             {list.items.map((item) => (
-              <li
-                key={item.id}
-                className={`panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${
-                  item.purchased ? "gift-claimed" : ""
-                }`}
-              >
-                <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <GiftGlyph hint={item.imageHint} />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <p className="gift-title text-lg font-semibold text-ink">
-                        {item.title}
+              <li key={item.id}>
+                <WishItem
+                  item={item}
+                  footer={
+                    item.claimedByMe ? (
+                      <p className="mt-1 text-sm font-semibold text-leaf">
+                        You claimed this
                       </p>
-                      {item.purchased && (
-                        <span className="text-sm font-semibold text-ink-soft">
-                          Already purchased
-                        </span>
-                      )}
-                      {!item.purchased && (
-                        <span className="price-badge">
-                          {formatMoney(item.price)}
-                        </span>
-                      )}
-                    </div>
-                    {item.notes && (
-                      <p className="mt-1 text-sm text-ink-soft">{item.notes}</p>
-                    )}
-                  </div>
-                </div>
-
-                {!item.purchased ? (
-                  <div className="flex flex-wrap gap-2 sm:justify-end">
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-secondary"
-                      >
-                        Buy link
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      className="btn btn-primary !rounded-full"
-                      onClick={() => {
-                        setActiveItem(item);
-                        setShip("to_giver");
-                        setDoneMsg(null);
-                        setClaimError(null);
-                        setRevealedAddress(null);
-                      }}
-                    >
-                      Mark purchased
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-sm font-semibold text-ink-soft sm:ml-auto">
-                    {item.claimedByMe ? "You claimed this" : "Taken"}
-                  </span>
-                )}
+                    ) : null
+                  }
+                  actions={
+                    !item.purchased ? (
+                      <>
+                        {item.url && (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-secondary !px-3 !py-2 text-sm"
+                          >
+                            Buy
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn-primary !px-3 !py-2 text-sm"
+                          onClick={() => {
+                            setActiveItem(item);
+                            setShip("to_giver");
+                            setDoneMsg(null);
+                            setClaimError(null);
+                            setRevealedAddress(null);
+                          }}
+                        >
+                          Claim
+                        </button>
+                      </>
+                    ) : undefined
+                  }
+                />
               </li>
             ))}
           </ul>

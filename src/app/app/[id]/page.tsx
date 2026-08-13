@@ -5,9 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
-import { GiftGlyph } from "@/components/GiftGlyph";
+import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
-import { formatMoney } from "@/lib/api";
 import type { GiftItem } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
@@ -268,67 +267,69 @@ export default function ManageListPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="animate-rise space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
-                {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
-              </p>
-              <h1 className="mt-1 font-display text-4xl tracking-tight text-ink">
-                {list.title}
-              </h1>
-              {list.description && (
-                <p className="mt-2 max-w-xl text-ink-soft">{list.description}</p>
-              )}
+          <div className="wish-hero">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="wish-hero-kicker">
+                  {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
+                  {list.published ? " · Shared" : " · Draft"}
+                </p>
+                <h1 className="wish-hero-title">{list.title}</h1>
+                {list.description && (
+                  <p className="wish-hero-meta">{list.description}</p>
+                )}
+              </div>
+              <Countdown eventDate={list.eventDate} />
             </div>
-            <Countdown eventDate={list.eventDate} />
           </div>
 
-          <div className="panel space-y-3 p-5">
-            <p className="font-display text-xl text-ink">List details</p>
-            <input
-              className="field"
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
-              placeholder="Title"
-            />
-            <textarea
-              className="field min-h-20"
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-              placeholder="Note for friends"
-            />
-            <input
-              className="field"
-              type="date"
-              value={metaDate}
-              onChange={(e) => setMetaDate(e.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={busy}
-              onClick={() => void saveMeta()}
-            >
-              Save details
-            </button>
-          </div>
+          <details className="panel p-5">
+            <summary className="cursor-pointer font-display text-xl text-ink">
+              Edit list details
+            </summary>
+            <div className="mt-4 space-y-3">
+              <input
+                className="field"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                placeholder="Title"
+              />
+              <textarea
+                className="field min-h-20"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="Note for friends"
+              />
+              <input
+                className="field"
+                type="date"
+                value={metaDate}
+                onChange={(e) => setMetaDate(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={busy}
+                onClick={() => void saveMeta()}
+              >
+                Save details
+              </button>
+            </div>
+          </details>
 
           {list.items.length === 0 ? (
-            <div className="panel p-6 text-center">
-              <p className="font-display text-xl">No gifts yet</p>
+            <div className="py-10 text-center">
+              <p className="font-display text-2xl text-ink">No gifts yet</p>
               <p className="mt-1 text-sm text-ink-soft">
                 Add your first idea below.
               </p>
             </div>
           ) : (
-            <ul className="stagger space-y-3">
+            <ul className="wish-list stagger">
               {list.items.map((item) => (
-                <li
-                  key={item.id}
-                  className={`panel p-4 ${item.purchased ? "gift-claimed" : ""}`}
-                >
+                <li key={item.id}>
                   {editingId === item.id ? (
-                    <div className="space-y-3">
+                    <div className="space-y-3 py-4">
                       <input
                         className="field"
                         value={editTitle}
@@ -375,69 +376,52 @@ export default function ManageListPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-3">
-                      <GiftGlyph hint={item.imageHint} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="gift-title font-semibold text-ink">
-                            {item.title}
-                          </p>
-                          {item.purchased ? (
-                            <p className="text-sm font-semibold text-ink-soft">
-                              Claimed
-                            </p>
-                          ) : (
-                            <span className="price-badge">
-                              {formatMoney(item.price)}
-                            </span>
-                          )}
-                        </div>
-                        {item.notes && (
-                          <p className="mt-1 text-sm text-ink-soft">
-                            {item.notes}
-                          </p>
-                        )}
-                        {item.url && !item.purchased && (
+                    <WishItem
+                      item={item}
+                      footer={
+                        item.url && !item.purchased ? (
                           <a
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-1 inline-block text-sm font-semibold text-coral-deep underline-offset-2 hover:underline"
+                            className="wish-item-link"
                           >
-                            Open product link
+                            View product
                           </a>
-                        )}
-                      </div>
-                      {!item.purchased && (
-                        <div className="flex shrink-0 flex-col gap-1">
-                          <button
-                            type="button"
-                            className="btn btn-ghost text-sm"
-                            onClick={() => startEdit(item)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost text-sm text-coral-deep"
-                            onClick={() => {
-                              if (!confirm(`Remove “${item.title}”?`)) return;
-                              void removeItem(list.id, item.id)
-                                .then(() => toast.success("Removed"))
-                                .catch((err) =>
-                                  toast.error(
-                                    err instanceof Error
-                                      ? err.message
-                                      : "Could not remove",
-                                  ),
-                                );
-                            }}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        ) : null
+                      }
+                      actions={
+                        !item.purchased ? (
+                          <>
+                            <button
+                              type="button"
+                              className="btn btn-ghost !px-2 !py-1 text-sm"
+                              onClick={() => startEdit(item)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost !px-2 !py-1 text-sm text-coral-deep"
+                              onClick={() => {
+                                if (!confirm(`Remove “${item.title}”?`)) return;
+                                void removeItem(list.id, item.id)
+                                  .then(() => toast.success("Removed"))
+                                  .catch((err) =>
+                                    toast.error(
+                                      err instanceof Error
+                                        ? err.message
+                                        : "Could not remove",
+                                    ),
+                                  );
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </>
+                        ) : undefined
+                      }
+                    />
                   )}
                 </li>
               ))}
