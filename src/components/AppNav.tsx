@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+/** Calendar-first home, then the rest of the app. */
 const tabs = [
   {
     href: "/app",
-    label: "Home",
-    match: (p: string) => p === "/app",
-    icon: HomeIcon,
+    label: "Calendar",
+    match: (p: string) => p === "/app" || p.startsWith("/app/calendar"),
+    icon: CalendarIcon,
   },
   {
     href: "/app/lists",
@@ -36,10 +37,10 @@ const tabs = [
     primary: true,
   },
   {
-    href: "/app/calendar",
-    label: "Calendar",
-    match: (p: string) => p.startsWith("/app/calendar"),
-    icon: CalendarIcon,
+    href: "/app/activity",
+    label: "Activity",
+    match: (p: string) => p.startsWith("/app/activity"),
+    icon: ActivityIcon,
   },
   {
     href: "/app/profile",
@@ -77,14 +78,23 @@ export function AppNav() {
   );
 }
 
-function HomeIcon() {
+function CalendarIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
+      <rect
+        x="3.5"
+        y="5"
+        width="17"
+        height="15"
+        rx="2.5"
         stroke="currentColor"
         strokeWidth="1.8"
-        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 9.5h17M8 3.5v3M16 3.5v3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -111,23 +121,15 @@ function CreateIcon() {
   );
 }
 
-function CalendarIcon() {
+function ActivityIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect
-        x="3.5"
-        y="5"
-        width="17"
-        height="15"
-        rx="2.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
       <path
-        d="M3.5 9.5h17M8 3.5v3M16 3.5v3"
+        d="M4 12h4l2-6 4 12 2-6h4"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
