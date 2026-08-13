@@ -1,4 +1,4 @@
-# Givito closed beta
+# Givy closed beta
 
 ## What is live
 - Google sign-in via Supabase Auth
@@ -46,7 +46,7 @@ In **Supabase** → Authentication → URL configuration:
 - Redirect URLs: `http://localhost:3000/auth/callback`, prod callback
 
 ### 3. Invites
-Starter code seeded by migration: `Givito-BETA-2026` (50 uses).
+Starter code seeded by migration: `GIVY-BETA-2026` (50 uses).
 
 Add more rows in `beta_invites` as needed.
 

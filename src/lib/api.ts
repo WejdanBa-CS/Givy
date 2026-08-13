@@ -117,7 +117,7 @@ export async function fetchSessionUser(): Promise<User | null> {
 
   return {
     id: user.id,
-    name: profile?.display_name ?? user.user_metadata?.full_name ?? "Givito user",
+    name: profile?.display_name ?? user.user_metadata?.full_name ?? "Givy user",
     email: profile?.email ?? user.email ?? "",
     provider,
     avatarHue: profile?.avatar_hue ?? 180,

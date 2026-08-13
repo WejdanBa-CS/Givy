@@ -35,7 +35,7 @@ export default function ListsPage() {
           <p className="mt-1 text-ink-soft">Birthdays, holidays, weddings: all your Givies.</p>
         </div>
         <Link href="/app/create" className="btn btn-primary">
-          New Givito
+          New Givy
         </Link>
       </div>
 
@@ -86,7 +86,7 @@ export default function ListsPage() {
           <div className="panel p-8 text-center">
             <p className="font-display text-2xl">Nothing here yet</p>
             <Link href="/app/create" className="btn btn-primary mt-4">
-              Create a Givito
+              Create a Givy
             </Link>
           </div>
         )}

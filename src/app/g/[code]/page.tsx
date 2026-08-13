@@ -60,14 +60,14 @@ function SharedGivyInner() {
       <div className="shell pb-16">
         <SiteHeader />
         <div className="panel mx-auto mt-10 max-w-lg p-8 text-center">
-          <p className="font-display text-3xl text-ink">Hmm, no Givito here</p>
+          <p className="font-display text-3xl text-ink">Hmm, no Givy here</p>
           <p className="mt-2 text-sm text-ink-soft">
             {cloud
               ? "This link may be old or the list isn’t published yet."
               : "This list isn’t on this device. In demo mode, open the share link from the same browser that created it."}
           </p>
           <Link href="/" className="btn btn-primary mt-5">
-            Go to Givito
+            Go to Givy
           </Link>
         </div>
       </div>

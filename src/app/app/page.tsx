@@ -28,7 +28,7 @@ export default function AppHomePage() {
       <section>
         <p className="text-sm font-semibold text-ink-soft">Welcome back</p>
         <h1 className="font-display text-4xl tracking-tight text-ink">
-          {user?.name.split(" ")[0]}, ready to Givito?
+          {user?.name.split(" ")[0]}, ready to Givy?
         </h1>
         {!cloud && (
           <p className="mt-2 text-sm text-ink-soft">
@@ -130,7 +130,7 @@ export default function AppHomePage() {
             <div className="panel p-6 text-center">
               <p className="font-display text-xl">No lists yet</p>
               <Link href="/app/create" className="btn btn-primary mt-4">
-                Create a Givito
+                Create a Givy
               </Link>
             </div>
           )}

@@ -16,7 +16,7 @@ export function SiteHeader() {
       <Link
         href={user ? "/app" : "/"}
         className="group"
-        aria-label="Givito home"
+        aria-label="Givy home"
       >
         <Logo size="md" />
       </Link>
