@@ -13,7 +13,18 @@ const tabs = [
   {
     href: "/app/lists",
     label: "Lists",
-    match: (p: string) => p.startsWith("/app/lists"),
+    match: (p: string) => {
+      if (p.startsWith("/app/lists")) return true;
+      const reserved = [
+        "/app",
+        "/app/create",
+        "/app/activity",
+        "/app/profile",
+        "/app/giveaways",
+      ];
+      if (reserved.includes(p)) return false;
+      return /^\/app\/[^/]+$/.test(p);
+    },
     icon: ListsIcon,
   },
   {
@@ -24,10 +35,10 @@ const tabs = [
     primary: true,
   },
   {
-    href: "/app/giveaways",
-    label: "Gives",
-    match: (p: string) => p.startsWith("/app/giveaways"),
-    icon: GiftIcon,
+    href: "/app/activity",
+    label: "Activity",
+    match: (p: string) => p.startsWith("/app/activity"),
+    icon: ActivityIcon,
   },
   {
     href: "/app/profile",
@@ -99,15 +110,14 @@ function CreateIcon() {
   );
 }
 
-function GiftIcon() {
+function ActivityIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 10v10M4 14h16" stroke="currentColor" strokeWidth="1.8" />
       <path
-        d="M12 10c-2.5-3.5-6-2.5-6 0 0 1.8 1.8 3 6 3 4.2 0 6-1.2 6-3 0-2.5-3.5-3.5-6 0Z"
+        d="M4 12h4l2-6 4 12 2-6h4"
         stroke="currentColor"
         strokeWidth="1.8"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>

@@ -7,11 +7,16 @@ import { formatMoney, formatShortDate } from "@/lib/store";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function AppHomePage() {
-  const { user, lists, giveaways, activity } = useGivy();
-  const upcoming = [...lists].sort((a, b) => a.eventDate.localeCompare(b.eventDate))[0];
-  const openGives = giveaways.filter((g) => g.status === "open").slice(0, 2);
+  const { user, lists, activity, cloud } = useGivy();
+  const upcoming = [...lists].sort((a, b) =>
+    a.eventDate.localeCompare(b.eventDate),
+  )[0];
   const claimedTotal = lists.reduce(
     (n, l) => n + l.items.filter((i) => i.purchased).length,
+    0,
+  );
+  const openTotal = lists.reduce(
+    (n, l) => n + l.items.filter((i) => !i.purchased).length,
     0,
   );
 
@@ -22,13 +27,18 @@ export default function AppHomePage() {
         <h1 className="font-display text-4xl tracking-tight text-ink">
           {user?.name.split(" ")[0]}, ready to Givy?
         </h1>
+        {!cloud && (
+          <p className="mt-2 text-sm text-ink-soft">
+            Local demo: lists live in this browser. Connect Supabase for cloud sync.
+          </p>
+        )}
       </section>
 
       <section className="grid grid-cols-3 gap-3">
         {[
           { label: "Lists", value: String(lists.length) },
+          { label: "Open gifts", value: String(openTotal) },
           { label: "Claimed", value: String(claimedTotal) },
-          { label: "Gives", value: String(giveaways.filter((g) => g.status === "open").length) },
         ].map((stat) => (
           <div key={stat.label} className="panel px-3 py-4 text-center">
             <p className="font-display text-2xl text-ink">{stat.value}</p>
@@ -45,7 +55,9 @@ export default function AppHomePage() {
                 Next up · {OCCASION_EMOJI[upcoming.occasion]}{" "}
                 {OCCASION_LABELS[upcoming.occasion]}
               </p>
-              <h2 className="mt-1 font-display text-2xl text-ink">{upcoming.title}</h2>
+              <h2 className="mt-1 font-display text-2xl text-ink">
+                {upcoming.title}
+              </h2>
               <p className="mt-1 text-sm text-ink-soft">
                 {upcoming.items.filter((i) => !i.purchased).length} still open ·{" "}
                 {formatShortDate(upcoming.eventDate)}
@@ -58,7 +70,10 @@ export default function AppHomePage() {
               Open list
             </Link>
             {upcoming.published && (
-              <Link href={`/g/${upcoming.shareCode}`} className="btn btn-secondary">
+              <Link
+                href={`/g/${upcoming.shareCode}`}
+                className="btn btn-secondary"
+              >
                 Shared view
               </Link>
             )}
@@ -69,26 +84,38 @@ export default function AppHomePage() {
       <section>
         <div className="mb-3 flex items-end justify-between">
           <h2 className="font-display text-2xl text-ink">Your lists</h2>
-          <Link href="/app/lists" className="text-sm font-semibold text-coral-deep">
+          <Link
+            href="/app/lists"
+            className="text-sm font-semibold text-coral-deep"
+          >
             See all
           </Link>
         </div>
         <div className="stagger space-y-3">
           {lists.slice(0, 3).map((list) => {
             const open = list.items.filter((i) => !i.purchased).length;
-            const prices = list.items.map((i) => i.price).filter((p): p is number => p != null);
+            const prices = list.items
+              .map((i) => i.price)
+              .filter((p): p is number => p != null);
             return (
-              <Link key={list.id} href={`/app/${list.id}`} className="panel block p-4">
+              <Link
+                key={list.id}
+                href={`/app/${list.id}`}
+                className="panel block p-4"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold text-leaf">
-                      {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
+                      {OCCASION_EMOJI[list.occasion]}{" "}
+                      {OCCASION_LABELS[list.occasion]}
                       {list.published ? " · Live" : " · Draft"}
                     </p>
                     <p className="font-semibold text-ink">{list.title}</p>
                     <p className="text-sm text-ink-soft">
                       {open} open
-                      {prices.length ? ` · from ${formatMoney(Math.min(...prices))}` : ""}
+                      {prices.length
+                        ? ` · from ${formatMoney(Math.min(...prices))}`
+                        : ""}
                     </p>
                   </div>
                   <Countdown eventDate={list.eventDate} />
@@ -109,27 +136,11 @@ export default function AppHomePage() {
 
       <section>
         <div className="mb-3 flex items-end justify-between">
-          <h2 className="font-display text-2xl text-ink">Nearby giveaways</h2>
-          <Link href="/app/giveaways" className="text-sm font-semibold text-coral-deep">
-            Browse
-          </Link>
-        </div>
-        <div className="space-y-3">
-          {openGives.map((g) => (
-            <Link key={g.id} href="/app/giveaways" className="panel block p-4">
-              <p className="font-semibold text-ink">{g.title}</p>
-              <p className="text-sm text-ink-soft">
-                {g.itemName} · {g.area} · ends {formatShortDate(g.endsAt)}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <div className="mb-3 flex items-end justify-between">
           <h2 className="font-display text-2xl text-ink">Activity</h2>
-          <Link href="/app/activity" className="text-sm font-semibold text-coral-deep">
+          <Link
+            href="/app/activity"
+            className="text-sm font-semibold text-coral-deep"
+          >
             All
           </Link>
         </div>
@@ -141,7 +152,9 @@ export default function AppHomePage() {
             </li>
           ))}
           {activity.length === 0 && (
-            <li className="px-4 py-6 text-center text-sm text-ink-soft">No activity yet</li>
+            <li className="px-4 py-6 text-center text-sm text-ink-soft">
+              No activity yet. Create a list to get started.
+            </li>
           )}
         </ul>
       </section>

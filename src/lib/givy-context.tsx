@@ -26,11 +26,25 @@ import {
   type ClaimResult,
 } from "./api";
 import {
-  createGiveaway as createGiveawayStore,
-  drawGiveaway as drawGiveawayStore,
+  addItem as addItemLocal,
+  claimItem as claimItemLocal,
+  createList as createListLocal,
+  deleteList as deleteListLocal,
+  ensureSeedData,
   getActivity,
+  getCurrentUser,
   getGiveaways,
+  getListById,
+  getListByShareCode,
+  getListsForUser,
+  publishList as publishListLocal,
+  removeItem as removeItemLocal,
+  signIn as signInLocal,
+  signOut as signOutLocal,
+  updateList as updateListLocal,
+  createGiveaway as createGiveawayStore,
   joinGiveaway as joinGiveawayStore,
+  drawGiveaway as drawGiveawayStore,
 } from "./store";
 import type {
   ActivityEvent,
@@ -44,7 +58,8 @@ import type {
 
 type GivyContextValue = {
   ready: boolean;
-  configured: boolean;
+  /** True when Supabase env is present (cloud mode). */
+  cloud: boolean;
   user: User | null;
   lists: GivyList[];
   giveaways: Giveaway[];
@@ -58,6 +73,8 @@ type GivyContextValue = {
     description?: string;
     eventDate: string;
     recipientAddress?: string;
+    supportUrl?: string;
+    supportLabel?: string;
     withDemoItems?: boolean;
   }) => Promise<GivyList | null>;
   updateList: (id: string, patch: Partial<GivyList>) => Promise<GivyList | null>;
@@ -89,31 +106,35 @@ type GivyContextValue = {
 const GivyContext = createContext<GivyContextValue | null>(null);
 
 export function GivyProvider({ children }: { children: ReactNode }) {
+  const cloud = isSupabaseConfigured();
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [lists, setLists] = useState<GivyList[]>([]);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
-  const configured = isSupabaseConfigured();
 
   const refresh = useCallback(async () => {
-    if (!configured) {
-      setUser(null);
-      setLists([]);
+    if (cloud) {
+      const u = await fetchSessionUser();
+      setUser(u);
+      if (u) {
+        // Invite unlock only enforced when profile flag is used; MVP allows all signed-in users
+        setLists(await fetchMyLists(u.id, u.name));
+      } else {
+        setLists([]);
+      }
       setGiveaways([]);
       setActivity([]);
       return;
     }
-    const u = await fetchSessionUser();
+
+    const u = getCurrentUser();
+    if (u) ensureSeedData(u);
     setUser(u);
-    if (u?.betaUnlocked) {
-      setLists(await fetchMyLists(u.id, u.name));
-    } else {
-      setLists([]);
-    }
+    setLists(u ? getListsForUser(u.id) : []);
     setGiveaways(getGiveaways());
     setActivity(getActivity());
-  }, [configured]);
+  }, [cloud]);
 
   useEffect(() => {
     void (async () => {
@@ -128,80 +149,126 @@ export function GivyProvider({ children }: { children: ReactNode }) {
   const value = useMemo<GivyContextValue>(
     () => ({
       ready,
-      configured,
+      cloud,
       user,
       lists,
       giveaways,
       activity,
       refresh,
       signIn: async (provider, next = "/app") => {
-        if (provider !== "google") {
-          throw new Error("Closed beta uses Google sign-in only");
+        if (cloud) {
+          if (provider !== "google") {
+            throw new Error(
+              "Cloud mode currently supports Google. Apple and Facebook come next.",
+            );
+          }
+          await signInWithGoogle(next);
+          return;
         }
-        if (!configured) {
-          throw new Error("Supabase is not configured");
-        }
-        await signInWithGoogle(next);
+        signInLocal(provider);
+        await refresh();
       },
       signOut: async () => {
-        await signOutRemote();
+        if (cloud) await signOutRemote();
+        else signOutLocal();
         await refresh();
       },
       createList: async (input) => {
         if (!user) return null;
-        const list = await createListRemote({ owner: user, ...input });
+        if (cloud) {
+          const list = await createListRemote({ owner: user, ...input });
+          await refresh();
+          return list;
+        }
+        const list = createListLocal({ owner: user, ...input });
         await refresh();
         return list;
       },
       updateList: async (id, patch) => {
-        await updateListRemote(id, patch);
+        if (cloud) {
+          await updateListRemote(id, patch);
+          await refresh();
+          return lists.find((l) => l.id === id) ?? null;
+        }
+        const list = updateListLocal(id, patch);
         await refresh();
-        return lists.find((l) => l.id === id) ?? null;
+        return list;
       },
       deleteList: async (id) => {
-        await deleteListRemote(id);
+        if (cloud) await deleteListRemote(id);
+        else deleteListLocal(id);
         await refresh();
       },
       addItem: async (listId, item) => {
-        const gift = await addItemRemote(listId, item);
+        if (cloud) {
+          const gift = await addItemRemote(listId, item);
+          await refresh();
+          return gift;
+        }
+        const gift = addItemLocal(listId, item);
         await refresh();
         return gift;
       },
       removeItem: async (listId, itemId) => {
-        await removeItemRemote(listId, itemId);
+        if (cloud) await removeItemRemote(listId, itemId);
+        else removeItemLocal(listId, itemId);
         await refresh();
       },
       publishList: async (listId) => {
-        await publishListRemote(listId);
+        if (cloud) {
+          await publishListRemote(listId);
+          await refresh();
+          return lists.find((l) => l.id === listId) ?? null;
+        }
+        const list = publishListLocal(listId);
         await refresh();
-        return lists.find((l) => l.id === listId) ?? null;
+        return list;
       },
-      claimItem: async (_listId, itemId, shipPreference) => {
-        const result = await claimItemRemote(itemId, shipPreference);
-        return result;
+      claimItem: async (listId, itemId, shipPreference) => {
+        if (cloud) {
+          return claimItemRemote(itemId, shipPreference);
+        }
+        const updated = claimItemLocal(listId, itemId, shipPreference);
+        if (!updated) return { ok: false, error: "Could not mark as purchased" };
+        const item = updated.items.find((i) => i.id === itemId);
+        return {
+          ok: true,
+          recipientAddress:
+            shipPreference === "to_recipient"
+              ? updated.recipientAddress ?? null
+              : null,
+          ownerName: updated.ownerName,
+          shipPreference: item?.shipPreference,
+        };
       },
       createGiveaway: (input) => {
-        if (!user) return null;
+        if (!user || cloud) return null;
         const g = createGiveawayStore({ owner: user, ...input });
         setGiveaways(getGiveaways());
         return g;
       },
       joinGiveaway: (id) => {
-        if (!user) return null;
+        if (!user || cloud) return null;
         const g = joinGiveawayStore(id, user.id);
         setGiveaways(getGiveaways());
         return g;
       },
       drawGiveaway: (id) => {
-        if (!user) return null;
+        if (!user || cloud) return null;
         const g = drawGiveawayStore(id, user.id);
         setGiveaways(getGiveaways());
         return g;
       },
-      getList: (id) => lists.find((l) => l.id === id) ?? null,
-      getByShare: async (code) => fetchPublicList(code),
+      getList: (id) =>
+        cloud
+          ? lists.find((l) => l.id === id) ?? null
+          : getListById(id),
+      getByShare: async (code) => {
+        if (cloud) return fetchPublicList(code);
+        return getListByShareCode(code);
+      },
     }),
-    [ready, configured, user, lists, giveaways, activity, refresh],
+    [ready, cloud, user, lists, giveaways, activity, refresh],
   );
 
   return <GivyContext.Provider value={value}>{children}</GivyContext.Provider>;

@@ -4,7 +4,7 @@ export default function TermsPage() {
       <h1 className="font-display text-4xl text-ink">Terms</h1>
       <p className="mt-4 text-ink-soft">
         Closed beta stub. Givy is provided as-is for invited testers. Do not upload illegal
-        content. Gift claims are a coordination tool — purchases happen on retailer sites.
+        content. Gift claims are a coordination tool. Purchases happen on retailer sites.
       </p>
     </main>
   );

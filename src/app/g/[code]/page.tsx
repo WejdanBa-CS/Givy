@@ -13,7 +13,7 @@ import { OCCASION_LABELS } from "@/lib/types";
 
 export default function SharedGivyPage() {
   const params = useParams<{ code: string }>();
-  const { ready, configured, user, getByShare, claimItem } = useGivy();
+  const { ready, cloud, user, getByShare, claimItem } = useGivy();
   const [list, setList] = useState<GivyList | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeItem, setActiveItem] = useState<GiftItem | null>(null);
@@ -28,19 +28,17 @@ export default function SharedGivyPage() {
     void (async () => {
       setLoading(true);
       try {
-        if (!configured) {
-          setList(null);
-          return;
-        }
         setList(await getByShare(params.code));
       } finally {
         setLoading(false);
       }
     })();
-  }, [ready, configured, params.code, getByShare]);
+  }, [ready, params.code, getByShare]);
 
   if (!ready || loading) {
-    return <div className="shell py-20 text-center text-ink-soft">Loading…</div>;
+    return (
+      <div className="shell py-20 text-center text-ink-soft">Loading…</div>
+    );
   }
 
   if (!list) {
@@ -50,7 +48,9 @@ export default function SharedGivyPage() {
         <div className="panel mx-auto mt-10 max-w-lg p-8 text-center">
           <p className="font-display text-3xl text-ink">Hmm, no Givy here</p>
           <p className="mt-2 text-sm text-ink-soft">
-            This link may be old, unpublished, or the server isn&apos;t configured yet.
+            {cloud
+              ? "This link may be old or the list isn’t published yet."
+              : "This list isn’t on this device. In demo mode, open the share link from the same browser that created it."}
           </p>
           <Link href="/" className="btn btn-primary mt-5">
             Go to Givy
@@ -64,7 +64,7 @@ export default function SharedGivyPage() {
 
   async function confirmClaim() {
     if (!activeItem || !list) return;
-    if (!user) {
+    if (cloud && !user) {
       window.location.href = `/login?next=/g/${params.code}`;
       return;
     }
@@ -73,7 +73,7 @@ export default function SharedGivyPage() {
     const result = await claimItem(list.id, activeItem.id, ship);
     setBusy(false);
     if (!result.ok) {
-      setClaimError(result.error ?? "Could not claim this gift");
+      setClaimError(result.error ?? "Could not mark this gift");
       return;
     }
     if (ship === "to_recipient" && result.recipientAddress) {
@@ -81,8 +81,8 @@ export default function SharedGivyPage() {
     }
     setDoneMsg(
       ship === "to_giver"
-        ? `Nice — "${activeItem.title}" is yours to wrap. Ship it to your place.`
-        : `Nice — "${activeItem.title}" is marked claimed. Ship it to ${list.ownerName}.`,
+        ? `Nice. "${activeItem.title}" is yours to wrap.`
+        : `Nice. "${activeItem.title}" is marked purchased. Ship it to ${list.ownerName}.`,
     );
     setList(await getByShare(params.code));
     setActiveItem(null);
@@ -91,7 +91,7 @@ export default function SharedGivyPage() {
   return (
     <div className="pb-20">
       <div className="friend-banner">
-        🤫 Friend view — gifts you claim stay anonymous. No duplicates, no spoilers.
+        Friend view: gifts you mark as purchased stay anonymous. No duplicates.
       </div>
       <div className="shell">
         <SiteHeader />
@@ -113,9 +113,24 @@ export default function SharedGivyPage() {
               <Countdown eventDate={list.eventDate} compact={false} />
             </div>
             <p className="mt-5 text-sm font-semibold text-ink-soft">
-              {openCount} idea{openCount === 1 ? "" : "s"} still open · claimed gifts are
-              crossed out (buyer stays anonymous)
+              {openCount} idea{openCount === 1 ? "" : "s"} still open · claimed
+              gifts are crossed out (buyer stays anonymous)
             </p>
+            {list.supportUrl && (
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <a
+                  href={list.supportUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-primary !rounded-full !bg-amber !text-ink hover:!opacity-90"
+                >
+                  {list.supportLabel?.trim() || "Support me"}
+                </a>
+                <p className="text-sm text-ink-soft">
+                  Tip {list.ownerName.split(" ")[0]} if you want. Totally optional.
+                </p>
+              </div>
+            )}
           </div>
 
           {doneMsg && (
@@ -123,7 +138,8 @@ export default function SharedGivyPage() {
               <p>{doneMsg}</p>
               {revealedAddress && (
                 <p className="mt-2 font-normal text-ink-soft">
-                  Ship to: <span className="font-semibold text-ink">{revealedAddress}</span>
+                  Ship to:{" "}
+                  <span className="font-semibold text-ink">{revealedAddress}</span>
                 </p>
               )}
             </div>
@@ -144,11 +160,15 @@ export default function SharedGivyPage() {
                       <p className="gift-title text-lg font-semibold text-ink">
                         {item.title}
                       </p>
-                      <span className="text-sm font-semibold text-ink-soft">
-                        {item.purchased ? "Already claimed" : null}
-                      </span>
+                      {item.purchased && (
+                        <span className="text-sm font-semibold text-ink-soft">
+                          Already purchased
+                        </span>
+                      )}
                       {!item.purchased && (
-                        <span className="price-badge">{formatMoney(item.price)}</span>
+                        <span className="price-badge">
+                          {formatMoney(item.price)}
+                        </span>
                       )}
                     </div>
                     {item.notes && (
@@ -180,7 +200,7 @@ export default function SharedGivyPage() {
                         setRevealedAddress(null);
                       }}
                     >
-                      Claim this gift 🎁
+                      Mark purchased
                     </button>
                   </div>
                 ) : (
@@ -197,13 +217,15 @@ export default function SharedGivyPage() {
       {activeItem && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-ink/35 p-4 sm:place-items-center">
           <div className="panel w-full max-w-md animate-rise border-2 p-5 sm:p-6">
-            <p className="font-display text-2xl text-ink">Claim {activeItem.title}</p>
-            <p className="mt-2 text-sm text-ink-soft">
-              Others will see it as taken — they won&apos;t see it was you.
+            <p className="font-display text-2xl text-ink">
+              Claim {activeItem.title}
             </p>
-            {!user && (
+            <p className="mt-2 text-sm text-ink-soft">
+              Others will see it as taken. They won&apos;t see it was you.
+            </p>
+            {cloud && !user && (
               <p className="mt-3 rounded-2xl bg-paper p-3 text-sm text-ink-soft">
-                You&apos;ll sign in with Google to claim (keeps claims secure and anonymous to the list owner).
+                Sign in to mark this gift so claims stay secure across devices.
               </p>
             )}
 
@@ -234,14 +256,16 @@ export default function SharedGivyPage() {
                     Ship to {list.ownerName}
                   </span>
                   <span className="block text-sm text-ink-soft">
-                    Address is revealed only after you claim — never on the public list.
+                    Address is revealed only after you confirm.
                   </span>
                 </span>
               </label>
             </div>
 
             {claimError && (
-              <p className="mt-3 text-sm font-semibold text-coral-deep">{claimError}</p>
+              <p className="mt-3 text-sm font-semibold text-coral-deep">
+                {claimError}
+              </p>
             )}
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -251,7 +275,11 @@ export default function SharedGivyPage() {
                 disabled={busy}
                 onClick={() => void confirmClaim()}
               >
-                {busy ? "Claiming…" : user ? "Confirm claim" : "Sign in to claim"}
+                {busy
+                  ? "Saving…"
+                  : cloud && !user
+                    ? "Sign in to claim"
+                    : "Confirm"}
               </button>
               <button
                 type="button"

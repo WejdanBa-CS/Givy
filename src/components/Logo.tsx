@@ -11,7 +11,7 @@ const SIZES = {
   hero: 72,
 } as const;
 
-/** Coral gift + leaf bow — brand mark for Givy */
+/** Coral gift + leaf bow: brand mark for Givy */
 export function LogoMark({ size = 36, className = "" }: { size?: number; className?: string }) {
   return (
     <svg
@@ -29,7 +29,7 @@ export function LogoMark({ size = 36, className = "" }: { size?: number; classNa
       {/* cream ribbon */}
       <rect x="29" y="24" width="6" height="32" rx="2" fill="#FFF7F4" />
       <rect x="8" y="38" width="48" height="6" rx="2" fill="#FFF7F4" />
-      {/* bow loops — solid, tilted */}
+      {/* bow loops: solid, tilted */}
       <ellipse
         cx="21"
         cy="15.5"

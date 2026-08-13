@@ -14,9 +14,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Givy — gifts without the guesswork",
+  title: "Givy · gifts without the guesswork",
   description:
-    "Build a wishlist, share one link, and let friends claim gifts in private — no duplicates, no awkward moments.",
+    "Build a wishlist, share one link, and let friends claim gifts in private. No duplicates, no awkward moments.",
   applicationName: "Givy",
   icons: {
     icon: [{ url: "/icon.png", type: "image/png" }],

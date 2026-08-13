@@ -15,6 +15,7 @@ export type ClaimResult = {
   ok: boolean;
   recipientAddress?: string | null;
   ownerName?: string;
+  shipPreference?: string;
   error?: string;
 };
 
@@ -26,6 +27,8 @@ type ListRow = {
   description: string | null;
   event_date: string;
   recipient_address: string | null;
+  support_url: string | null;
+  support_label: string | null;
   share_code: string;
   published: boolean;
   created_at: string;
@@ -76,6 +79,8 @@ function mapList(row: ListRow, items: GiftItem[]): GivyList {
     description: row.description ?? undefined,
     eventDate: row.event_date,
     recipientAddress: row.recipient_address ?? undefined,
+    supportUrl: row.support_url ?? undefined,
+    supportLabel: row.support_label ?? undefined,
     shareCode: row.share_code,
     published: row.published,
     items,
@@ -181,6 +186,8 @@ export async function createListRemote(input: {
   description?: string;
   eventDate: string;
   recipientAddress?: string;
+  supportUrl?: string;
+  supportLabel?: string;
   withDemoItems?: boolean;
 }): Promise<GivyList> {
   const supabase = createClient();
@@ -193,6 +200,8 @@ export async function createListRemote(input: {
       description: input.description ?? null,
       event_date: input.eventDate,
       recipient_address: input.recipientAddress ?? null,
+      support_url: input.supportUrl ?? null,
+      support_label: input.supportLabel ?? null,
       share_code: shareCode(),
       published: false,
     })
@@ -242,6 +251,12 @@ export async function updateListRemote(
   if (patch.eventDate !== undefined) payload.event_date = patch.eventDate;
   if (patch.recipientAddress !== undefined) {
     payload.recipient_address = patch.recipientAddress;
+  }
+  if (patch.supportUrl !== undefined) {
+    payload.support_url = patch.supportUrl || null;
+  }
+  if (patch.supportLabel !== undefined) {
+    payload.support_label = patch.supportLabel || null;
   }
   if (patch.published !== undefined) payload.published = patch.published;
 
@@ -312,6 +327,8 @@ export async function fetchPublicList(
     event_date: string;
     share_code: string;
     owner_name: string;
+    support_url?: string | null;
+    support_label?: string | null;
     items: Array<{
       id: string;
       title: string;
@@ -337,6 +354,8 @@ export async function fetchPublicList(
     published: true,
     // Never expose address on public fetch
     recipientAddress: undefined,
+    supportUrl: payload.support_url ?? undefined,
+    supportLabel: payload.support_label ?? undefined,
     createdAt: "",
     updatedAt: "",
     items: (payload.items ?? []).map((i) => ({
@@ -377,7 +396,7 @@ export async function claimItemRemote(
 }
 
 export function formatMoney(value?: number) {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",

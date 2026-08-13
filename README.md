@@ -1,28 +1,28 @@
 # Givy
 
-Centralized gift registries for birthdays, holidays, weddings, and local giveaways.
+Gift registry web app: create a list, share one link, friends mark gifts purchased anonymously.
 
-## Flutter app (primary)
+## Design
+Warm Editorial: cream `#FEF6EE`, coral `#E8391E`, leaf green, gold accents · Fraunces + DM Sans · gift-box logo.
 
-```bash
-cd mobile
-flutter pub get
-flutter run                 # Android / Windows
-flutter run -d edge         # Website (http://localhost:8080 if --web-port 8080)
-```
+## Stack
+- **Next.js 15** (App Router) + Tailwind CSS 4
+- **Local demo** (default): browser storage + demo social sign-in
+- **Cloud** (optional): Supabase Auth + Postgres + RLS (see `BETA.md`)
 
-Build a static website:
-
-```bash
-cd mobile
-flutter build web
-```
-
-## Web MVP (Next.js)
-
+## Run locally
 ```bash
 npm install
 npm run dev
 ```
+Open http://localhost:3000 → Sign in → create a list → Finalize & share → open `/g/[code]`.
 
-Open [http://localhost:3000](http://localhost:3000).
+## MVP features
+1. Social sign-in UI (Google / Apple / Facebook): demo locally; Google OAuth in cloud
+2. Create & manage gift lists (title, occasion, date, items, links, prices)
+3. Unique share links
+4. Public visitor view with anonymous “Mark purchased”
+5. Owner-only edits; shipping address revealed only after claim (cloud RPC)
+
+## Priority
+**Next.js website first.** The Flutter app in `mobile/` is paused until the web product succeeds.

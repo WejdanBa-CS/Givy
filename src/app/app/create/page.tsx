@@ -19,9 +19,12 @@ export default function CreatePage() {
   const [occasion, setOccasion] = useState<Occasion>("birthday");
   const [eventDate, setEventDate] = useState(defaultDate);
   const [description, setDescription] = useState(
-    "A few things I'd love — no pressure, just ideas.",
+    "A few things I'd love. No pressure, just ideas.",
   );
   const [address, setAddress] = useState("");
+  const [enableSupport, setEnableSupport] = useState(false);
+  const [supportUrl, setSupportUrl] = useState("");
+  const [supportLabel, setSupportLabel] = useState("Support me");
   const [withDemo, setWithDemo] = useState(true);
 
   async function onSubmit(e: FormEvent) {
@@ -32,6 +35,12 @@ export default function CreatePage() {
       description: description.trim() || undefined,
       eventDate,
       recipientAddress: address.trim() || undefined,
+      supportUrl:
+        enableSupport && supportUrl.trim() ? supportUrl.trim() : undefined,
+      supportLabel:
+        enableSupport && supportUrl.trim()
+          ? supportLabel.trim() || "Support me"
+          : undefined,
       withDemoItems: withDemo,
     });
     if (list) router.push(`/app/${list.id}`);
@@ -119,6 +128,56 @@ export default function CreatePage() {
           />
         </div>
 
+        <div className="rounded-2xl border-2 border-line bg-paper/70 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={enableSupport}
+              onChange={(e) => setEnableSupport(e.target.checked)}
+            />
+            <span>
+              <span className="block font-semibold text-ink">
+                Support me (for creators)
+              </span>
+              <span className="block text-sm text-ink-soft">
+                Add a tip link (Ko-fi, Buy Me a Coffee, PayPal, Patreon) on your
+                public list.
+              </span>
+            </span>
+          </label>
+          {enableSupport && (
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="label" htmlFor="supportUrl">
+                  Support link
+                </label>
+                <input
+                  id="supportUrl"
+                  className="field"
+                  type="url"
+                  value={supportUrl}
+                  onChange={(e) => setSupportUrl(e.target.value)}
+                  placeholder="https://ko-fi.com/yourname"
+                  required={enableSupport}
+                />
+              </div>
+              <div>
+                <label className="label" htmlFor="supportLabel">
+                  Button text
+                </label>
+                <input
+                  id="supportLabel"
+                  className="field"
+                  value={supportLabel}
+                  onChange={(e) => setSupportLabel(e.target.value)}
+                  placeholder="Support me"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-paper/70 p-3">
           <input
             type="checkbox"
@@ -131,7 +190,7 @@ export default function CreatePage() {
               Start with sample birthday ideas
             </span>
             <span className="block text-sm text-ink-soft">
-              Hat, socks, snacks, watch, gift card — edit anytime.
+              Hat, socks, snacks, watch, gift card. Edit anytime.
             </span>
           </span>
         </label>

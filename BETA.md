@@ -6,7 +6,7 @@
 - Lists + items stored in Postgres with RLS
 - Public share page (`/g/[code]`) never returns shipping address
 - Address is revealed only to the claimer after a successful `claim_item` RPC
-- List owners see claimed/open status only — never who claimed
+- List owners see claimed/open status only, never who claimed
 
 ## One-time setup
 

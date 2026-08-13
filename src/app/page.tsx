@@ -1,16 +1,5 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const FigmaGivyApp = dynamic(() => import("@/components/FigmaGivyApp"), {
-  ssr: false,
-  loading: () => (
-    <div className="grid min-h-screen place-items-center bg-[#FEF6EE] text-[#8A6F5E]">
-      Loading Givy…
-    </div>
-  ),
-});
+import { LandingPage } from "@/components/LandingPage";
 
 export default function HomePage() {
-  return <FigmaGivyApp />;
+  return <LandingPage />;
 }

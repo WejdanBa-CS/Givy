@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/app";
+  const requireInvite = process.env.NEXT_PUBLIC_BETA_REQUIRE_INVITE === "true";
 
   if (code) {
     const supabase = await createClient();
@@ -15,14 +16,17 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("beta_unlocked")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        const dest = profile?.beta_unlocked ? next : "/invite";
-        return NextResponse.redirect(`${origin}${dest}`);
+        if (requireInvite) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("beta_unlocked")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (!profile?.beta_unlocked) {
+            return NextResponse.redirect(`${origin}/invite`);
+          }
+        }
+        return NextResponse.redirect(`${origin}${next}`);
       }
     }
   }

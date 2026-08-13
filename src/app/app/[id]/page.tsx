@@ -24,10 +24,14 @@ export default function ManageListPage() {
   const [notesInput, setNotesInput] = useState("");
   const [copied, setCopied] = useState(false);
   const [addressDraft, setAddressDraft] = useState("");
+  const [supportUrlDraft, setSupportUrlDraft] = useState("");
+  const [supportLabelDraft, setSupportLabelDraft] = useState("Support me");
 
   useEffect(() => {
     setAddressDraft(list?.recipientAddress ?? "");
-  }, [list?.id, list?.recipientAddress]);
+    setSupportUrlDraft(list?.supportUrl ?? "");
+    setSupportLabelDraft(list?.supportLabel ?? "Support me");
+  }, [list?.id, list?.recipientAddress, list?.supportUrl, list?.supportLabel]);
 
   if (!list) {
     return (
@@ -175,7 +179,7 @@ export default function ManageListPage() {
           <div className="panel p-5">
             <p className="font-display text-xl text-ink">Share</p>
             <p className="mt-1 text-sm text-ink-soft">
-              Finalize and send the link. Claimed gifts gray out — buyer stays private.
+              Finalize and send the link. Claimed gifts gray out. Buyer stays private.
             </p>
             <div className="mt-4 rounded-2xl border border-line bg-paper/80 p-3 text-sm break-all text-ink-soft">
               {shareUrl}
@@ -219,6 +223,58 @@ export default function ManageListPage() {
               }}
               placeholder="123 Gift Lane…"
             />
+          </div>
+
+          <div className="panel p-5">
+            <p className="font-display text-xl text-ink">Support me</p>
+            <p className="mt-1 text-sm text-ink-soft">
+              For creators: show a tip button on your public list (Ko-fi, Buy Me a
+              Coffee, PayPal, Patreon…).
+            </p>
+            <label className="label mt-3" htmlFor="supportUrl">
+              Support link
+            </label>
+            <input
+              id="supportUrl"
+              className="field"
+              type="url"
+              value={supportUrlDraft}
+              onChange={(e) => setSupportUrlDraft(e.target.value)}
+              onBlur={() => {
+                if (supportUrlDraft !== (list.supportUrl ?? "")) {
+                  void updateList(list.id, {
+                    supportUrl: supportUrlDraft.trim() || undefined,
+                    supportLabel: supportUrlDraft.trim()
+                      ? supportLabelDraft.trim() || "Support me"
+                      : undefined,
+                  });
+                }
+              }}
+              placeholder="https://ko-fi.com/yourname"
+            />
+            <label className="label mt-3" htmlFor="supportLabel">
+              Button text
+            </label>
+            <input
+              id="supportLabel"
+              className="field"
+              value={supportLabelDraft}
+              onChange={(e) => setSupportLabelDraft(e.target.value)}
+              onBlur={() => {
+                if (supportLabelDraft !== (list.supportLabel ?? "Support me")) {
+                  void updateList(list.id, {
+                    supportLabel: supportLabelDraft.trim() || "Support me",
+                  });
+                }
+              }}
+              placeholder="Support me"
+            />
+            {supportUrlDraft.trim() && (
+              <p className="mt-3 text-xs font-semibold text-leaf">
+                Visitors will see “{supportLabelDraft.trim() || "Support me"}” on
+                your public page.
+              </p>
+            )}
           </div>
 
           <button
