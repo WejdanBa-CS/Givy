@@ -89,7 +89,7 @@ class LandingScreen extends StatelessWidget {
                           const SizedBox(height: 28),
                           ...[
                             ('✏️', '01', 'Make your list', 'Add gifts with a price, notes, or a product link.'),
-                            ('🔗', '02', 'Share one link', 'Send it to friends and family — any chat, any app.'),
+                            ('🔗', '02', 'Share one link', 'Send it to friends and family. Any chat, any app.'),
                             ('🤫', '03', 'They claim in private', 'Each gift can only be claimed once. You never see who bought what.'),
                           ].map(
                             (s) => Padding(
@@ -226,7 +226,7 @@ class _HeroCopy extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         const Text(
-          'Build a list. Share one link. Friends claim gifts in private — so nobody buys the same thing twice.',
+          'Build a list. Share one link. Friends claim gifts in private, so nobody buys the same thing twice.',
           style: TextStyle(color: GivyColors.inkSoft, height: 1.45, fontSize: 16),
         ),
         const SizedBox(height: 22),
@@ -504,7 +504,7 @@ class LoginScreen extends StatelessWidget {
                       Text('Sign in', style: givyDisplay(size: 30)),
                       const SizedBox(height: 8),
                       const Text(
-                        'Demo mode — choose a provider to continue.',
+                        'Demo mode: choose a provider to continue.',
                         style: TextStyle(color: GivyColors.inkSoft),
                       ),
                       const SizedBox(height: 20),

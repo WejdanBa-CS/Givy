@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import { GivyProvider } from "@/lib/givy-context";
 import "./globals.css";
 
@@ -35,7 +36,14 @@ export const metadata: Metadata = {
     title: "Givy · gifts without the guesswork",
     description:
       "Build a wishlist, share one link, and let friends claim gifts in private.",
-    images: [{ url: "/givy-hero.jpg", width: 1920, height: 1080, alt: "Givy" }],
+    images: [
+      {
+        url: "/givy-hero.jpg",
+        width: 1536,
+        height: 1024,
+        alt: "Givy — a wrapped gift",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -57,22 +65,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="/givy-hero.avif"
+          type="image/avif"
+          fetchPriority="high"
+        />
+      </head>
       <body className={`${display.variable} ${body.variable} antialiased`}>
-        <GivyProvider>
-          {children}
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: "#fff",
-                color: "#1a120e",
-                border: "2px solid #e8d9cc",
-                fontFamily: "var(--font-body)",
-                fontWeight: 600,
-              },
-            }}
-          />
-        </GivyProvider>
+        <MotionProvider>
+          <GivyProvider>
+            {children}
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: "#fff",
+                  color: "#1a120e",
+                  border: "2px solid #e8d9cc",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 600,
+                },
+              }}
+            />
+          </GivyProvider>
+        </MotionProvider>
       </body>
     </html>
   );

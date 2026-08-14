@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn";
+
 type LogoProps = {
   size?: "sm" | "md" | "lg" | "hero";
   showWordmark?: boolean;
@@ -5,14 +7,14 @@ type LogoProps = {
 };
 
 const SIZES = {
-  sm: 28,
-  md: 36,
+  sm: 32,
+  md: 40,
   lg: 48,
   hero: 72,
 } as const;
 
 /** Coral gift + leaf bow: brand mark for Givy */
-export function LogoMark({ size = 36, className = "" }: { size?: number; className?: string }) {
+export function LogoMark({ size = 40, className = "" }: { size?: number; className?: string }) {
   return (
     <svg
       width={size}
@@ -67,7 +69,9 @@ export function Logo({ size = "md", showWordmark = true, className = "" }: LogoP
           : "text-2xl leading-none";
 
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+    <span
+      className={cn("inline-flex items-center gap-2.5", className)}
+    >
       <span className="logo-mark relative shrink-0 transition-transform duration-300 ease-out group-hover:-rotate-8 group-hover:scale-105">
         <LogoMark size={px} />
       </span>

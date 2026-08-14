@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../controller.dart';
 import '../models.dart';
@@ -57,7 +58,7 @@ class _GiveawaysScreenState extends State<GiveawaysScreen> {
         ),
         const SizedBox(height: 6),
         const Text(
-          'Free stuff nearby — join the pool, and a lucky person gets to pick it up.',
+          'Free stuff nearby. Join the pool, and a lucky person gets to pick it up.',
           style: TextStyle(color: GivyColors.inkSoft),
         ),
         if (showForm) ...[
@@ -294,7 +295,7 @@ class _SharedScreenState extends State<SharedScreen> {
         body: Column(
           children: [
             FriendBanner(
-              text: 'Friend view — claims stay private from ${list.ownerName.split(' ').first}',
+              text: 'Friend view: claims stay private from ${list.ownerName.split(' ').first}',
             ),
             Expanded(
               child: Scaffold(
@@ -329,6 +330,32 @@ class _SharedScreenState extends State<SharedScreen> {
                             ),
                           const SizedBox(height: 12),
                           CountdownDisplay(eventDate: list.eventDate),
+                          if (list.supportUrl != null && list.supportUrl!.isNotEmpty) ...[
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: GivyColors.gold,
+                                  foregroundColor: GivyColors.ink,
+                                ),
+                                onPressed: () async {
+                                  final uri = Uri.tryParse(list.supportUrl!);
+                                  if (uri != null) {
+                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  }
+                                },
+                                child: Text(list.supportLabel?.trim().isNotEmpty == true
+                                    ? list.supportLabel!.trim()
+                                    : 'Support me'),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Tip ${list.ownerName.split(' ').first} if you want. Totally optional.',
+                              style: const TextStyle(color: GivyColors.inkSoft, fontSize: 13),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -399,7 +426,7 @@ class _SharedScreenState extends State<SharedScreen> {
                   Text('Claim ${item.title}', style: givyDisplay(size: 24)),
                   const SizedBox(height: 6),
                   const Text(
-                    'Others will see it as taken — they won’t see it was you.',
+                    'Others will see it as taken. They won’t see it was you.',
                     style: TextStyle(color: GivyColors.inkSoft),
                   ),
                   RadioListTile<ShipPreference>(
@@ -436,8 +463,8 @@ class _SharedScreenState extends State<SharedScreen> {
     if (!mounted) return;
     setState(() {
       doneMsg = confirmed == ShipPreference.toGiver
-          ? 'Nice — “${item.title}” is yours to wrap.'
-          : 'Nice — “${item.title}” is marked claimed for direct shipping.';
+          ? 'Nice. “${item.title}” is yours to wrap.'
+          : 'Nice. “${item.title}” is marked claimed for direct shipping.';
     });
   }
 }

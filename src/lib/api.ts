@@ -1,5 +1,6 @@
 import { customAlphabet } from "nanoid";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { safeHttpUrl, safeSupportUrl } from "@/lib/security";
 import { safeNextPath } from "@/lib/safe-next";
 import type {
   AuthProvider,
@@ -11,6 +12,15 @@ import type {
 } from "@/lib/types";
 import { DEMO_SEED_ITEMS } from "@/lib/types";
 
+function sanitizeItemUrl(url?: string | null): string | null {
+  if (!url) return null;
+  return safeHttpUrl(url);
+}
+
+function sanitizeSupportUrl(url?: string | null): string | null {
+  if (url == null || url === "") return null;
+  return safeSupportUrl(url);
+}
 const shareCode = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 
 export type ClaimResult = {
@@ -220,7 +230,7 @@ export async function createListRemote(input: {
       description: input.description ?? null,
       event_date: input.eventDate,
       recipient_address: input.recipientAddress ?? null,
-      support_url: input.supportUrl ?? null,
+      support_url: sanitizeSupportUrl(input.supportUrl ?? null),
       support_label: input.supportLabel ?? null,
       share_code: shareCode(),
       published: false,
@@ -236,9 +246,9 @@ export async function createListRemote(input: {
       list_id: list.id,
       title: d.title,
       notes: d.notes ?? null,
-      url: d.url ?? null,
+      url: sanitizeItemUrl(d.url),
       price: d.price ?? null,
-      image_url: d.imageHint ?? null,
+      image_url: sanitizeItemUrl(d.imageHint),
       emoji: null,
       is_claimed: false,
     }));
@@ -273,7 +283,7 @@ export async function updateListRemote(
     payload.recipient_address = patch.recipientAddress;
   }
   if (patch.supportUrl !== undefined) {
-    payload.support_url = patch.supportUrl || null;
+    payload.support_url = sanitizeSupportUrl(patch.supportUrl || null);
   }
   if (patch.supportLabel !== undefined) {
     payload.support_label = patch.supportLabel || null;
@@ -301,9 +311,9 @@ export async function addItemRemote(
       list_id: listId,
       title: item.title,
       notes: item.notes ?? null,
-      url: item.url ?? null,
+      url: sanitizeItemUrl(item.url),
       price: item.price ?? null,
-      image_url: item.imageHint ?? null,
+      image_url: sanitizeItemUrl(item.imageHint),
       is_claimed: false,
     })
     .select("*")
@@ -336,9 +346,11 @@ export async function updateItemRemote(
   const payload: Record<string, unknown> = {};
   if (patch.title !== undefined) payload.title = patch.title;
   if (patch.notes !== undefined) payload.notes = patch.notes ?? null;
-  if (patch.url !== undefined) payload.url = patch.url ?? null;
+  if (patch.url !== undefined) payload.url = sanitizeItemUrl(patch.url);
   if (patch.price !== undefined) payload.price = patch.price ?? null;
-  if (patch.imageHint !== undefined) payload.image_url = patch.imageHint ?? null;
+  if (patch.imageHint !== undefined) {
+    payload.image_url = sanitizeItemUrl(patch.imageHint);
+  }
 
   const { data, error } = await supabase
     .from("items")

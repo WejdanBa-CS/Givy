@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogoMark } from "@/components/Logo";
@@ -17,7 +16,7 @@ export function LandingPage() {
     <div className="landing min-h-screen bg-mist text-ink">
       <header className="landing-nav">
         <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Givy home">
-          <LogoMark size={28} />
+          <LogoMark size={36} />
           <span className="font-display text-xl font-semibold tracking-tight">Givy</span>
         </Link>
         <Button asChild variant="ghost" size="sm" className="text-inherit">
@@ -29,14 +28,23 @@ export function LandingPage() {
 
       <section className="landing-hero" aria-label="Givy">
         <div className="landing-hero-media" aria-hidden>
-          <Image
-            src="/givy-hero.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
+          {/*
+            Static AVIF/WebP/JPEG (not /_next/image) for LCP on cold hosts:
+            precompressed sources + matching preload in root layout.
+          */}
+          <picture>
+            <source srcSet="/givy-hero.avif" type="image/avif" />
+            <source srcSet="/givy-hero.webp" type="image/webp" />
+            <img
+              src="/givy-hero.jpg"
+              alt=""
+              width={1536}
+              height={1024}
+              decoding="async"
+              fetchPriority="high"
+              className="landing-hero-img"
+            />
+          </picture>
           <div className="landing-hero-veil" />
         </div>
 
@@ -67,14 +75,14 @@ export function LandingPage() {
 
       <section id="how" className="landing-how shell">
         <FadeIn>
-          <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+          <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
             How it works
           </h2>
-          <p className="mt-3 max-w-lg text-ink-soft">
+          <p className="mt-3 max-w-lg text-ink-soft lg:max-w-xl lg:text-lg">
             From empty list to shared gifts in three quiet steps.
           </p>
         </FadeIn>
-        <Stagger className="landing-steps mt-10" delay={0.1}>
+        <Stagger className="landing-steps" delay={0.1}>
           {[
             {
               n: "01",
@@ -105,15 +113,15 @@ export function LandingPage() {
 
       <section className="landing-close">
         <FadeIn className="shell text-center">
-          <h2 className="font-display text-3xl tracking-tight sm:text-4xl">
+          <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
             Ready when they are.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-ink-soft">
+          <p className="mx-auto mt-3 max-w-md text-ink-soft lg:max-w-lg lg:text-lg">
             Make a registry in under a minute.
           </p>
           <Button
             size="lg"
-            className="mt-8"
+            className="mt-8 landing-close-cta"
             onClick={() => router.push(primaryHref)}
           >
             {ready && user ? "Go to my lists" : "Create your Givy"}

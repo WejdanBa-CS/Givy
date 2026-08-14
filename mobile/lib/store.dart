@@ -226,7 +226,7 @@ class GivyStore {
       ownerName: user.name,
       title: "${user.name.split(' ').first}'s Birthday Wishlist",
       occasion: Occasion.birthday,
-      description: "A few things I'd love — no pressure, just ideas.",
+      description: "A few things I'd love. No pressure, just ideas.",
       eventDate: '2026-09-15',
       recipientAddress: '184 Maple Street, Apt 4B',
       shareCode: 'demo${_uuid.v4().substring(0, 6)}',
@@ -288,7 +288,7 @@ class GivyStore {
       ownerName: 'Maya Chen',
       title: 'Free coffee table',
       description:
-          'Moving next week — solid wood coffee table, minor scuffs. Pickup only.',
+          'Moving next week. Solid wood coffee table, minor scuffs. Pickup only.',
       itemName: 'Mid-century coffee table',
       area: 'Within 10 miles',
       endsAt: _ymd(giveawayEnd),
@@ -302,7 +302,7 @@ class GivyStore {
       ownerId: user.id,
       ownerName: user.name,
       title: 'Desk lamp giveaway',
-      description: 'Barely used lamp — first lucky neighbor wins.',
+      description: 'Barely used lamp. First lucky neighbor wins.',
       itemName: 'Adjustable desk lamp',
       area: 'Same neighborhood',
       endsAt: _ymd(giveawayEnd),
@@ -353,6 +353,8 @@ class GivyStore {
     String? description,
     required String eventDate,
     String? recipientAddress,
+    String? supportUrl,
+    String? supportLabel,
     bool withDemoItems = true,
   }) async {
     final now = DateTime.now().toIso8601String();
@@ -372,6 +374,8 @@ class GivyStore {
       description: description,
       eventDate: eventDate,
       recipientAddress: recipientAddress,
+      supportUrl: supportUrl,
+      supportLabel: supportLabel,
       shareCode: _uuid.v4().substring(0, 10),
       items: withDemoItems
           ? [

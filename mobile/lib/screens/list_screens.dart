@@ -37,7 +37,7 @@ class _ListsScreenState extends State<ListsScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        const Text('Birthdays, holidays, weddings — all your Givies.', style: TextStyle(color: GivyColors.inkSoft)),
+        const Text('Birthdays, holidays, weddings: all your Givies.', style: TextStyle(color: GivyColors.inkSoft)),
         const SizedBox(height: 14),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -113,11 +113,14 @@ class CreateScreen extends StatefulWidget {
 
 class _CreateScreenState extends State<CreateScreen> {
   final titleCtrl = TextEditingController(text: 'My birthday wishlist');
-  final noteCtrl = TextEditingController(text: "A few things I'd love — no pressure, just ideas.");
+  final noteCtrl = TextEditingController(text: "A few things I'd love. No pressure, just ideas.");
   final addressCtrl = TextEditingController();
+  final supportUrlCtrl = TextEditingController();
+  final supportLabelCtrl = TextEditingController(text: 'Support me');
   Occasion occasion = Occasion.birthday;
   late DateTime eventDate;
   bool withDemo = true;
+  bool enableSupport = false;
 
   @override
   void initState() {
@@ -130,6 +133,8 @@ class _CreateScreenState extends State<CreateScreen> {
     titleCtrl.dispose();
     noteCtrl.dispose();
     addressCtrl.dispose();
+    supportUrlCtrl.dispose();
+    supportLabelCtrl.dispose();
     super.dispose();
   }
 
@@ -184,6 +189,27 @@ class _CreateScreenState extends State<CreateScreen> {
               const SizedBox(height: 12),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
+                title: const Text('Support me (for creators)', style: TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: const Text('Tip link on your public list (Ko-fi, PayPal, etc.)'),
+                value: enableSupport,
+                activeThumbColor: GivyColors.coral,
+                onChanged: (v) => setState(() => enableSupport = v),
+              ),
+              if (enableSupport) ...[
+                TextField(
+                  controller: supportUrlCtrl,
+                  decoration: const InputDecoration(labelText: 'Support link', hintText: 'https://ko-fi.com/yourname'),
+                  keyboardType: TextInputType.url,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: supportLabelCtrl,
+                  decoration: const InputDecoration(labelText: 'Button text'),
+                ),
+                const SizedBox(height: 8),
+              ],
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
                 title: const Text('Start with sample birthday ideas', style: TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: const Text('Hat, socks, snacks, watch, gift card'),
                 value: withDemo,
@@ -197,12 +223,19 @@ class _CreateScreenState extends State<CreateScreen> {
                   onPressed: () async {
                     final ymd =
                         '${eventDate.year.toString().padLeft(4, '0')}-${eventDate.month.toString().padLeft(2, '0')}-${eventDate.day.toString().padLeft(2, '0')}';
+                    final supportUrl = enableSupport && supportUrlCtrl.text.trim().isNotEmpty
+                        ? supportUrlCtrl.text.trim()
+                        : null;
                     final list = await context.read<GivyController>().createList(
                           title: titleCtrl.text.trim().isEmpty ? 'Untitled Givy' : titleCtrl.text.trim(),
                           occasion: occasion,
                           description: noteCtrl.text.trim().isEmpty ? null : noteCtrl.text.trim(),
                           eventDate: ymd,
                           recipientAddress: addressCtrl.text.trim().isEmpty ? null : addressCtrl.text.trim(),
+                          supportUrl: supportUrl,
+                          supportLabel: supportUrl == null
+                              ? null
+                              : (supportLabelCtrl.text.trim().isEmpty ? 'Support me' : supportLabelCtrl.text.trim()),
                           withDemoItems: withDemo,
                         );
                     if (list != null && context.mounted) {
@@ -235,6 +268,9 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   final urlCtrl = TextEditingController();
   final notesCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
+  final supportUrlCtrl = TextEditingController();
+  final supportLabelCtrl = TextEditingController(text: 'Support me');
+  bool _supportHydrated = false;
 
   @override
   void dispose() {
@@ -243,6 +279,8 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     urlCtrl.dispose();
     notesCtrl.dispose();
     addressCtrl.dispose();
+    supportUrlCtrl.dispose();
+    supportLabelCtrl.dispose();
     super.dispose();
   }
 
@@ -261,6 +299,11 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     }
     if (addressCtrl.text.isEmpty && (list.recipientAddress?.isNotEmpty ?? false)) {
       addressCtrl.text = list.recipientAddress!;
+    }
+    if (!_supportHydrated) {
+      supportUrlCtrl.text = list.supportUrl ?? '';
+      supportLabelCtrl.text = list.supportLabel ?? 'Support me';
+      _supportHydrated = true;
     }
 
     return GivyScaffold(
@@ -465,6 +508,44 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                     maxLines: 2,
                     decoration: const InputDecoration(hintText: '123 Gift Lane…'),
                     onChanged: (v) => c.updateAddress(list.id, v),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            GivyPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Support me', style: givyDisplay(size: 22)),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'For creators: tip link on your public list.',
+                    style: TextStyle(color: GivyColors.inkSoft, fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: supportUrlCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Support link',
+                      hintText: 'https://ko-fi.com/yourname',
+                    ),
+                    keyboardType: TextInputType.url,
+                    onChanged: (v) => c.updateSupport(
+                      list.id,
+                      supportUrl: v,
+                      supportLabel: supportLabelCtrl.text,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: supportLabelCtrl,
+                    decoration: const InputDecoration(labelText: 'Button text'),
+                    onChanged: (v) => c.updateSupport(
+                      list.id,
+                      supportUrl: supportUrlCtrl.text,
+                      supportLabel: v,
+                    ),
                   ),
                 ],
               ),

@@ -48,6 +48,8 @@ class GivyController extends ChangeNotifier {
     String? description,
     required String eventDate,
     String? recipientAddress,
+    String? supportUrl,
+    String? supportLabel,
     bool withDemoItems = true,
   }) async {
     if (user == null) return null;
@@ -58,6 +60,8 @@ class GivyController extends ChangeNotifier {
       description: description,
       eventDate: eventDate,
       recipientAddress: recipientAddress,
+      supportUrl: supportUrl,
+      supportLabel: supportLabel,
       withDemoItems: withDemoItems,
     );
     _reload();
@@ -79,6 +83,21 @@ class GivyController extends ChangeNotifier {
 
   Future<void> updateAddress(String id, String address) async {
     await _store.updateList(id, (l) => l.copyWith(recipientAddress: address));
+    _reload();
+    notifyListeners();
+  }
+
+  Future<void> updateSupport(String id, {String? supportUrl, String? supportLabel}) async {
+    final url = supportUrl?.trim();
+    await _store.updateList(
+      id,
+      (l) => url == null || url.isEmpty
+          ? l.copyWith(clearSupport: true)
+          : l.copyWith(
+              supportUrl: url,
+              supportLabel: (supportLabel?.trim().isEmpty ?? true) ? 'Support me' : supportLabel!.trim(),
+            ),
+    );
     _reload();
     notifyListeners();
   }
