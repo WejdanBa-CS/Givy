@@ -58,7 +58,7 @@ export function parseSuggestBody(body: unknown): SuggestInput | { error: string 
   const occasion: Occasion = isOccasion(raw.occasion) ? raw.occasion : "other";
   const interests = plainText(raw.interests, SUGGEST_LIMITS.interestsMax);
 
-  let count = SUGGEST_LIMITS.countMin;
+  let count: number = SUGGEST_LIMITS.countMin;
   if (typeof raw.count === "number" && Number.isFinite(raw.count)) {
     count = Math.round(raw.count);
   }

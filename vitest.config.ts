@@ -11,6 +11,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Avoid Vite native configLoader warning with ESM in .ts on Windows
-  configLoader: "bundle",
 });
