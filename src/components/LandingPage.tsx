@@ -130,7 +130,7 @@ export function LandingPage() {
       </section>
 
       <footer className="shell border-t border-line/80 py-8 text-center text-sm text-ink-soft">
-        © {new Date().getFullYear()} Givy ·{" "}
+        © {new Date().getFullYear()} Wejdan Al Amri · Givy · All rights reserved ·{" "}
         <Link href="/privacy" className="underline-offset-2 hover:underline">
           Privacy
         </Link>{" "}

@@ -48,6 +48,22 @@ export default function TermsPage() {
             </section>
 
             <section>
+              <h2 className="font-display text-2xl text-ink">Intellectual property</h2>
+              <p className="mt-2">
+                Givy, its design, code, and branding are owned by Wejdan Al Amri. You
+                may not copy, scrape, or clone the service for commercial use. Source
+                is published under the terms in our{" "}
+                <a
+                  className="font-semibold text-coral-deep underline-offset-2 hover:underline"
+                  href="https://github.com/WejdanBa-CS/Givy/blob/master/LICENSE"
+                >
+                  LICENSE
+                </a>
+                .
+              </p>
+            </section>
+
+            <section>
               <h2 className="font-display text-2xl text-ink">Disclaimer</h2>
               <p className="mt-2">
                 Givy is provided as-is. We do not guarantee uninterrupted service or

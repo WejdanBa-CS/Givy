@@ -20,7 +20,6 @@ import {
   isSupabaseConfigured,
   publishListRemote,
   removeItemRemote,
-  signInWithGoogle,
   signInWithOAuth,
   signOutRemote,
   updateItemRemote,
