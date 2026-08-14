@@ -18,6 +18,7 @@
    - `supabase/migrations/003_security_hardening.sql`
    - `supabase/migrations/004_beta_invites_intentional_rls.sql`
    - `supabase/migrations/006_beta_write_gate.sql` (DB invite enforcement)
+   - `supabase/migrations/007_purge_demo_invites.sql` (remove any legacy demo invites)
    - Optional: `005_enable_index_advisor.sql`
 3. Copy Project URL + anon key into `.env.local` (never commit real keys)
 
@@ -51,7 +52,7 @@ insert into public.beta_invites (code, note, max_uses)
 values ('YOUR-UNIQUE-CODE', 'friend invite', 1);
 ```
 
-The old `GIVY-BETA-2026` seed is retired by migration 003.
+Use long random codes only you share privately (e.g. `openssl rand -hex 8`). Never commit real codes to git.
 
 ### 4. Env
 ```bash

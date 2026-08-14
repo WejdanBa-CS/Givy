@@ -33,3 +33,22 @@ Out of scope:
 ## Safe harbor
 
 Good-faith research that avoids privacy violations and service disruption is appreciated.
+
+## Secrets & production checklist
+
+**Never commit** to this repo:
+
+- `.env.local`, `.env`, or any file with real API keys
+- Supabase **service role** key (not used by this app — keep it out entirely)
+- Google OAuth **client secret** (Supabase Auth dashboard only)
+- `OPENAI_API_KEY` (Render env var only)
+- Real beta invite codes (create in Supabase SQL editor only)
+
+**After cloning or going public:**
+
+1. Run migration `007_purge_demo_invites.sql` in Supabase if the project existed before Aug 2026
+2. Create new private invite codes in SQL — see [`BETA.md`](BETA.md)
+3. Set production env vars in Render (not in git): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Rotate any key that was ever pasted into chat, screenshots, or an old commit
+
+CI runs a basic secret pattern scan on every push.
