@@ -43,20 +43,31 @@ export function getCurrentUser(): User | null {
 export function signIn(provider: AuthProvider): User {
   const saved = readJson<Record<string, User>>("givy.users", {});
   if (saved[provider]) {
-    writeJson(USER_KEY, saved[provider]);
-    ensureSeedData(saved[provider]);
-    return saved[provider];
+    const existing = saved[provider];
+    const user =
+      provider === "guest" && !existing.betaUnlocked
+        ? { ...existing, betaUnlocked: true, email: "" }
+        : existing;
+    if (user !== existing) {
+      saved[provider] = user;
+      writeJson("givy.users", saved);
+    }
+    writeJson(USER_KEY, user);
+    ensureSeedData(user);
+    return user;
   }
 
   const names: Record<AuthProvider, string> = {
     google: "Alex Rivera",
     apple: "Jordan Lee",
     facebook: "Sam Okoye",
+    guest: "Guest",
   };
   const emails: Record<AuthProvider, string> = {
     google: "alex@gmail.com",
     apple: "jordan@icloud.com",
     facebook: "sam@facebook.com",
+    guest: "",
   };
   const user: User = {
     id: uid("user"),
@@ -64,6 +75,7 @@ export function signIn(provider: AuthProvider): User {
     email: emails[provider],
     provider,
     avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+    betaUnlocked: provider === "guest" ? true : undefined,
   };
   saved[provider] = user;
   writeJson("givy.users", saved);

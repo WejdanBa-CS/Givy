@@ -26,6 +26,7 @@ import {
   updateListRemote,
   type ClaimResult,
 } from "./api";
+import { clearGuestCookie, isGuestUser, setGuestCookie } from "./guest";
 import {
   addItem as addItemLocal,
   claimItem as claimItemLocal,
@@ -60,8 +61,10 @@ import type {
 
 type GivyContextValue = {
   ready: boolean;
-  /** True when Supabase env is present (cloud mode). */
+  /** True when Supabase env is present (cloud OAuth available). */
   cloud: boolean;
+  /** True when this session stores data only in the browser (guest / local demo). */
+  localSession: boolean;
   user: User | null;
   lists: GivyList[];
   giveaways: Giveaway[];
@@ -114,6 +117,16 @@ type GivyContextValue = {
 
 const GivyContext = createContext<GivyContextValue | null>(null);
 
+function applyLocalUser(u: User | null) {
+  if (u) ensureSeedData(u);
+  return {
+    user: u,
+    lists: u ? getListsForUser(u.id) : [],
+    giveaways: getGiveaways(),
+    activity: getActivity(),
+  };
+}
+
 export function GivyProvider({ children }: { children: ReactNode }) {
   const cloud = isSupabaseConfigured();
   const [ready, setReady] = useState(false);
@@ -122,15 +135,28 @@ export function GivyProvider({ children }: { children: ReactNode }) {
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
 
+  const localSession = !cloud || isGuestUser(user);
+
   const refresh = useCallback(async () => {
+    const local = getCurrentUser();
+    if (isGuestUser(local)) {
+      setGuestCookie();
+      const next = applyLocalUser(local);
+      setUser(next.user);
+      setLists(next.lists);
+      setGiveaways(next.giveaways);
+      setActivity(next.activity);
+      return;
+    }
+
     if (cloud) {
       const u = await fetchSessionUser();
-      setUser(u);
       if (u) {
-        // Invite unlock only enforced when profile flag is used; MVP allows all signed-in users
+        clearGuestCookie();
+        signOutLocal();
+        setUser(u);
         const mine = await fetchMyLists(u.id, u.name);
         setLists(mine);
-        // Derive simple activity from claimed gifts so cloud owners see progress
         const derived: ActivityEvent[] = [];
         for (const list of mine) {
           for (const item of list.items) {
@@ -156,20 +182,22 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         }
         derived.sort((a, b) => b.at.localeCompare(a.at));
         setActivity(derived.slice(0, 40));
-      } else {
-        setLists([]);
-        setActivity([]);
+        setGiveaways([]);
+        return;
       }
+
+      setUser(null);
+      setLists([]);
+      setActivity([]);
       setGiveaways([]);
       return;
     }
 
-    const u = getCurrentUser();
-    if (u) ensureSeedData(u);
-    setUser(u);
-    setLists(u ? getListsForUser(u.id) : []);
-    setGiveaways(getGiveaways());
-    setActivity(getActivity());
+    const next = applyLocalUser(local);
+    setUser(next.user);
+    setLists(next.lists);
+    setGiveaways(next.giveaways);
+    setActivity(next.activity);
   }, [cloud]);
 
   useEffect(() => {
@@ -186,32 +214,51 @@ export function GivyProvider({ children }: { children: ReactNode }) {
     () => ({
       ready,
       cloud,
+      localSession,
       user,
       lists,
       giveaways,
       activity,
       refresh,
       signIn: async (provider, next = "/app") => {
+        if (provider === "guest") {
+          if (cloud) {
+            try {
+              await signOutRemote();
+            } catch {
+              /* ignore — guest does not need a cloud session */
+            }
+          }
+          signInLocal("guest");
+          setGuestCookie();
+          await refresh();
+          return;
+        }
+
         if (cloud) {
           if (provider === "apple") {
             throw new Error(
               "Apple sign-in comes next. Use Google or Facebook for now.",
             );
           }
+          clearGuestCookie();
+          signOutLocal();
           await signInWithOAuth(provider, next);
           return;
         }
+        clearGuestCookie();
         signInLocal(provider);
         await refresh();
       },
       signOut: async () => {
+        clearGuestCookie();
+        signOutLocal();
         if (cloud) await signOutRemote();
-        else signOutLocal();
         await refresh();
       },
       createList: async (input) => {
         if (!user) return null;
-        if (cloud) {
+        if (!localSession) {
           const list = await createListRemote({ owner: user, ...input });
           await refresh();
           return list;
@@ -221,7 +268,7 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return list;
       },
       updateList: async (id, patch) => {
-        if (cloud) {
+        if (!localSession) {
           await updateListRemote(id, patch);
           await refresh();
           return lists.find((l) => l.id === id) ?? null;
@@ -231,12 +278,12 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return list;
       },
       deleteList: async (id) => {
-        if (cloud) await deleteListRemote(id);
+        if (!localSession) await deleteListRemote(id);
         else deleteListLocal(id);
         await refresh();
       },
       addItem: async (listId, item) => {
-        if (cloud) {
+        if (!localSession) {
           const gift = await addItemRemote(listId, item);
           await refresh();
           return gift;
@@ -246,7 +293,7 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return gift;
       },
       updateItem: async (listId, itemId, patch) => {
-        if (cloud) {
+        if (!localSession) {
           const gift = await updateItemRemote(listId, itemId, patch);
           await refresh();
           return gift;
@@ -256,12 +303,12 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return gift;
       },
       removeItem: async (listId, itemId) => {
-        if (cloud) await removeItemRemote(listId, itemId);
+        if (!localSession) await removeItemRemote(listId, itemId);
         else removeItemLocal(listId, itemId);
         await refresh();
       },
       publishList: async (listId) => {
-        if (cloud) {
+        if (!localSession) {
           await publishListRemote(listId);
           await refresh();
           return lists.find((l) => l.id === listId) ?? null;
@@ -271,53 +318,78 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return list;
       },
       claimItem: async (listId, itemId, shipPreference) => {
-        if (!cloud && user && getListById(listId)?.ownerId === user.id) {
-          throw new Error("You cannot claim from your own list");
+        if (localSession) {
+          const localList = getListById(listId);
+          if (localList && user && localList.ownerId === user.id) {
+            throw new Error("You cannot claim from your own list");
+          }
+          if (localList) {
+            const updated = claimItemLocal(listId, itemId, shipPreference);
+            if (!updated) {
+              return { ok: false, error: "Could not mark as purchased" };
+            }
+            const item = updated.items.find((i) => i.id === itemId);
+            return {
+              ok: true,
+              recipientAddress:
+                shipPreference === "to_recipient"
+                  ? updated.recipientAddress ?? null
+                  : null,
+              ownerName: updated.ownerName,
+              shipPreference: item?.shipPreference,
+            };
+          }
+          if (cloud) {
+            return {
+              ok: false,
+              error:
+                "Guest mode can’t claim cloud lists. Sign in with Google or Facebook to claim this gift.",
+            };
+          }
+          return { ok: false, error: "Could not mark as purchased" };
         }
-        if (cloud) {
-          return claimItemRemote(itemId, shipPreference);
-        }
-        const updated = claimItemLocal(listId, itemId, shipPreference);
-        if (!updated) return { ok: false, error: "Could not mark as purchased" };
-        const item = updated.items.find((i) => i.id === itemId);
-        return {
-          ok: true,
-          recipientAddress:
-            shipPreference === "to_recipient"
-              ? updated.recipientAddress ?? null
-              : null,
-          ownerName: updated.ownerName,
-          shipPreference: item?.shipPreference,
-        };
+        return claimItemRemote(itemId, shipPreference);
       },
       createGiveaway: (input) => {
-        if (!user || cloud) return null;
+        if (!user || !localSession) return null;
         const g = createGiveawayStore({ owner: user, ...input });
         setGiveaways(getGiveaways());
         return g;
       },
       joinGiveaway: (id) => {
-        if (!user || cloud) return null;
+        if (!user || !localSession) return null;
         const g = joinGiveawayStore(id, user.id);
         setGiveaways(getGiveaways());
         return g;
       },
       drawGiveaway: (id) => {
-        if (!user || cloud) return null;
+        if (!user || !localSession) return null;
         const g = drawGiveawayStore(id, user.id);
         setGiveaways(getGiveaways());
         return g;
       },
       getList: (id) =>
-        cloud
-          ? lists.find((l) => l.id === id) ?? null
-          : getListById(id),
+        localSession ? getListById(id) : lists.find((l) => l.id === id) ?? null,
       getByShare: async (code) => {
-        if (cloud) return fetchPublicList(code);
-        return getPublicListByShareCode(code);
+        if (localSession) {
+          const local = getPublicListByShareCode(code);
+          if (local) return local;
+          if (cloud) return fetchPublicList(code);
+          return null;
+        }
+        return fetchPublicList(code);
       },
     }),
-    [ready, cloud, user, lists, giveaways, activity, refresh],
+    [
+      ready,
+      cloud,
+      localSession,
+      user,
+      lists,
+      giveaways,
+      activity,
+      refresh,
+    ],
   );
 
   return <GivyContext.Provider value={value}>{children}</GivyContext.Provider>;
