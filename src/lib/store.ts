@@ -15,7 +15,17 @@ const ACTIVITY_KEY = "givy.activity";
 const SEEDED_KEY = "givy.seeded";
 
 export function uid(prefix = "id"): string {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
+  const bytes = new Uint8Array(8);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback for non-browser runtimes; avoids Math.random in security-sensitive ID generation.
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = (Date.now() + i) & 0xff;
+    }
+  }
+  const rand = Array.from(bytes, (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 8);
+  return `${prefix}_${rand}${Date.now().toString(36).slice(-4)}`;
 }
 
 function readJson<T>(key: string, fallback: T): T {
