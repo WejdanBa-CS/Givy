@@ -7,7 +7,7 @@ export type Occasion =
   | "creator"
   | "other";
 
-export type AuthProvider = "google" | "apple" | "facebook";
+export type AuthProvider = "google" | "apple" | "facebook" | "guest";
 
 export type ShipPreference = "to_giver" | "to_recipient";
 

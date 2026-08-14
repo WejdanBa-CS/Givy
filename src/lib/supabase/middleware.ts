@@ -43,7 +43,10 @@ export async function updateSession(request: NextRequest) {
   const isApp = path.startsWith("/app");
   const requireInvite = process.env.NEXT_PUBLIC_BETA_REQUIRE_INVITE === "true";
 
-  if (isApp && !user) {
+  const isGuest = request.cookies.get("givy_guest")?.value === "1";
+
+  // Guest testers skip OAuth / email — session lives in the browser only.
+  if (isApp && !user && !isGuest) {
     const redirect = request.nextUrl.clone();
     redirect.pathname = "/login";
     redirect.searchParams.set("next", path);

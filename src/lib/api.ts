@@ -122,7 +122,10 @@ export async function fetchSessionUser(): Promise<User | null> {
     (user.identities?.[0]?.provider as string | undefined) ??
     "google";
   const provider: AuthProvider =
-    providerRaw === "facebook" || providerRaw === "apple" || providerRaw === "google"
+    providerRaw === "facebook" ||
+    providerRaw === "apple" ||
+    providerRaw === "google" ||
+    providerRaw === "guest"
       ? providerRaw
       : "google";
 

@@ -78,7 +78,7 @@ function LoginInner() {
     setMessage(null);
     try {
       await signIn(id, next);
-      if (!cloud) router.replace(next);
+      if (!cloud || id === "guest") router.replace(next);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Sign-in failed");
       setBusy(null);
@@ -138,6 +138,39 @@ function LoginInner() {
               </button>
             ))}
           </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center" aria-hidden>
+              <div className="w-full border-t border-line" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-paper px-3 font-medium uppercase tracking-wide text-ink-soft">
+                or
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-mist/60 px-4 py-3.5 text-left transition hover:border-coral/40 hover:bg-mist-deep/40 disabled:opacity-60"
+            disabled={busy !== null}
+            onClick={() => void onProvider("guest")}
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white text-lg" aria-hidden>
+              ✦
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold text-ink">
+                {busy === "guest" ? "Opening…" : "Continue as guest"}
+              </span>
+              <span className="block text-xs font-medium text-ink-soft">
+                No email. Safe for testers — stays in this browser.
+              </span>
+            </span>
+            <span aria-hidden className="shrink-0 text-ink-soft">
+              →
+            </span>
+          </button>
 
           <p className="mt-6 text-center text-xs text-ink-soft">
             By continuing you agree to our{" "}
