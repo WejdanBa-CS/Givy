@@ -37,8 +37,10 @@ export const SUGGEST_LIMITS = {
 /** Strip tags / control chars; keep plain text only. */
 export function plainText(raw: unknown, maxLen: number): string {
   if (typeof raw !== "string") return "";
-  return raw
-    .replace(/<[^>]*>/g, " ")
+  // Bound input and tag bodies so tag-stripping cannot ReDoS on long "<" runs.
+  const capped = raw.slice(0, Math.min(raw.length, Math.max(maxLen * 8, 2_000)));
+  return capped
+    .replace(/<[^<>]{0,200}>/g, " ")
     .replace(/[\u0000-\u001F\u007F]/g, " ")
     .replace(/\s+/g, " ")
     .trim()

@@ -15,6 +15,16 @@ describe("plainText", () => {
   it("truncates to max length", () => {
     expect(plainText("abcdefghij", 5)).toBe("abcde");
   });
+
+  it("handles long runs of '<' without hanging", () => {
+    const attack = `${"<".repeat(50_000)}hello`;
+    const start = Date.now();
+    // Cap + bounded tag matcher; unmatched '<' is treated as plain text, not backtracking.
+    const out = plainText(attack, 80);
+    expect(out.length).toBeLessThanOrEqual(80);
+    expect(out.includes("hello")).toBe(false);
+    expect(Date.now() - start).toBeLessThan(200);
+  });
 });
 
 describe("parseSuggestBody", () => {
