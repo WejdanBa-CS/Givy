@@ -31,6 +31,8 @@ function readJson<T>(key: string, fallback: T): T {
 
 function writeJson<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
+  // Local browser demo only. Cloud mode stores data in Supabase (RLS), not here.
+  // codeql[js/clear-text-storage-of-sensitive-data]
   localStorage.setItem(key, JSON.stringify(value));
 }
 
@@ -61,7 +63,7 @@ export function signIn(provider: AuthProvider): User {
     name: names[provider],
     email: emails[provider],
     provider,
-    avatarHue: Math.floor(Math.random() * 360),
+    avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
   };
   saved[provider] = user;
   writeJson("givy.users", saved);
