@@ -18,20 +18,75 @@ export function uid(prefix = "id"): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
 }
 
-function readJson<T>(key: string, fallback: T): T {
+const ENC_VERSION = 1;
+const ENC_PREFIX = "enc:";
+const KEY_MATERIAL = "givy.local.v1";
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+async function getStorageKey(): Promise<CryptoKey | null> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) return null;
+  const enc = new TextEncoder();
+  const seed = `${KEY_MATERIAL}:${window.location.host}`;
+  const digest = await window.crypto.subtle.digest("SHA-256", enc.encode(seed));
+  return window.crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function encryptText(plain: string): Promise<string> {
+  const key = await getStorageKey();
+  if (!key || typeof window === "undefined") return plain;
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const cipherBuf = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(plain));
+  const payload = {
+    v: ENC_VERSION,
+    iv: bytesToBase64(iv),
+    ct: bytesToBase64(new Uint8Array(cipherBuf)),
+  };
+  return `${ENC_PREFIX}${JSON.stringify(payload)}`;
+}
+
+async function decryptText(raw: string): Promise<string | null> {
+  if (!raw.startsWith(ENC_PREFIX)) return null;
+  const key = await getStorageKey();
+  if (!key) return null;
+  const payload = JSON.parse(raw.slice(ENC_PREFIX.length)) as { v: number; iv: string; ct: string };
+  if (payload.v !== ENC_VERSION) return null;
+  const iv = base64ToBytes(payload.iv);
+  const ct = base64ToBytes(payload.ct);
+  const plainBuf = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+  return new TextDecoder().decode(plainBuf);
+}
+
+async function readJson<T>(key: string, fallback: T): Promise<T> {
   if (typeof window === "undefined") return fallback;
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+    const decrypted = await decryptText(raw);
+    const json = decrypted ?? raw;
+    return JSON.parse(json) as T;
   } catch {
     return fallback;
   }
 }
 
-function writeJson<T>(key: string, value: T) {
+async function writeJson<T>(key: string, value: T): Promise<void> {
   if (typeof window === "undefined") return;
-  localStorage.setItem(key, JSON.stringify(value));
+  const serialized = JSON.stringify(value);
+  const encrypted = await encryptText(serialized);
+  localStorage.setItem(key, encrypted);
 }
 
 export function getCurrentUser(): User | null {
