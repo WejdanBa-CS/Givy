@@ -32,7 +32,11 @@ export function SiteHeader() {
             <Link
               href="/app/profile"
               className="hidden items-center gap-2 sm:flex"
-              title={user.email}
+              title={
+                user.provider === "guest"
+                  ? "Guest — no email"
+                  : user.email
+              }
             >
               <span
                 className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
