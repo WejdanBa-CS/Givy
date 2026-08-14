@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { formatMoney } from "@/lib/api";
+import { springs } from "@/lib/motion-presets";
 import type { GiftItem } from "@/lib/types";
 
 type Props = {
@@ -13,13 +14,15 @@ type Props = {
 };
 
 export function WishItem({ item, actions, footer }: Props) {
+  const reduce = useReducedMotion();
   return (
     <motion.article
       layout
-      initial={{ opacity: 0, y: 10 }}
+      initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ x: item.purchased ? 0 : 2 }}
+      transition={reduce ? { duration: 0 } : springs.soft}
+      whileHover={reduce || item.purchased ? undefined : { x: 2 }}
+      whileTap={reduce || item.purchased ? undefined : { scale: 0.995 }}
       className={`wish-item ${item.purchased ? "is-claimed" : ""}`}
     >
       <GiftGlyph title={item.title} hint={item.imageHint} claimed={item.purchased} />

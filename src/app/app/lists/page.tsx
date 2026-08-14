@@ -28,23 +28,27 @@ export default function ListsPage() {
   );
 
   return (
-    <div className="animate-rise space-y-5">
+    <div className="animate-rise space-y-5 lg:space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-4xl tracking-tight text-ink">Lists</h1>
-          <p className="mt-1 text-ink-soft">Birthdays, holidays, weddings: all your Givies.</p>
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl">
+            Lists
+          </h1>
+          <p className="mt-1 text-ink-soft lg:text-lg">
+            Birthdays, holidays, weddings: all your Givies.
+          </p>
         </div>
-        <Link href="/app/create" className="btn btn-primary">
+        <Link href="/app/create" className="btn btn-primary shrink-0">
           New Givy
         </Link>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="-mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 lg:flex-wrap lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filters.map((f) => (
           <button
             key={f}
             type="button"
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold ${
+            className={`shrink-0 snap-start rounded-full px-3 py-1.5 text-sm font-semibold ${
               filter === f
                 ? "bg-ink text-white"
                 : "border border-line bg-white/70 text-ink-soft"
@@ -56,18 +60,24 @@ export default function ListsPage() {
         ))}
       </div>
 
-      <div className="stagger space-y-3">
+      <div className="stagger space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
         {filtered.map((list) => {
           const claimed = list.items.filter((i) => i.purchased).length;
           return (
-            <Link key={list.id} href={`/app/${list.id}`} className="panel block p-5">
+            <Link
+              key={list.id}
+              href={`/app/${list.id}`}
+              className="panel block p-4 sm:p-5 lg:p-6"
+            >
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
                     {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
                     {list.published ? " · Shared" : " · Draft"}
                   </p>
-                  <h2 className="mt-1 font-display text-2xl text-ink">{list.title}</h2>
+                  <h2 className="mt-1 break-words font-display text-xl text-ink sm:text-2xl">
+                    {list.title}
+                  </h2>
                   <p className="mt-1 text-sm text-ink-soft">
                     {list.items.length} items · {claimed} claimed
                     {list.items[0]?.price != null
@@ -83,7 +93,7 @@ export default function ListsPage() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="panel p-8 text-center">
+          <div className="panel p-8 text-center lg:col-span-2">
             <p className="font-display text-2xl">
               {lists.length === 0 ? "Nothing here yet" : "No lists in this filter"}
             </p>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useGivy } from "@/lib/givy-context";
+import { paypalMeUrl, safeSupportUrl } from "@/lib/security";
 import type { Occasion } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
@@ -23,7 +24,7 @@ export default function CreatePage() {
   const [address, setAddress] = useState("");
   const [enableSupport, setEnableSupport] = useState(false);
   const [supportUrl, setSupportUrl] = useState("");
-  const [supportLabel, setSupportLabel] = useState("Support me");
+  const [supportLabel, setSupportLabel] = useState("Support with PayPal");
   const [withDemo, setWithDemo] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -31,18 +32,29 @@ export default function CreatePage() {
     e.preventDefault();
     setBusy(true);
     try {
+      let tipUrl: string | undefined;
+      if (enableSupport && supportUrl.trim()) {
+        tipUrl =
+          safeSupportUrl(supportUrl) ??
+          paypalMeUrl(supportUrl) ??
+          undefined;
+        if (!tipUrl) {
+          toast.error(
+            "Use a valid https PayPal.me, PayPal, Ko-fi, or Buy Me a Coffee link.",
+          );
+          setBusy(false);
+          return;
+        }
+      }
       const list = await createList({
         title: title.trim() || "Untitled Givy",
         occasion,
         description: description.trim() || undefined,
         eventDate,
         recipientAddress: address.trim() || undefined,
-        supportUrl:
-          enableSupport && supportUrl.trim() ? supportUrl.trim() : undefined,
+        supportUrl: tipUrl,
         supportLabel:
-          enableSupport && supportUrl.trim()
-            ? supportLabel.trim() || "Support me"
-            : undefined,
+          tipUrl ? supportLabel.trim() || "Support with PayPal" : undefined,
         withDemoItems: withDemo,
       });
       if (!list) {
@@ -59,13 +71,18 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl animate-rise">
-      <h1 className="font-display text-4xl tracking-tight text-ink">New Givy</h1>
-      <p className="mt-2 text-ink-soft">
+    <div className="mx-auto max-w-xl animate-rise lg:max-w-2xl">
+      <h1 className="font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl">
+        New Givy
+      </h1>
+      <p className="mt-2 text-ink-soft lg:text-lg">
         Pick an occasion, set the date, and start collecting ideas.
       </p>
 
-      <form onSubmit={onSubmit} className="panel mt-6 space-y-4 p-6">
+      <form
+        onSubmit={onSubmit}
+        className="panel mt-6 space-y-4 p-4 sm:p-6 lg:mt-8 lg:space-y-5 lg:p-8"
+      >
         <div>
           <label className="label" htmlFor="title">
             List title
@@ -154,7 +171,8 @@ export default function CreatePage() {
                 Support me (for creators)
               </span>
               <span className="block text-sm text-ink-soft">
-                Add a tip link on your public list.
+                PayPal.me or Ko-fi tip link on your public list. Payments stay on
+                PayPal — Givy never sees card numbers.
               </span>
             </span>
           </label>
@@ -165,14 +183,14 @@ export default function CreatePage() {
                 type="url"
                 value={supportUrl}
                 onChange={(e) => setSupportUrl(e.target.value)}
-                placeholder="https://ko-fi.com/yourname"
+                placeholder="https://www.paypal.com/paypalme/yourname"
                 required={enableSupport}
               />
               <input
                 className="field"
                 value={supportLabel}
                 onChange={(e) => setSupportLabel(e.target.value)}
-                placeholder="Support me"
+                placeholder="Support with PayPal"
               />
             </div>
           )}

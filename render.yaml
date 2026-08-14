@@ -20,4 +20,4 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
       - key: NEXT_PUBLIC_BETA_REQUIRE_INVITE
-        value: "false"
+        value: "true"

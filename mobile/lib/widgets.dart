@@ -307,7 +307,7 @@ class ClaimProgressBar extends StatelessWidget {
   }
 }
 
-/// Figma GiftCard — image, emoji corner, yellow price badge, claim CTA
+/// Figma GiftCard: image, emoji corner, yellow price badge, claim CTA
 class GiftProductCard extends StatelessWidget {
   const GiftProductCard({
     super.key,

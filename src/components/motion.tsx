@@ -3,8 +3,13 @@
 import { motion, type HTMLMotionProps, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
-
-const ease = [0.22, 1, 0.36, 1] as const;
+import {
+  editorialEase,
+  fadeUp,
+  fadeUpReduced,
+  springs,
+  staggerContainer,
+} from "@/lib/motion-presets";
 
 export function FadeIn({
   className,
@@ -19,7 +24,7 @@ export function FadeIn({
       className={cn(className)}
       initial={reduce ? false : { opacity: 0, y }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay, ease }}
+      transition={{ duration: 0.7, delay, ease: editorialEase }}
       {...props}
     >
       {children}
@@ -68,19 +73,67 @@ export function StaggerItem({
   return (
     <motion.div
       className={cn(className)}
-      variants={{
-        hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.55, ease },
-        },
-      }}
+      variants={reduce ? fadeUpReduced : fadeUp}
     >
       {children}
     </motion.div>
   );
 }
 
-export const MotionList = motion.ul;
+/** Subtle press feedback for cards and list rows. */
+export function Pressable({
+  className,
+  children,
+  disabled,
+  ...props
+}: HTMLMotionProps<"div"> & { disabled?: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className={cn(className)}
+      whileTap={reduce || disabled ? undefined : { scale: 0.985 }}
+      whileHover={reduce || disabled ? undefined : { y: -1 }}
+      transition={springs.soft}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function MotionList({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.ul
+      className={cn(className)}
+      initial="hidden"
+      animate="show"
+      variants={reduce ? { hidden: {}, show: {} } : staggerContainer}
+    >
+      {children}
+    </motion.ul>
+  );
+}
+
+export function MotionListItem({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.li className={cn(className)} variants={reduce ? fadeUpReduced : fadeUp}>
+      {children}
+    </motion.li>
+  );
+}
+
 export const MotionLi = motion.li;

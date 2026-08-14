@@ -35,14 +35,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
-      <header className="shell flex items-center justify-between gap-3 py-4">
-        <Link href="/app" className="group" aria-label="Givy home">
-          <Logo size="sm" />
+      <header className="shell flex items-center justify-between gap-3 py-4 pt-[max(1rem,env(safe-area-inset-top))] lg:py-5">
+        <Link href="/app" className="group min-w-0" aria-label="Givy home">
+          <Logo size="md" />
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 lg:gap-3">
           <Link
             href="/app/profile"
-            className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
+            className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white lg:h-9 lg:w-9"
             style={{ background: `hsl(${user.avatarHue} 55% 42%)` }}
             title="Profile"
           >
@@ -55,7 +55,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className={`shell app-content ${showNav ? "pb-28" : "pb-8"}`}>{children}</div>
+      <div
+        className={`shell app-content ${showNav ? "pb-28 lg:pb-32" : "pb-8 lg:pb-12"}`}
+      >
+        {children}
+      </div>
 
       {showNav && <AppNav />}
     </div>

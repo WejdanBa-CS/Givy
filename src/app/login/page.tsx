@@ -94,12 +94,12 @@ function LoginInner() {
         : null);
 
   return (
-    <div className="shell pb-16">
+    <div className="shell pb-16 lg:pb-24">
       <SiteHeader />
-      <main className="mx-auto mt-10 max-w-md animate-rise">
-        <div className="panel p-7 sm:p-8">
+      <main className="mx-auto mt-10 max-w-md animate-rise lg:mt-16">
+        <div className="panel p-5 sm:p-7 md:p-8 lg:p-9">
           <Logo size="lg" />
-          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">
+          <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Sign in to Givy
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">

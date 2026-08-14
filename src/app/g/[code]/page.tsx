@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
+import { GiftUnwrapCelebration } from "@/components/GiftUnwrapCelebration";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WishItem } from "@/components/WishItem";
+import { SupportPayPanel } from "@/components/SupportPayPanel";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useGivy } from "@/lib/givy-context";
+import { safeHttpUrl } from "@/lib/security";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
 
@@ -34,6 +37,9 @@ function SharedGivyInner() {
   const [busy, setBusy] = useState(false);
   const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
   const [reopenedClaim, setReopenedClaim] = useState(false);
+  const [unwrapTitle, setUnwrapTitle] = useState<string | null>(null);
+
+  const clearUnwrap = useCallback(() => setUnwrapTitle(null), []);
 
   useEffect(() => {
     if (!ready) return;
@@ -131,12 +137,24 @@ function SharedGivyInner() {
       if (ship === "to_recipient" && result.recipientAddress) {
         setRevealedAddress(result.recipientAddress);
       }
+      const claimedTitle = activeItem.title;
       setDoneMsg(
         ship === "to_giver"
-          ? `Nice. "${activeItem.title}" is yours to wrap.`
-          : `Nice. "${activeItem.title}" is marked purchased. Ship it to ${list.ownerName}.`,
+          ? `Nice. "${claimedTitle}" is yours to wrap.`
+          : `Nice. "${claimedTitle}" is marked purchased. Ship it to ${list.ownerName}.`,
       );
-      toast.success("Gift marked purchased");
+      toast.success("All yours — gift marked purchased", {
+        description:
+          ship === "to_giver"
+            ? `"${claimedTitle}" is reserved. Wrap it and give it in person.`
+            : `"${claimedTitle}" is reserved. Ship it to ${list.ownerName}.`,
+      });
+      // Celebration is additive; claim already succeeded.
+      try {
+        setUnwrapTitle(claimedTitle);
+      } catch {
+        /* ignore */
+      }
       setList(await getByShare(params.code));
       setActiveItem(null);
     } catch (err) {
@@ -166,10 +184,10 @@ function SharedGivyInner() {
       <div className="shell">
         <SiteHeader />
 
-        <main className="mt-6 animate-rise">
+        <main className="mt-6 animate-rise lg:mt-8">
           <header className="wish-hero">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
+            <div className="flex flex-wrap items-start justify-between gap-4 lg:gap-8">
+              <div className="min-w-0 flex-1">
                 <p className="wish-hero-kicker">
                   {OCCASION_LABELS[list.occasion]} · {list.ownerName}
                 </p>
@@ -186,16 +204,11 @@ function SharedGivyInner() {
               <Countdown eventDate={list.eventDate} compact={false} />
             </div>
             {list.supportUrl && (
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <a
-                  href={list.supportUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-secondary"
-                >
-                  {list.supportLabel?.trim() || "Support me"}
-                </a>
-              </div>
+              <SupportPayPanel
+                supportUrl={list.supportUrl}
+                supportLabel={list.supportLabel}
+                ownerName={list.ownerName}
+              />
             )}
           </header>
 
@@ -240,9 +253,13 @@ function SharedGivyInner() {
                   actions={
                     !item.purchased ? (
                       <>
-                        {item.url && (
+                        {safeHttpUrl(item.url) && (
                           <Button asChild variant="secondary" size="sm">
-                            <a href={item.url} target="_blank" rel="noreferrer">
+                            <a
+                              href={safeHttpUrl(item.url)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               Buy
                             </a>
                           </Button>
@@ -268,6 +285,12 @@ function SharedGivyInner() {
           </ul>
         </main>
       </div>
+
+      <GiftUnwrapCelebration
+        open={Boolean(unwrapTitle)}
+        giftTitle={unwrapTitle ?? undefined}
+        onComplete={clearUnwrap}
+      />
 
       <Dialog
         open={Boolean(activeItem)}

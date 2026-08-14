@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
+import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
+import { paypalMeUrl, safeHttpUrl, safeSupportUrl } from "@/lib/security";
 import type { GiftItem } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
@@ -100,7 +102,9 @@ export default function ManageListPage() {
       await updateItem(list.id, editingId, {
         title: editTitle.trim(),
         price: editPrice ? Number(editPrice) : undefined,
-        url: editUrl.trim() || undefined,
+        url: editUrl.trim()
+          ? (safeHttpUrl(editUrl.trim()) ?? undefined)
+          : undefined,
         notes: editNotes.trim() || undefined,
       });
       toast.success("Gift updated");
@@ -120,7 +124,9 @@ export default function ManageListPage() {
       await addItem(list.id, {
         title: titleInput.trim(),
         price: priceInput ? Number(priceInput) : undefined,
-        url: urlInput.trim() || undefined,
+        url: urlInput.trim()
+          ? (safeHttpUrl(urlInput.trim()) ?? undefined)
+          : undefined,
         notes: notesInput.trim() || undefined,
       });
       setTitleInput("");
@@ -148,6 +154,12 @@ export default function ManageListPage() {
 
   async function onPublish() {
     if (!list) return;
+    if (!list.recipientAddress?.trim() && !addressDraft.trim()) {
+      const go = confirm(
+        "No ship-to address saved. Friends who choose “ship to you” won’t get an address. Publish anyway?",
+      );
+      if (!go) return;
+    }
     setBusy(true);
     try {
       await publishList(list.id);
@@ -198,6 +210,40 @@ export default function ManageListPage() {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveSupportLink() {
+    if (!list) return;
+    const raw = supportUrlDraft.trim();
+    if (!raw) {
+      try {
+        await updateList(list.id, {
+          supportUrl: undefined,
+          supportLabel: undefined,
+        });
+        toast.success("Support link cleared");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not save");
+      }
+      return;
+    }
+    const tip = safeSupportUrl(raw) ?? paypalMeUrl(raw);
+    if (!tip) {
+      toast.error(
+        "Use a valid https PayPal.me, PayPal, Ko-fi, or Buy Me a Coffee link.",
+      );
+      return;
+    }
+    try {
+      await updateList(list.id, {
+        supportUrl: tip,
+        supportLabel: supportLabelDraft.trim() || "Support with PayPal",
+      });
+      setSupportUrlDraft(tip);
+      toast.success("Support link saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save");
     }
   }
 
@@ -379,16 +425,19 @@ export default function ManageListPage() {
                     <WishItem
                       item={item}
                       footer={
-                        item.url && !item.purchased ? (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="wish-item-link"
-                          >
-                            View product
-                          </a>
-                        ) : null
+                        (() => {
+                          const buy = item.url ? safeHttpUrl(item.url) : null;
+                          return buy && !item.purchased ? (
+                            <a
+                              href={buy}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="wish-item-link"
+                            >
+                              View product
+                            </a>
+                          ) : null;
+                        })()
                       }
                       actions={
                         !item.purchased ? (
@@ -427,6 +476,17 @@ export default function ManageListPage() {
               ))}
             </ul>
           )}
+
+          <SuggestGiftsPanel
+            occasion={list.occasion}
+            onUse={(s) => {
+              setTitleInput(s.title);
+              setNotesInput(s.notes ?? s.why ?? "");
+              setPriceInput(
+                s.priceHint != null ? String(s.priceHint) : "",
+              );
+            }}
+          />
 
           <form onSubmit={onAdd} className="panel space-y-3 p-5">
             <p className="font-display text-xl text-ink">Add a gift idea</p>
@@ -502,10 +562,10 @@ export default function ManageListPage() {
           <div className="panel p-5">
             <p className="font-display text-xl text-ink">Support me</p>
             <p className="mt-1 text-sm text-ink-soft">
-              Optional tip link for creators on your public list.
+              PayPal.me recommended. Tips process on PayPal, not Givy.
             </p>
             <label className="label mt-3" htmlFor="supportUrl">
-              Support link
+              PayPal.me or tip link
             </label>
             <input
               id="supportUrl"
@@ -513,7 +573,7 @@ export default function ManageListPage() {
               type="url"
               value={supportUrlDraft}
               onChange={(e) => setSupportUrlDraft(e.target.value)}
-              placeholder="https://ko-fi.com/yourname"
+              placeholder="https://www.paypal.com/paypalme/yourname"
             />
             <label className="label mt-3" htmlFor="supportLabel">
               Button text
@@ -523,25 +583,14 @@ export default function ManageListPage() {
               className="field"
               value={supportLabelDraft}
               onChange={(e) => setSupportLabelDraft(e.target.value)}
-              placeholder="Support me"
+              placeholder="Support with PayPal"
             />
             <button
               type="button"
               className="btn btn-secondary mt-3"
               disabled={busy}
               onClick={() => {
-                void updateList(list.id, {
-                  supportUrl: supportUrlDraft.trim() || undefined,
-                  supportLabel: supportUrlDraft.trim()
-                    ? supportLabelDraft.trim() || "Support me"
-                    : undefined,
-                })
-                  .then(() => toast.success("Support link saved"))
-                  .catch((err) =>
-                    toast.error(
-                      err instanceof Error ? err.message : "Could not save",
-                    ),
-                  );
+                void saveSupportLink();
               }}
             >
               Save support link
@@ -593,29 +642,27 @@ export default function ManageListPage() {
         </div>
         <div className="panel p-5">
           <p className="font-display text-xl text-ink">Support me</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            PayPal.me recommended. Tips process on PayPal, not Givy.
+          </p>
           <input
             className="field mt-3"
             type="url"
             value={supportUrlDraft}
             onChange={(e) => setSupportUrlDraft(e.target.value)}
-            placeholder="https://ko-fi.com/yourname"
+            placeholder="https://www.paypal.com/paypalme/yourname"
           />
           <input
             className="field mt-3"
             value={supportLabelDraft}
             onChange={(e) => setSupportLabelDraft(e.target.value)}
-            placeholder="Support me"
+            placeholder="Support with PayPal"
           />
           <button
             type="button"
             className="btn btn-secondary mt-3"
             onClick={() => {
-              void updateList(list.id, {
-                supportUrl: supportUrlDraft.trim() || undefined,
-                supportLabel: supportUrlDraft.trim()
-                  ? supportLabelDraft.trim() || "Support me"
-                  : undefined,
-              }).then(() => toast.success("Support link saved"));
+              void saveSupportLink();
             }}
           >
             Save support link

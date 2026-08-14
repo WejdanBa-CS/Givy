@@ -43,6 +43,14 @@
   --radius-3xl: 1.5rem;
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-rise: rise-in 700ms var(--ease-editorial) both;
+  --animate-float: floaty 5.5s ease-in-out infinite;
+  --animate-tick: tick-pulse 2.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.8s ease-in-out infinite;
+  --text-display-2xl: clamp(2.25rem, 5vw, 3.5rem);
+  --text-display-xl: clamp(1.75rem, 3.5vw, 2.5rem);
+  --text-display-lg: clamp(1.375rem, 2.5vw, 1.875rem);
+  --spacing-shell: min(1180px, calc(100% - 2rem));
+  --blur-editorial: 8px;
 }
 
 * {
@@ -51,6 +59,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -59,6 +68,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   background: var(--mist);
+  overflow-x: clip;
 }
 
 body::before {
@@ -87,6 +97,19 @@ select {
   z-index: 1;
   width: min(1120px, calc(100% - 2rem));
   margin-inline: auto;
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    width: min(1180px, calc(100% - 3rem));
+  }
+}
+
+@media (max-width: 380px) {
+  .shell {
+    width: calc(100% - 1.25rem);
+  }
 }
 
 .btn {
@@ -196,6 +219,16 @@ select {
   }
 }
 
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .animate-rise {
   animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -206,6 +239,19 @@ select {
 
 .animate-tick {
   animation: tick-pulse 2.4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-float,
+  .animate-tick,
+  .animate-shimmer {
+    animation: none;
+  }
 }
 
 .logo-mark {
@@ -280,6 +326,16 @@ select {
   min-height: 100vh;
 }
 
+.app-content {
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .app-content {
+    padding-top: 0.35rem;
+  }
+}
+
 .app-nav {
   position: fixed;
   left: 0;
@@ -306,13 +362,21 @@ select {
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  padding: 0.35rem 0.2rem;
+  padding: 0.35rem 0.1rem;
   border-radius: 1rem;
   color: var(--ink-soft);
-  font-size: 0.68rem;
+  font-size: clamp(0.58rem, 2.6vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 0.01em;
   transition: color 160ms ease, transform 160ms ease;
+  min-width: 0;
+}
+
+.app-nav-item > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-nav-item.is-active {
@@ -345,6 +409,34 @@ select {
   color: var(--ink);
 }
 
+@media (min-width: 1024px) {
+  .app-nav {
+    left: 50%;
+    right: auto;
+    bottom: 1.35rem;
+    width: min(640px, calc(100% - 3rem));
+    transform: translateX(-50%);
+    padding: 0.7rem 0.85rem;
+    border: 2px solid var(--line);
+    border-radius: 1.35rem;
+    box-shadow: 0 18px 40px -24px rgba(26, 18, 14, 0.35);
+  }
+
+  .app-nav-inner {
+    width: 100%;
+    gap: 0.35rem;
+  }
+
+  .app-nav-item {
+    font-size: 0.72rem;
+    padding: 0.4rem 0.2rem;
+  }
+
+  .app-nav-item.is-primary .app-nav-icon {
+    margin-top: -0.7rem;
+  }
+}
+
 /* —— Landing —— */
 .landing {
   font-family: var(--font-body);
@@ -363,6 +455,13 @@ select {
   padding-block: 1.25rem;
   color: #fff7f0;
   mix-blend-mode: normal;
+}
+
+@media (min-width: 1024px) {
+  .landing-nav {
+    width: min(1180px, calc(100% - 3rem));
+    padding-block: 1.6rem;
+  }
 }
 
 .landing-nav .btn-ghost {
@@ -388,9 +487,23 @@ select {
   z-index: 0;
 }
 
+.landing-hero-media picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.landing-hero-img,
 .landing-hero-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   animation: hero-ken 28s ease-in-out infinite alternate;
   transform-origin: center center;
+  will-change: transform;
 }
 
 .landing-hero-veil {
@@ -412,7 +525,8 @@ select {
   padding-bottom: clamp(3.5rem, 10vh, 6.5rem);
   padding-top: 7rem;
   color: #fff7f0;
-  max-width: 40rem;
+  /* Align to .shell edges; constrain text via child max-widths */
+  max-width: none;
 }
 
 .landing-brand {
@@ -531,6 +645,166 @@ select {
 
   .landing-nav {
     color: #fff7f0;
+    padding-block: 1rem;
+  }
+
+  .landing-brand {
+    font-size: clamp(2.75rem, 16vw, 4.25rem);
+  }
+
+  .landing-hero-copy {
+    padding-top: 5.5rem;
+    padding-bottom: max(2.75rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .landing-headline {
+    max-width: none;
+  }
+
+  .landing-lede {
+    font-size: 0.98rem;
+    max-width: none;
+  }
+
+  .landing-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .landing-cta .btn-primary,
+  .landing-cta .landing-cta-secondary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .landing-close-cta {
+    width: 100%;
+    max-width: 20rem;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 640px) {
+  .landing-brand {
+    font-size: clamp(2.4rem, 14vw, 3.25rem);
+  }
+
+  .landing-hero-copy {
+    padding-top: 4.25rem;
+    padding-bottom: 1.75rem;
+  }
+
+  .landing-headline {
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  .landing-lede {
+    margin-top: 0.55rem;
+  }
+
+  .landing-cta {
+    margin-top: 1.15rem;
+    gap: 0.55rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-hero-img,
+  .landing-hero-media img {
+    object-position: center 28%;
+  }
+
+  .landing-hero-veil {
+    background:
+      linear-gradient(
+        105deg,
+        rgba(26, 18, 14, 0.72) 0%,
+        rgba(26, 18, 14, 0.42) 42%,
+        rgba(26, 18, 14, 0.2) 68%,
+        rgba(26, 18, 14, 0.35) 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(26, 18, 14, 0.28) 0%,
+        rgba(26, 18, 14, 0.08) 38%,
+        rgba(26, 18, 14, 0.45) 72%,
+        rgba(26, 18, 14, 0.72) 100%
+      );
+  }
+
+  .landing-hero-copy {
+    padding-top: 8.5rem;
+    padding-bottom: clamp(4.5rem, 12vh, 8rem);
+  }
+
+  .landing-brand {
+    font-size: clamp(5.5rem, 8vw, 8.25rem);
+  }
+
+  .landing-headline {
+    margin-top: 1.5rem;
+    font-size: clamp(1.35rem, 1.1vw + 1rem, 1.75rem);
+    max-width: 30rem;
+    line-height: 1.4;
+  }
+
+  .landing-lede {
+    margin-top: 1rem;
+    font-size: 1.125rem;
+    max-width: 32rem;
+  }
+
+  .landing-cta {
+    margin-top: 2.15rem;
+    gap: 0.9rem;
+  }
+
+  .landing-cta .btn-primary,
+  .landing-cta .landing-cta-secondary {
+    min-width: 11rem;
+  }
+
+  .landing-how {
+    padding-block: clamp(4.5rem, 9vw, 6.5rem);
+  }
+
+  .landing-steps {
+    margin: 3.25rem 0 0;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .landing-step {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 2.25rem 1.75rem 2.25rem 0;
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  .landing-step:last-child {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  .landing-close {
+    padding-block: clamp(4.5rem, 9vw, 6.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-img,
+  .landing-hero-media img {
+    animation: none;
+    will-change: auto;
+  }
+
+  .animate-rise,
+  .animate-rise-delay-1,
+  .animate-rise-delay-2,
+  .animate-rise-delay-3,
+  .stagger > * {
+    animation: none;
   }
 }
 
@@ -538,6 +812,27 @@ select {
 .wish-hero {
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 1024px) {
+  .wish-hero {
+    padding-bottom: 1.75rem;
+  }
+
+  .wish-hero-meta {
+    max-width: 42rem;
+    font-size: 1rem;
+  }
+
+  .wish-item {
+    gap: 1.35rem;
+    padding: 1.35rem 0;
+  }
+
+  .wish-glyph {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
 }
 
 .wish-hero-kicker {
@@ -676,7 +971,8 @@ select {
   font-weight: 600;
   font-size: 0.85rem;
   text-align: center;
-  padding: 0.85rem 1rem;
+  padding: 0.85rem max(1rem, env(safe-area-inset-left, 0px))
+    0.85rem max(1rem, env(safe-area-inset-right, 0px));
 }
 
 @media (max-width: 640px) {
@@ -690,5 +986,15 @@ select {
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
+  }
+
+  .wish-hero-title {
+    font-size: clamp(1.75rem, 8vw, 2.35rem);
+  }
+
+  .wish-glyph {
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 0.875rem;
   }
 }

@@ -117,6 +117,13 @@ export function getListByShareCode(code: string): GivyList | null {
   );
 }
 
+/** Published list for guests — never include shipping address. */
+export function getPublicListByShareCode(code: string): GivyList | null {
+  const list = getListByShareCode(code);
+  if (!list) return null;
+  return { ...list, recipientAddress: undefined };
+}
+
 export function getGiveaways(): Giveaway[] {
   return readJson<Giveaway[]>(GIVEAWAYS_KEY, []).sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt),

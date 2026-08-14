@@ -37,7 +37,7 @@ import {
   getCurrentUser,
   getGiveaways,
   getListById,
-  getListByShareCode,
+  getPublicListByShareCode,
   getListsForUser,
   publishList as publishListLocal,
   removeItem as removeItemLocal,
@@ -272,6 +272,9 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         return list;
       },
       claimItem: async (listId, itemId, shipPreference) => {
+        if (!cloud && user && getListById(listId)?.ownerId === user.id) {
+          throw new Error("You cannot claim from your own list");
+        }
         if (cloud) {
           return claimItemRemote(itemId, shipPreference);
         }
@@ -312,7 +315,7 @@ export function GivyProvider({ children }: { children: ReactNode }) {
           : getListById(id),
       getByShare: async (code) => {
         if (cloud) return fetchPublicList(code);
-        return getListByShareCode(code);
+        return getPublicListByShareCode(code);
       },
     }),
     [ready, cloud, user, lists, giveaways, activity, refresh],

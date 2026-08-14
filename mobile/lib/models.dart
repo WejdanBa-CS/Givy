@@ -1,4 +1,4 @@
-enum Occasion { birthday, wedding, holiday, baby, graduation, other }
+enum Occasion { birthday, wedding, holiday, baby, graduation, creator, other }
 
 enum AuthProvider { google, apple, facebook }
 
@@ -151,6 +151,8 @@ class GivyList {
     this.description,
     required this.eventDate,
     this.recipientAddress,
+    this.supportUrl,
+    this.supportLabel,
     required this.shareCode,
     this.published = false,
     required this.items,
@@ -166,6 +168,8 @@ class GivyList {
   final String? description;
   final String eventDate;
   final String? recipientAddress;
+  final String? supportUrl;
+  final String? supportLabel;
   final String shareCode;
   final bool published;
   final List<GiftItem> items;
@@ -179,6 +183,9 @@ class GivyList {
     String? title,
     String? description,
     String? recipientAddress,
+    String? supportUrl,
+    String? supportLabel,
+    bool clearSupport = false,
     bool? published,
     List<GiftItem>? items,
     String? updatedAt,
@@ -192,6 +199,8 @@ class GivyList {
       description: description ?? this.description,
       eventDate: eventDate,
       recipientAddress: recipientAddress ?? this.recipientAddress,
+      supportUrl: clearSupport ? null : (supportUrl ?? this.supportUrl),
+      supportLabel: clearSupport ? null : (supportLabel ?? this.supportLabel),
       shareCode: shareCode,
       published: published ?? this.published,
       items: items ?? this.items,
@@ -209,6 +218,8 @@ class GivyList {
         'description': description,
         'eventDate': eventDate,
         'recipientAddress': recipientAddress,
+        'supportUrl': supportUrl,
+        'supportLabel': supportLabel,
         'shareCode': shareCode,
         'published': published,
         'items': items.map((e) => e.toJson()).toList(),
@@ -225,6 +236,8 @@ class GivyList {
         description: json['description'] as String?,
         eventDate: json['eventDate'] as String,
         recipientAddress: json['recipientAddress'] as String?,
+        supportUrl: json['supportUrl'] as String?,
+        supportLabel: json['supportLabel'] as String?,
         shareCode: json['shareCode'] as String,
         published: json['published'] as bool? ?? false,
         items: (json['items'] as List<dynamic>)
@@ -364,6 +377,7 @@ const occasionLabels = {
   Occasion.holiday: 'Holiday',
   Occasion.baby: 'Baby',
   Occasion.graduation: 'Graduation',
+  Occasion.creator: 'Creator / content',
   Occasion.other: 'Just because',
 };
 
@@ -373,5 +387,6 @@ const occasionEmoji = {
   Occasion.holiday: '🎄',
   Occasion.baby: '🍼',
   Occasion.graduation: '🎓',
+  Occasion.creator: '🎥',
   Occasion.other: '✨',
 };
