@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  inviteLinkPath,
   isPaypalSupportUrl,
+  normalizeInviteCode,
   paypalMeUrl,
   safeHttpUrl,
   safeNextPath,
@@ -24,6 +26,32 @@ describe("safeNextPath", () => {
   it("uses fallback when empty", () => {
     expect(safeNextPath(null, "/login")).toBe("/login");
     expect(safeNextPath("  ", "/login")).toBe("/login");
+  });
+});
+
+describe("normalizeInviteCode", () => {
+  it("accepts beta invite codes", () => {
+    expect(normalizeInviteCode("GIVY-FRIEND-001")).toBe("GIVY-FRIEND-001");
+    expect(normalizeInviteCode("  givy-closed-beta-5  ")).toBe(
+      "givy-closed-beta-5",
+    );
+  });
+
+  it("rejects unsafe values", () => {
+    expect(normalizeInviteCode("bad code!")).toBeNull();
+    expect(normalizeInviteCode("javascript:alert(1)")).toBeNull();
+    expect(normalizeInviteCode("")).toBeNull();
+  });
+});
+
+describe("inviteLinkPath", () => {
+  it("builds shareable invite paths", () => {
+    expect(inviteLinkPath("GIVY-FRIEND-001")).toBe(
+      "/invite/GIVY-FRIEND-001",
+    );
+    expect(inviteLinkPath("GIVY-FRIEND-001", "https://givy.onrender.com")).toBe(
+      "https://givy.onrender.com/invite/GIVY-FRIEND-001",
+    );
   });
 });
 

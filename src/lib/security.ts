@@ -83,3 +83,30 @@ export function isPaypalSupportUrl(raw: string | null | undefined): boolean {
   const host = new URL(url).hostname.toLowerCase();
   return host === "paypal.com" || host.endsWith(".paypal.com") || host.includes("paypal.me");
 }
+
+/** Closed-beta invite codes: letters, numbers, hyphens only. */
+export function normalizeInviteCode(
+  raw: string | null | undefined,
+): string | null {
+  if (!raw) return null;
+  let trimmed = raw.trim();
+  try {
+    trimmed = decodeURIComponent(trimmed).trim();
+  } catch {
+    return null;
+  }
+  if (!/^[A-Za-z0-9-]{4,64}$/.test(trimmed)) return null;
+  return trimmed;
+}
+
+/** Path or absolute URL for a shareable beta invite link. */
+export function inviteLinkPath(
+  code: string,
+  siteUrl?: string | null,
+): string | null {
+  const normalized = normalizeInviteCode(code);
+  if (!normalized) return null;
+  const path = `/invite/${encodeURIComponent(normalized)}`;
+  const base = siteUrl?.trim().replace(/\/$/, "");
+  return base ? `${base}${path}` : path;
+}
