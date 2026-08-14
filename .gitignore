@@ -6,6 +6,9 @@ figma-source/
 out/
 node_modules/
 npm-debug.log*
+.env
+.env.*
+!.env.example
 .env*.local
 .DS_Store
 *.pem
@@ -13,8 +16,17 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# IDE / OS
+.idea/
+.vscode/
+Thumbs.db
+
 # Tests
 test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+coverage/
+
+# Release drafts (local only)
+.release-notes-*.md

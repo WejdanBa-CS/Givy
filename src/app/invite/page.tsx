@@ -61,7 +61,7 @@ export default function InvitePage() {
                 className="field"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="GIVY-BETA-…"
+                placeholder="your-invite-code"
                 required
                 autoComplete="off"
               />
