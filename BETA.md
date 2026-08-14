@@ -54,6 +54,20 @@ values ('YOUR-UNIQUE-CODE', 'friend invite', 1);
 
 Use long random codes only you share privately (e.g. `openssl rand -hex 8`). Never commit real codes to git.
 
+### Shareable invite links
+
+Send testers a link instead of asking them to type the code:
+
+```
+https://givy.onrender.com/invite/GIVY-FRIEND-001
+```
+
+Or with query param: `https://givy.onrender.com/invite?code=GIVY-FRIEND-001`
+
+Flow: open link → sign in with Google → invite redeems automatically → `/app`.
+
+Replace the code in the URL with your row from `beta_invites`. Links are private — do not post them publicly.
+
 ### 4. Env
 ```bash
 NEXT_PUBLIC_BETA_REQUIRE_INVITE=true

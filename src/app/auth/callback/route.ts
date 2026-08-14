@@ -24,7 +24,9 @@ export async function GET(request: Request) {
             .eq("id", user.id)
             .maybeSingle();
           if (!profile?.beta_unlocked) {
-            return NextResponse.redirect(`${origin}/invite`);
+            const dest = safeNextPath(next, "/invite");
+            const path = dest.startsWith("/invite") ? dest : "/invite";
+            return NextResponse.redirect(`${origin}${path}`);
           }
         }
         return NextResponse.redirect(`${origin}${next}`);
