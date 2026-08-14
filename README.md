@@ -69,6 +69,7 @@ Optional: `OPENAI_API_KEY` (gift suggestions), `NEXT_PUBLIC_BETA_REQUIRE_INVITE=
    - `supabase/migrations/003_security_hardening.sql`
    - `supabase/migrations/004_beta_invites_intentional_rls.sql`
    - `supabase/migrations/006_beta_write_gate.sql`
+   - `supabase/migrations/007_purge_demo_invites.sql`
    - `005_enable_index_advisor.sql` (optional)
 3. Enable Google (and optional Facebook) under Authentication → Providers
 4. Set Site URL + redirect URLs to your domain and `/auth/callback`

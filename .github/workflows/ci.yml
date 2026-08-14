@@ -18,3 +18,17 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run lint
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for leaked secrets
+        run: |
+          set -e
+          patterns='eyJhbGci[A-Za-z0-9_-]{10,}|sk-proj-[A-Za-z0-9]{10,}|GOCSPX-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|[0-9]{12,}-[a-z0-9]+\.apps\.googleusercontent\.com'
+          if git grep -E "$patterns" -- ':!package-lock.json' ':!*.md' ':!.github/workflows/ci.yml'; then
+            echo 'Possible secret found in tracked files — see matches above.'
+            exit 1
+          fi
+          echo 'No secret patterns in tracked source files.'

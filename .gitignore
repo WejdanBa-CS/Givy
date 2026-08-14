@@ -27,6 +27,16 @@ playwright-report/
 blob-report/
 playwright/.cache/
 coverage/
+node_modules/.vite/
 
-# Release drafts (local only)
-.release-notes-*.md
+# Secrets (never commit)
+.env.local
+.env.production
+.env.development
+google_oauth.env
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+key.properties

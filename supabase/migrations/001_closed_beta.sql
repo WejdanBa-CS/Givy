@@ -108,10 +108,7 @@ $$;
 revoke all on function public.redeem_invite(text) from public;
 grant execute on function public.redeem_invite(text) to authenticated;
 
--- Seed a starter invite (change/delete after sharing)
-insert into public.beta_invites (code, note, max_uses)
-values ('GIVY-BETA-2026', 'Closed beta starter', 50)
-on conflict (code) do nothing;
+-- Do not seed invite codes in migrations (public repo). Create invites in the SQL editor — see BETA.md.
 
 -- ─── Lists ────────────────────────────────────────────────────────────────────
 create table if not exists public.lists (

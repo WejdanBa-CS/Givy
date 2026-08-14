@@ -70,10 +70,9 @@ begin
 end;
 $$;
 
--- Retire the committed starter invite (rotate out-of-band for new codes)
-update public.beta_invites
-set max_uses = least(max_uses, use_count)
-where code = 'GIVY-BETA-2026';
+-- Remove any legacy demo starter invite (never use migration seeds in production)
+delete from public.beta_invites
+where note = 'Closed beta starter';
 
 -- ─── 3) Protect is_claimed; only claim_item may flip it ─────────────────────
 create or replace function public.freeze_item_claimed()
