@@ -32,7 +32,7 @@ Warm Editorial — cream `#FEF6EE`, coral `#E8391E`, leaf green, gold · Fraunce
 | Local demo | Browser storage + demo sign-in (no backend) |
 | Deploy | [Render](render.yaml) (Vercel-compatible Next.js) |
 
-**Priority:** Next.js website first. Flutter app in `mobile/` is experimental / paused.
+**Priority:** Next.js website first. Flutter Play app in `mobile/` wraps the live site for Google Play.
 
 ## Quick start
 
@@ -103,7 +103,7 @@ src/components/   UI, motion, panels
 src/lib/          API, security, store, Supabase client
 supabase/         SQL migrations
 e2e/              Playwright tests
-mobile/           Flutter (paused)
+mobile/           Flutter Google Play shell (loads givy.onrender.com)
 ```
 
 ## License & copyright
