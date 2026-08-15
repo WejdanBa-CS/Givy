@@ -79,6 +79,12 @@ function LoginInner() {
     if (ready && user) router.replace(next);
   }, [ready, user, router, next]);
 
+  if (!ready || user) {
+    return (
+      <div className="shell py-20 text-center text-ink-soft">Loading…</div>
+    );
+  }
+
   async function onProvider(id: AuthProvider) {
     setBusy(id);
     setMessage(null);
