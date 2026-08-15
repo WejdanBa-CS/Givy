@@ -55,7 +55,8 @@ Release builds always load **https://givy.onrender.com** (no local dart-define).
    - Short + full description
 4. Privacy: `https://givy.onrender.com/privacy`
 5. Terms: `https://givy.onrender.com/terms`
-6. **App content → App access**: **Yes** (restricted)
+6. Account deletion: `https://givy.onrender.com/delete-account`
+7. **App content → App access**: **Yes** (restricted)
    - Provide review email, password, and invite steps (open app → Sign in with email → if asked, open `/invite` and enter code)
 7. Add tester emails or share the opt-in URL
 8. **Send for review** / start rollout to Closed testing
