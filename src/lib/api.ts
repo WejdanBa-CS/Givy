@@ -228,10 +228,12 @@ export async function signOutRemote() {
 
 export async function redeemInvite(code: string) {
   const supabase = createClient();
+  const normalized = code.trim();
+  if (!normalized) throw new Error("Enter an invite code.");
   const { error } = await supabase.rpc("redeem_invite", {
-    invite_code: code.trim(),
+    invite_code: normalized,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function fetchMyLists(

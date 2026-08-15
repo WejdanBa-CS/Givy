@@ -76,7 +76,13 @@ function LoginInner() {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    if (ready && user) router.replace(next);
+    if (!ready || !user) return;
+    // Don't bounce unlocked users back through the invite screen.
+    if (user.betaUnlocked && next.startsWith("/invite")) {
+      router.replace("/app");
+      return;
+    }
+    router.replace(next);
   }, [ready, user, router, next]);
 
   if (!ready || user) {
@@ -108,7 +114,7 @@ function LoginInner() {
         const result = await signUpWithEmail(email, password, name);
         if (result.needsEmailConfirm) {
           setInfo(
-            "Check your email for a confirmation link, then sign in here.",
+            "Account created. Check your inbox and spam for a confirmation link, then sign in here.",
           );
           setMode("signin");
           setBusy(null);
