@@ -251,6 +251,9 @@ export function GivyProvider({ children }: { children: ReactNode }) {
               "Apple sign-in comes next. Use Google or Facebook for now.",
             );
           }
+          if (provider === "email") {
+            throw new Error("Use the email form to sign in with email.");
+          }
           clearGuestCookie();
           signOutLocal();
           await signInWithOAuth(provider, next);

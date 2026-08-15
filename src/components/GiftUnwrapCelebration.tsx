@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
 
 type Props = {
@@ -51,7 +51,7 @@ export function GiftUnwrapCelebration({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           className="pointer-events-none fixed inset-0 z-[80] grid place-items-center bg-[radial-gradient(ellipse_55%_45%_at_50%_48%,rgba(254,246,238,0.72),transparent_70%)]"
           role="status"
           aria-live="polite"
@@ -72,7 +72,7 @@ export function GiftUnwrapCelebration({
             aria-hidden
           >
             {reduce ? (
-              <motion.div
+              <m.div
                 className="rounded-2xl border border-line bg-mist/90 px-5 py-3.5 shadow-givy"
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -82,20 +82,20 @@ export function GiftUnwrapCelebration({
                 <p className="font-display text-lg font-semibold tracking-tight text-ink">
                   Marked purchased
                 </p>
-              </motion.div>
+              </m.div>
             ) : (
               <>
                 {/* 1 — lid lift / ribbon reveal */}
                 <div className="relative h-[78px] w-[88px] max-[480px]:h-[68px] max-[480px]:w-[76px]">
-                  <motion.div
+                  <m.div
                     className="absolute left-0 top-0 z-[2] h-[22px] w-full origin-[20%_100%] rounded-t-[10px] rounded-b-md bg-coral-deep shadow-[0_6px_16px_-8px_rgba(201,46,22,0.55)] max-[480px]:h-5"
                     initial={{ y: 0, rotate: 0 }}
                     animate={{ y: -42, rotate: -12 }}
                     transition={{ duration: 0.55, ease, delay: 0.08 }}
                   >
                     <span className="absolute left-1/2 top-[-10px] ml-[-14px] h-3.5 w-7 rounded-full bg-leaf shadow-[-14px_2px_0_-2px_var(--leaf),14px_2px_0_-2px_var(--leaf)]" />
-                  </motion.div>
-                  <motion.div
+                  </m.div>
+                  <m.div
                     className="absolute left-1 top-[18px] h-[52px] w-20 overflow-hidden rounded-[10px] bg-coral shadow-[0_14px_28px_-16px_rgba(232,57,30,0.55)] max-[480px]:left-[3px] max-[480px]:h-[46px] max-[480px]:w-[70px]"
                     initial={{ scale: 1 }}
                     animate={{ scale: [1, 1.04, 1] }}
@@ -103,23 +103,23 @@ export function GiftUnwrapCelebration({
                   >
                     <span className="absolute left-1/2 top-0 ml-[-4px] h-full w-2 rounded-sm bg-[#fff7f4]" />
                     <span className="absolute left-0 top-[48%] mt-[-4px] h-2 w-full rounded-sm bg-[#fff7f4]" />
-                  </motion.div>
+                  </m.div>
                 </div>
 
                 {/* 2 — soft title reveal */}
-                <motion.p
+                <m.p
                   className="m-0 text-center font-display text-[1.15rem] font-semibold tracking-tight text-ink"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, ease, delay: 0.7 }}
                 >
                   Marked purchased
-                </motion.p>
+                </m.p>
 
                 {/* 3 — lightweight sparkles */}
                 <div className="pointer-events-none absolute left-1/2 top-[42%] h-0 w-0">
                   {SPARKLES.map((s) => (
-                    <motion.span
+                    <m.span
                       key={s.id}
                       className="absolute left-0 top-0 rounded-full"
                       style={{
@@ -145,7 +145,7 @@ export function GiftUnwrapCelebration({
               </>
             )}
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

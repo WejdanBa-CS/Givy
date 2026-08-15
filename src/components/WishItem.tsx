@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { formatMoney } from "@/lib/api";
 import { springs } from "@/lib/motion-presets";
@@ -16,7 +16,7 @@ type Props = {
 export function WishItem({ item, actions, footer }: Props) {
   const reduce = useReducedMotion();
   return (
-    <motion.article
+    <m.article
       layout
       initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -39,6 +39,6 @@ export function WishItem({ item, actions, footer }: Props) {
         {footer}
       </div>
       {actions && <div className="wish-item-actions">{actions}</div>}
-    </motion.article>
+    </m.article>
   );
 }
