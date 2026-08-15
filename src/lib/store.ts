@@ -18,6 +18,21 @@ export function uid(prefix = "id"): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
 }
 
+function secureRandomInt(maxExclusive: number): number {
+  if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
+    throw new Error("maxExclusive must be a positive integer");
+  }
+  const range = 0x100000000; // 2^32
+  const limit = Math.floor(range / maxExclusive) * maxExclusive;
+  const buf = new Uint32Array(1);
+  let value: number;
+  do {
+    crypto.getRandomValues(buf);
+    value = buf[0];
+  } while (value >= limit);
+  return value % maxExclusive;
+}
+
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
@@ -74,7 +89,7 @@ export function signIn(provider: AuthProvider): User {
     name: names[provider],
     email: emails[provider],
     provider,
-    avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+    avatarHue: secureRandomInt(360),
     betaUnlocked: provider === "guest" ? true : undefined,
   };
   saved[provider] = user;
