@@ -165,34 +165,40 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         clearGuestCookie();
         signOutLocal();
         setUser(u);
-        const mine = await fetchMyLists(u.id, u.name);
-        setLists(mine);
-        const derived: ActivityEvent[] = [];
-        for (const list of mine) {
-          for (const item of list.items) {
-            if (item.purchased) {
+        try {
+          const mine = await fetchMyLists(u.id, u.name);
+          setLists(mine);
+          const derived: ActivityEvent[] = [];
+          for (const list of mine) {
+            for (const item of list.items) {
+              if (item.purchased) {
+                derived.push({
+                  id: `claim_${item.id}`,
+                  type: "claim",
+                  message: `Someone claimed “${item.title}” (anonymous)`,
+                  at: item.purchasedAt ?? list.updatedAt,
+                  listId: list.id,
+                });
+              }
+            }
+            if (list.published) {
               derived.push({
-                id: `claim_${item.id}`,
-                type: "claim",
-                message: `Someone claimed “${item.title}” (anonymous)`,
-                at: item.purchasedAt ?? list.updatedAt,
+                id: `pub_${list.id}`,
+                type: "publish",
+                message: `Shared “${list.title}”`,
+                at: list.updatedAt,
                 listId: list.id,
               });
             }
           }
-          if (list.published) {
-            derived.push({
-              id: `pub_${list.id}`,
-              type: "publish",
-              message: `Shared “${list.title}”`,
-              at: list.updatedAt,
-              listId: list.id,
-            });
-          }
+          derived.sort((a, b) => b.at.localeCompare(a.at));
+          setActivity(derived.slice(0, 40));
+          setGiveaways([]);
+        } catch {
+          setLists([]);
+          setActivity([]);
+          setGiveaways([]);
         }
-        derived.sort((a, b) => b.at.localeCompare(a.at));
-        setActivity(derived.slice(0, 40));
-        setGiveaways([]);
         return;
       }
 

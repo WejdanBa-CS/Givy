@@ -12,8 +12,13 @@ function inviteNextPath(code: string | null): string {
   return code ? `/invite?code=${encodeURIComponent(code)}` : "/invite";
 }
 
+function goToApp() {
+  // Full navigation so middleware re-reads beta_unlocked from the DB.
+  window.location.assign("/app");
+}
+
 function InviteInner() {
-  const { user, ready, refresh, signOut } = useGivy();
+  const { user, ready, signOut } = useGivy();
   const router = useRouter();
   const search = useSearchParams();
   const inviteCode = normalizeInviteCode(search.get("code"));
@@ -35,40 +40,40 @@ function InviteInner() {
       );
       return;
     }
-    if (user.betaUnlocked) router.replace("/app");
+    if (user.betaUnlocked) goToApp();
   }, [ready, user, router, inviteCode]);
 
   async function redeem(targetCode: string) {
+    const normalized = normalizeInviteCode(targetCode);
+    if (!normalized) {
+      setError("That invite code looks invalid. Check for typos and try again.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      await redeemInvite(targetCode);
-      await refresh();
-      router.replace("/app");
+      await redeemInvite(normalized);
+      goToApp();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invite failed");
       setBusy(false);
     }
   }
 
-  const autoRedeem = useCallback(
-    async (targetCode: string) => {
-      if (autoRedeemStarted.current) return;
-      autoRedeemStarted.current = true;
-      setBusy(true);
-      setError(null);
-      try {
-        await redeemInvite(targetCode);
-        await refresh();
-        router.replace("/app");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Invite failed");
-        setBusy(false);
-        autoRedeemStarted.current = false;
-      }
-    },
-    [refresh, router],
-  );
+  const autoRedeem = useCallback(async (targetCode: string) => {
+    if (autoRedeemStarted.current) return;
+    autoRedeemStarted.current = true;
+    setBusy(true);
+    setError(null);
+    try {
+      await redeemInvite(targetCode);
+      goToApp();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invite failed");
+      setBusy(false);
+      autoRedeemStarted.current = false;
+    }
+  }, []);
 
   useEffect(() => {
     if (!ready || !user || user.betaUnlocked || !inviteCode) return;
@@ -80,8 +85,16 @@ function InviteInner() {
     await redeem(code);
   }
 
-  if (!ready || !user || user.betaUnlocked) {
+  if (!ready || !user) {
     return <div className="shell py-20 text-center text-ink-soft">Loading…</div>;
+  }
+
+  if (user.betaUnlocked || busy) {
+    return (
+      <div className="shell py-20 text-center text-ink-soft">
+        {user.betaUnlocked ? "Opening Givy…" : "Checking invite…"}
+      </div>
+    );
   }
 
   return (
