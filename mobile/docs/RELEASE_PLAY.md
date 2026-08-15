@@ -6,11 +6,14 @@ Native Android shell (`com.givy.givy`) that loads the live site:
 
 **https://givy.onrender.com**
 
-Same product as the website (lists, invites, Google sign-in). Google Sign-In may open the system browser briefly (Google blocks OAuth inside embedded WebViews).
+Same product as the website (lists, invites, email/password, Google, Facebook, guest). Google Sign-In may open the system browser briefly (Google blocks OAuth inside embedded WebViews).
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), e.g. `1.3.1+4`.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.2+5`**.
+
+- `versionName` (1.3.2) — shown to users  
+- `versionCode` (5) — must increase on every Play upload  
 
 ## One-time signing setup
 
@@ -19,7 +22,7 @@ cd mobile
 .\tool\create_keystore.ps1
 ```
 
-Back up `android/upload-keystore.jks` and `android/key.properties` offline.
+Back up `android/upload-keystore.jks` and `android/key.properties` offline. Never commit them.
 
 ## Build the App Bundle
 
@@ -30,13 +33,37 @@ cd mobile
 
 Output: `build/app/outputs/bundle/release/app-release.aab`
 
-## Play Console
+Release builds always load **https://givy.onrender.com** (no local dart-define).
 
-1. Create app **Givy**, package `com.givy.givy`
-2. Closed testing → upload the AAB
-3. Store listing screenshots + icon
+## Before upload — production checklist
+
+1. **Render** has redeployed latest `master` (confirm https://givy.onrender.com/login shows email Sign in / Create account).
+2. **Supabase → Authentication → Providers → Email** is enabled.
+3. For Play review convenience, optionally disable **Confirm email** during closed beta.
+4. Create a review invite in Supabase, e.g.:
+
+```sql
+insert into public.beta_invites (code, note, max_uses)
+values ('GIVY-PLAY-REVIEW', 'Google Play review', 50);
+```
+
+5. Create a dedicated review account (email + password) and redeem the invite once so `betaUnlocked` is true.
+
+## Play Console — Closed testing
+
+1. App **Givy**, package `com.givy.givy`
+2. **Testing → Closed testing** → create release → upload the AAB
+3. Store listing:
+   - App icon (512×512)
+   - Feature graphic (1024×500)
+   - At least 2 phone screenshots
+   - Short + full description
 4. Privacy: `https://givy.onrender.com/privacy`
 5. Terms: `https://givy.onrender.com/terms`
+6. **App content → App access**: **Yes** (restricted)
+   - Provide review email, password, and invite steps (open app → Sign in with email → if asked, open `/invite` and enter code)
+7. Add tester emails or share the opt-in URL
+8. **Send for review** / start rollout to Closed testing
 
 ## After first upload
 
