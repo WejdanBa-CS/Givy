@@ -21,10 +21,13 @@ import {
   publishListRemote,
   removeItemRemote,
   signInWithOAuth,
+  signInWithEmail as signInWithEmailRemote,
+  signUpWithEmail as signUpWithEmailRemote,
   signOutRemote,
   updateItemRemote,
   updateListRemote,
   type ClaimResult,
+  type EmailAuthResult,
 } from "./api";
 import { clearGuestCookie, isGuestUser, setGuestCookie } from "./guest";
 import {
@@ -42,6 +45,7 @@ import {
   publishList as publishListLocal,
   removeItem as removeItemLocal,
   signIn as signInLocal,
+  signInWithEmailLocal,
   signOut as signOutLocal,
   updateItem as updateItemLocal,
   updateList as updateListLocal,
@@ -70,6 +74,12 @@ type GivyContextValue = {
   giveaways: Giveaway[];
   activity: ActivityEvent[];
   signIn: (provider: AuthProvider, next?: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    displayName?: string,
+  ) => Promise<EmailAuthResult>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
   createList: (input: {
@@ -249,6 +259,31 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         clearGuestCookie();
         signInLocal(provider);
         await refresh();
+      },
+      signInWithEmail: async (email, password) => {
+        clearGuestCookie();
+        if (cloud) {
+          signOutLocal();
+          await signInWithEmailRemote(email, password);
+          await refresh();
+          return;
+        }
+        signInWithEmailLocal(email, password, "signin");
+        await refresh();
+      },
+      signUpWithEmail: async (email, password, displayName) => {
+        clearGuestCookie();
+        if (cloud) {
+          signOutLocal();
+          const result = await signUpWithEmailRemote(email, password, displayName);
+          if (!result.needsEmailConfirm) {
+            await refresh();
+          }
+          return result;
+        }
+        signInWithEmailLocal(email, password, "signup", displayName);
+        await refresh();
+        return {};
       },
       signOut: async () => {
         clearGuestCookie();
