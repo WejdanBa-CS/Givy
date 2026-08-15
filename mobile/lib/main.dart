@@ -4,7 +4,11 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// Live Givy website — this Play app is a native shell around production.
-const String kGivyUrl = 'https://givy.onrender.com';
+/// Override for local testing, e.g. `--dart-define=GIVY_URL=http://10.0.2.2:3000`
+const String kGivyUrl = String.fromEnvironment(
+  'GIVY_URL',
+  defaultValue: 'https://givy.onrender.com',
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +67,11 @@ class _GivyWebShellState extends State<GivyWebShell> {
 
   static bool _isGivyHost(String host) {
     final h = host.toLowerCase();
-    return h == 'givy.onrender.com' || h == 'www.givy.onrender.com';
+    return h == 'givy.onrender.com' ||
+        h == 'www.givy.onrender.com' ||
+        h == 'localhost' ||
+        h == '10.0.2.2' ||
+        h == '127.0.0.1';
   }
 
   Future<void> _openExternal(Uri uri) async {
