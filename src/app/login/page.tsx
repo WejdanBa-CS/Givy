@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useGivy } from "@/lib/givy-context";
@@ -10,7 +10,7 @@ import { safeNextPath } from "@/lib/safe-next";
 import type { AuthProvider } from "@/lib/types";
 
 const providers: {
-  id: AuthProvider;
+  id: Exclude<AuthProvider, "guest" | "email" | "apple">;
   label: string;
   blurb: string;
 }[] = [
@@ -26,7 +26,7 @@ const providers: {
   },
 ];
 
-function ProviderIcon({ id }: { id: AuthProvider }) {
+function ProviderIcon({ id }: { id: "google" | "facebook" }) {
   if (id === "google") {
     return (
       <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden>
@@ -61,13 +61,19 @@ function ProviderIcon({ id }: { id: AuthProvider }) {
 }
 
 function LoginInner() {
-  const { user, ready, cloud, signIn } = useGivy();
+  const { user, ready, cloud, signIn, signInWithEmail, signUpWithEmail } =
+    useGivy();
   const router = useRouter();
   const search = useSearchParams();
   const next = safeNextPath(search.get("next"), "/app");
   const error = search.get("error");
-  const [busy, setBusy] = useState<AuthProvider | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     if (ready && user) router.replace(next);
@@ -76,11 +82,38 @@ function LoginInner() {
   async function onProvider(id: AuthProvider) {
     setBusy(id);
     setMessage(null);
+    setInfo(null);
     try {
       await signIn(id, next);
       if (!cloud || id === "guest") router.replace(next);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Sign-in failed");
+      setBusy(null);
+    }
+  }
+
+  async function onEmailSubmit(e: FormEvent) {
+    e.preventDefault();
+    setBusy("email");
+    setMessage(null);
+    setInfo(null);
+    try {
+      if (mode === "signup") {
+        const result = await signUpWithEmail(email, password, name);
+        if (result.needsEmailConfirm) {
+          setInfo(
+            "Check your email for a confirmation link, then sign in here.",
+          );
+          setMode("signin");
+          setBusy(null);
+          return;
+        }
+      } else {
+        await signInWithEmail(email, password);
+      }
+      router.replace(next);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Email sign-in failed");
       setBusy(null);
     }
   }
@@ -111,8 +144,118 @@ function LoginInner() {
               {errorText}
             </p>
           )}
+          {info && (
+            <p className="mt-4 rounded-2xl border border-leaf/30 bg-leaf/10 p-3 text-sm text-ink">
+              {info}
+            </p>
+          )}
 
-          <div className="mt-7 space-y-3">
+          <form onSubmit={onEmailSubmit} className="mt-7 space-y-3">
+            <div className="flex gap-2 rounded-2xl border border-line bg-mist/40 p-1">
+              <button
+                type="button"
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                  mode === "signin"
+                    ? "bg-paper text-ink shadow-sm"
+                    : "text-ink-soft"
+                }`}
+                disabled={busy !== null}
+                onClick={() => setMode("signin")}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                  mode === "signup"
+                    ? "bg-paper text-ink shadow-sm"
+                    : "text-ink-soft"
+                }`}
+                disabled={busy !== null}
+                onClick={() => setMode("signup")}
+              >
+                Create account
+              </button>
+            </div>
+
+            {mode === "signup" && (
+              <div>
+                <label className="label" htmlFor="name">
+                  Display name
+                </label>
+                <input
+                  id="name"
+                  className="field"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  autoComplete="name"
+                  disabled={busy !== null}
+                />
+              </div>
+            )}
+            <div>
+              <label className="label" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                className="field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                required
+                autoComplete="email"
+                disabled={busy !== null}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="password">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                className="field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+                required
+                minLength={8}
+                autoComplete={
+                  mode === "signup" ? "new-password" : "current-password"
+                }
+                disabled={busy !== null}
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={busy !== null}
+            >
+              {busy === "email"
+                ? mode === "signup"
+                  ? "Creating…"
+                  : "Signing in…"
+                : mode === "signup"
+                  ? "Create account"
+                  : "Sign in with email"}
+            </button>
+          </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center" aria-hidden>
+              <div className="w-full border-t border-line" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-paper px-3 font-medium uppercase tracking-wide text-ink-soft">
+                or
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             {providers.map((p) => (
               <button
                 key={p.id}
@@ -156,7 +299,10 @@ function LoginInner() {
             disabled={busy !== null}
             onClick={() => void onProvider("guest")}
           >
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white text-lg" aria-hidden>
+            <span
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white text-lg"
+              aria-hidden
+            >
               ✦
             </span>
             <span className="min-w-0 flex-1">
@@ -174,11 +320,17 @@ function LoginInner() {
 
           <p className="mt-6 text-center text-xs text-ink-soft">
             By continuing you agree to our{" "}
-            <Link href="/terms" className="font-semibold underline-offset-2 hover:underline">
+            <Link
+              href="/terms"
+              className="font-semibold underline-offset-2 hover:underline"
+            >
               Terms
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="font-semibold underline-offset-2 hover:underline">
+            <Link
+              href="/privacy"
+              className="font-semibold underline-offset-2 hover:underline"
+            >
               Privacy
             </Link>
             .

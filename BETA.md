@@ -1,7 +1,8 @@
 # Givy closed beta
 
 ## What is live
-- Google sign-in via Supabase Auth
+- Google / Facebook / **email+password** sign-in via Supabase Auth
+- Guest mode for quick local testing (browser-only)
 - Invite-code gate (`/invite`) — enforced in Next **and** Postgres (list/item writes require `beta_unlocked`)
 - Lists + items stored in Postgres with RLS
 - Public share page (`/g/[code]`) never returns shipping address
@@ -32,6 +33,14 @@ In **Supabase** → Authentication → Providers → Google:
 - Enable Google
 - Paste Client ID
 - Paste **Client secret** (never commit this)
+
+### 2a. Email / password
+In **Supabase** → Authentication → Providers → **Email**:
+- Enable Email
+- For fastest closed beta: turn **Confirm email** OFF (users can sign in immediately)
+- Or leave confirmation ON — Givy will tell them to check their inbox after signup
+
+Redirect URLs must still include `https://givy.onrender.com/auth/callback` (and localhost for local dev).
 
 ### 2b. Facebook OAuth (optional)
 1. Create an app at [Meta for Developers](https://developers.facebook.com/apps/)

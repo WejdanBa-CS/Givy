@@ -120,14 +120,15 @@ export async function fetchSessionUser(): Promise<User | null> {
   const providerRaw =
     (user.app_metadata?.provider as string | undefined) ??
     (user.identities?.[0]?.provider as string | undefined) ??
-    "google";
+    "email";
   const provider: AuthProvider =
     providerRaw === "facebook" ||
     providerRaw === "apple" ||
     providerRaw === "google" ||
-    providerRaw === "guest"
+    providerRaw === "guest" ||
+    providerRaw === "email"
       ? providerRaw
-      : "google";
+      : "email";
 
   return {
     id: user.id,
@@ -153,6 +154,65 @@ export async function signInWithOAuth(
     },
   });
   if (error) throw error;
+}
+
+export type EmailAuthResult = {
+  /** True when signup succeeded but email confirmation is required. */
+  needsEmailConfirm?: boolean;
+};
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function assertEmailPassword(email: string, password: string) {
+  const normalized = normalizeEmail(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    throw new Error("Enter a valid email address.");
+  }
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+  return normalized;
+}
+
+export async function signInWithEmail(
+  email: string,
+  password: string,
+): Promise<void> {
+  const supabase = createClient();
+  const normalized = assertEmailPassword(email, password);
+  const { error } = await supabase.auth.signInWithPassword({
+    email: normalized,
+    password,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  displayName?: string,
+): Promise<EmailAuthResult> {
+  const supabase = createClient();
+  const normalized = assertEmailPassword(email, password);
+  const origin = window.location.origin;
+  const { data, error } = await supabase.auth.signUp({
+    email: normalized,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/app")}`,
+      data: {
+        full_name: displayName?.trim() || normalized.split("@")[0],
+        name: displayName?.trim() || normalized.split("@")[0],
+      },
+    },
+  });
+  if (error) throw new Error(error.message);
+  if (!data.session) {
+    return { needsEmailConfirm: true };
+  }
+  return {};
 }
 
 /** @deprecated Prefer signInWithOAuth("google") */
