@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
@@ -41,17 +41,17 @@ export function CollapsiblePanel({
             </span>
           )}
         </span>
-        <motion.span
+        <m.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: reduce ? 0 : 0.25, ease: editorialEase }}
           className="mt-1 shrink-0 text-ink-soft"
         >
           <ChevronDown size={20} aria-hidden />
-        </motion.span>
+        </m.span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             initial={reduce ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={reduce ? undefined : { height: 0, opacity: 0 }}
@@ -59,7 +59,7 @@ export function CollapsiblePanel({
             className="overflow-hidden"
           >
             <div className="border-t border-line px-5 pb-5 pt-4">{children}</div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

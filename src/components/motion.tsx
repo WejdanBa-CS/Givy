@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type HTMLMotionProps, useReducedMotion } from "framer-motion";
+import { m, type HTMLMotionProps, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import {
@@ -20,7 +20,7 @@ export function FadeIn({
 }: HTMLMotionProps<"div"> & { delay?: number; y?: number }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div
+    <m.div
       className={cn(className)}
       initial={reduce ? false : { opacity: 0, y }}
       animate={{ opacity: 1, y: 0 }}
@@ -28,7 +28,7 @@ export function FadeIn({
       {...props}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -43,7 +43,7 @@ export function Stagger({
 }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div
+    <m.div
       className={cn(className)}
       initial="hidden"
       animate="show"
@@ -58,7 +58,7 @@ export function Stagger({
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -71,12 +71,12 @@ export function StaggerItem({
 }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div
+    <m.div
       className={cn(className)}
       variants={reduce ? fadeUpReduced : fadeUp}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -89,7 +89,7 @@ export function Pressable({
 }: HTMLMotionProps<"div"> & { disabled?: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div
+    <m.div
       className={cn(className)}
       whileTap={reduce || disabled ? undefined : { scale: 0.985 }}
       whileHover={reduce || disabled ? undefined : { y: -1 }}
@@ -97,7 +97,7 @@ export function Pressable({
       {...props}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -110,14 +110,14 @@ export function MotionList({
 }) {
   const reduce = useReducedMotion();
   return (
-    <motion.ul
+    <m.ul
       className={cn(className)}
       initial="hidden"
       animate="show"
       variants={reduce ? { hidden: {}, show: {} } : staggerContainer}
     >
       {children}
-    </motion.ul>
+    </m.ul>
   );
 }
 
@@ -130,10 +130,10 @@ export function MotionListItem({
 }) {
   const reduce = useReducedMotion();
   return (
-    <motion.li className={cn(className)} variants={reduce ? fadeUpReduced : fadeUp}>
+    <m.li className={cn(className)} variants={reduce ? fadeUpReduced : fadeUp}>
       {children}
-    </motion.li>
+    </m.li>
   );
 }
 
-export const MotionLi = motion.li;
+export const MotionLi = m.li;
