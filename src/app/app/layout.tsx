@@ -35,7 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
-      <header className="shell flex items-center justify-between gap-3 py-4 pt-[max(1rem,env(safe-area-inset-top))] lg:py-5">
+      <header className="shell flex items-center justify-between gap-3 py-4 pt-[max(1.75rem,calc(env(safe-area-inset-top,0px)+1rem))] lg:py-5">
         <Link href="/app" className="group min-w-0" aria-label="Givy home">
           <Logo size="md" />
         </Link>

@@ -1,0 +1,39 @@
+﻿App name:
+Givy
+
+Short description (80 max) — 75 chars:
+Gift wishlists without duplicates. Share one link; friends claim privately.
+
+Full description:
+Givy helps you share gift wishlists for birthdays, holidays, weddings, and more — without the awkward duplicate presents.
+
+Create a list, add gift ideas with links and prices, then share one private link with friends and family. When someone claims a gift, you see that it’s taken — but not who claimed it — so surprises stay intact.
+
+WHY GIVY
+• One shared list for every occasion
+• Anonymous claims — no more “who bought what” spoilers
+• Optional ship-to address revealed only to the person who claims a gift
+• Optional PayPal tip link for supporters (handled by PayPal, not Givy)
+• Sign in with email, Google, Facebook, or try as a guest
+
+HOW IT WORKS
+1. Create your Givy list
+2. Add gifts you actually want
+3. Share one link
+4. Friends claim gifts privately
+
+Givy is currently in closed beta (invite required). Purchases happen on retailer websites — Givy coordinates the list, not the checkout.
+
+Privacy: https://givy.onrender.com/privacy
+Terms: https://givy.onrender.com/terms
+Account deletion: https://givy.onrender.com/delete-account
+
+Made by Wejdan Al Amri.
+
+---
+Graphics (upload from this folder):
+- App icon 512×512: mobile/docs/play-store/app-icon-512.png
+- Feature graphic 1024×500: mobile/docs/play-store/feature-graphic-1024x500.png
+
+Phone screenshots:
+Capture 2–8 from the emulator (9:16). Suggested screens: home/login, your lists, list detail, shared claim view.

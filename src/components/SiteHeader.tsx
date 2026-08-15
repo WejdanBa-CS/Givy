@@ -12,7 +12,7 @@ export function SiteHeader() {
   const isApp = pathname.startsWith("/app") || pathname.startsWith("/create");
 
   return (
-    <header className="shell flex items-center justify-between gap-3 py-4 sm:gap-4 sm:py-5 lg:py-6">
+    <header className="shell flex items-center justify-between gap-3 py-4 pt-[max(1.75rem,calc(env(safe-area-inset-top,0px)+1rem))] sm:gap-4 sm:py-5 sm:pt-[max(2rem,calc(env(safe-area-inset-top,0px)+1.15rem))] lg:py-6">
       <Link
         href={user ? "/app" : "/"}
         className="group min-w-0"
@@ -34,7 +34,7 @@ export function SiteHeader() {
               className="hidden items-center gap-2 sm:flex"
               title={
                 user.provider === "guest"
-                  ? "Guest — no email"
+                  ? "Demo · this browser only"
                   : user.email
               }
             >
