@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
 import { MotionProvider } from "@/components/providers/motion-provider";
@@ -18,6 +18,13 @@ const body = DM_Sans({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
   "https://givy.onrender.com";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#FEF6EE",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

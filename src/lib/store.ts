@@ -37,7 +37,33 @@ function writeJson<T>(key: string, value: T) {
 }
 
 export function getCurrentUser(): User | null {
-  return readJson<User | null>(USER_KEY, null);
+  const user = readJson<User | null>(USER_KEY, null);
+  if (!user || user.provider !== "guest") return user;
+  if (user.name !== "Guest" && !user.name.startsWith("Guest")) return user;
+
+  const updated: User = { ...user, name: "Alex" };
+  writeJson(USER_KEY, updated);
+
+  const lists = getLists().map((list) => {
+    if (list.ownerId !== user.id) return list;
+    const title =
+      list.title === "Guest's birthday" || list.title.startsWith("Guest's ")
+        ? list.title.replace(/^Guest/, "Alex")
+        : list.title;
+    return {
+      ...list,
+      ownerName: "Alex",
+      title,
+    };
+  });
+  writeJson(LISTS_KEY, lists);
+
+  const giveaways = getGiveaways().map((g) =>
+    g.ownerId === user.id ? { ...g, ownerName: "Alex" } : g,
+  );
+  writeJson(GIVEAWAYS_KEY, giveaways);
+
+  return updated;
 }
 
 export function signIn(provider: AuthProvider): User {
@@ -61,7 +87,7 @@ export function signIn(provider: AuthProvider): User {
     google: "Alex Rivera",
     apple: "Jordan Lee",
     facebook: "Sam Okoye",
-    guest: "Guest",
+    guest: "Alex",
     email: "Email user",
   };
   const emails: Record<AuthProvider, string> = {

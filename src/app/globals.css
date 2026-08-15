@@ -453,6 +453,8 @@ select {
   width: min(1120px, calc(100% - 2rem));
   margin-inline: auto;
   padding-block: 1.25rem;
+  /* Clear status bar / notch in the Play WebView (inset often 0 there) */
+  padding-top: max(3.4rem, calc(env(safe-area-inset-top, 0px) + 2.5rem));
   color: #fff7f0;
   mix-blend-mode: normal;
 }
@@ -461,6 +463,7 @@ select {
   .landing-nav {
     width: min(1180px, calc(100% - 3rem));
     padding-block: 1.6rem;
+    padding-top: max(2.5rem, calc(env(safe-area-inset-top, 0px) + 1.6rem));
   }
 }
 
@@ -646,6 +649,7 @@ select {
   .landing-nav {
     color: #fff7f0;
     padding-block: 1rem;
+    padding-top: max(3.5rem, calc(env(safe-area-inset-top, 0px) + 2.6rem));
   }
 
   .landing-brand {
@@ -653,7 +657,7 @@ select {
   }
 
   .landing-hero-copy {
-    padding-top: 5.5rem;
+    padding-top: 6.75rem;
     padding-bottom: max(2.75rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)));
   }
 

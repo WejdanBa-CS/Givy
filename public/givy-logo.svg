@@ -1,13 +1,15 @@
 <svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Givy brand mark: coral gift + leaf bow -->
-  <rect width="64" height="64" rx="14" fill="#FEF6EE"/>
-  <rect x="8" y="28" width="48" height="28" rx="10" fill="#E8391E"/>
-  <rect x="6" y="24" width="52" height="11" rx="5.5" fill="#C92E16"/>
-  <rect x="29" y="24" width="6" height="32" rx="2" fill="#FFF7F4"/>
-  <rect x="8" y="38" width="48" height="6" rx="2" fill="#FFF7F4"/>
-  <ellipse cx="21" cy="15.5" rx="12" ry="7.5" fill="#3D6B4F" transform="rotate(-22 21 15.5)"/>
-  <ellipse cx="43" cy="15.5" rx="12" ry="7.5" fill="#3D6B4F" transform="rotate(22 43 15.5)"/>
-  <rect x="26.5" y="13" width="11" height="13" rx="4" fill="#2A4D38"/>
-  <circle cx="32" cy="19.5" r="2.8" fill="#FFCD3C"/>
-  <path d="M29 26l-5 9 5-2.5 3 4.5 3-4.5 5 2.5-5-9H29z" fill="#3D6B4F"/>
+  <!-- Givy trademark-style mark: red box, white ribbon, green leaves, gold knot -->
+  <rect width="64" height="64" rx="14" fill="#FFFFFF"/>
+  <!-- body -->
+  <rect x="14" y="28" width="36" height="28" fill="#E8391E"/>
+  <!-- lid -->
+  <rect x="11" y="24" width="42" height="8" fill="#D32F1A"/>
+  <!-- vertical ribbon -->
+  <rect x="29" y="24" width="6" height="32" fill="#FFFFFF"/>
+  <!-- leaf bow -->
+  <ellipse cx="22" cy="16" rx="10" ry="7" fill="#2F6B3A" transform="rotate(-28 22 16)"/>
+  <ellipse cx="42" cy="16" rx="10" ry="7" fill="#2F6B3A" transform="rotate(28 42 16)"/>
+  <!-- gold knot -->
+  <circle cx="32" cy="20" r="4" fill="#F5C518"/>
 </svg>

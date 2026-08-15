@@ -12,10 +12,13 @@ const String kGivyUrl = String.fromEnvironment(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
   runApp(const GivyPlayApp());
@@ -141,7 +144,11 @@ class _GivyWebShellState extends State<GivyWebShell> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFEF6EE),
+        // Web content owns top safe-area (status bar). Only pad the gesture bar.
         body: SafeArea(
+          top: false,
+          left: false,
+          right: false,
           child: Column(
             children: [
               if (_loading || _progress < 100)
