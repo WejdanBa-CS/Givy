@@ -54,7 +54,14 @@ export default function PrivacyPage() {
               <h2 className="font-display text-2xl text-ink">Retention & deletion</h2>
               <p className="mt-2">
                 We keep your data while your account is active. To request deletion of
-                your account and associated lists, email{" "}
+                your account and associated lists, use{" "}
+                <Link
+                  href="/delete-account"
+                  className="font-semibold text-coral-deep underline-offset-2 hover:underline"
+                >
+                  Delete your account
+                </Link>{" "}
+                or email{" "}
                 <a className="font-semibold text-coral-deep underline-offset-2 hover:underline" href="mailto:hello@givy.app">
                   hello@givy.app
                 </a>

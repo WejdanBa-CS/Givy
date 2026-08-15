@@ -137,6 +137,10 @@ export function LandingPage() {
         ·{" "}
         <Link href="/terms" className="underline-offset-2 hover:underline">
           Terms
+        </Link>{" "}
+        ·{" "}
+        <Link href="/delete-account" className="underline-offset-2 hover:underline">
+          Delete account
         </Link>
       </footer>
     </div>
