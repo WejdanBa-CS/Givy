@@ -10,7 +10,7 @@ Same product as the website (lists, invites, Google sign-in). Google Sign-In may
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), e.g. `1.3.0+3`.
+See `pubspec.yaml` (`versionName+versionCode`), e.g. `1.3.1+4`.
 
 ## One-time signing setup
 
