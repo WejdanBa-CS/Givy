@@ -56,6 +56,13 @@ export default function ProfilePage() {
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
+          href="/delete-account"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Delete account & data</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
+        <Link
           href="/terms"
           className="flex items-center justify-between px-5 py-4"
         >
