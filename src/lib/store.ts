@@ -62,12 +62,14 @@ export function signIn(provider: AuthProvider): User {
     apple: "Jordan Lee",
     facebook: "Sam Okoye",
     guest: "Guest",
+    email: "Email user",
   };
   const emails: Record<AuthProvider, string> = {
     google: "alex@gmail.com",
     apple: "jordan@icloud.com",
     facebook: "sam@facebook.com",
     guest: "",
+    email: "you@example.com",
   };
   const user: User = {
     id: uid("user"),
@@ -87,6 +89,58 @@ export function signIn(provider: AuthProvider): User {
 export function signOut() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(USER_KEY);
+}
+
+const LOCAL_EMAIL_AUTH_KEY = "givy.email_accounts";
+
+type LocalEmailAccount = {
+  password: string;
+  user: User;
+};
+
+/** Local demo mode only — not used when Supabase is configured. */
+export function signInWithEmailLocal(
+  email: string,
+  password: string,
+  mode: "signin" | "signup",
+  displayName?: string,
+): User {
+  const normalized = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    throw new Error("Enter a valid email address.");
+  }
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+
+  const accounts = readJson<Record<string, LocalEmailAccount>>(
+    LOCAL_EMAIL_AUTH_KEY,
+    {},
+  );
+  const existing = accounts[normalized];
+
+  if (mode === "signup") {
+    if (existing) throw new Error("An account with this email already exists.");
+    const user: User = {
+      id: uid("user"),
+      name: displayName?.trim() || normalized.split("@")[0] || "Givy user",
+      email: normalized,
+      provider: "email",
+      avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+    };
+    accounts[normalized] = { password, user };
+    writeJson(LOCAL_EMAIL_AUTH_KEY, accounts);
+    writeJson(USER_KEY, user);
+    ensureSeedData(user);
+    return user;
+  }
+
+  if (!existing || existing.password !== password) {
+    throw new Error("Invalid email or password.");
+  }
+  writeJson(USER_KEY, existing.user);
+  ensureSeedData(existing.user);
+  return existing.user;
 }
 
 function saveLists(lists: GivyList[]) {
