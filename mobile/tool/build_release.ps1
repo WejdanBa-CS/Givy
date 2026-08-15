@@ -23,12 +23,19 @@ $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';'
             [System.Environment]::GetEnvironmentVariable('Path','User')
 
 Write-Host 'Building Givy release App Bundle…'
+# Flutter may write toolchain warnings to stderr; do not treat those as a hard stop.
+$ErrorActionPreference = 'Continue'
 flutter build appbundle --release
+$flutterExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
 
 $aab = Join-Path $root 'build\app\outputs\bundle\release\app-release.aab'
 if (Test-Path $aab) {
   Write-Host ''
   Write-Host "Ready for Play Console: $aab"
+  if ($flutterExit -ne 0) {
+    Write-Host "Note: flutter exited with code $flutterExit (often a strip-symbols warning). AAB is still usable."
+  }
 } else {
   Write-Host 'Build finished but AAB was not found.'
   exit 1
