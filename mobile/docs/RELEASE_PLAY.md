@@ -40,12 +40,7 @@ Release builds always load **https://givy.onrender.com** (no local dart-define).
 1. **Render** has redeployed latest `master` (confirm https://givy.onrender.com/login shows email Sign in / Create account).
 2. **Supabase → Authentication → Providers → Email** is enabled.
 3. For Play review convenience, optionally disable **Confirm email** during closed beta.
-4. Create a review invite in Supabase, e.g.:
-
-```sql
-insert into public.beta_invites (code, note, max_uses)
-values ('GIVY-PLAY-REVIEW', 'Google Play review', 50);
-```
+4. Use your existing invite code for reviewers (do not publish it on GitHub or the store listing). Example for your own records only: create or reuse a high `max_uses` row in `beta_invites` via the Supabase SQL Editor.
 
 5. Create a dedicated review account (email + password) and redeem the invite once so `betaUnlocked` is true.
 
