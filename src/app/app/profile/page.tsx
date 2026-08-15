@@ -27,7 +27,7 @@ export default function ProfilePage() {
           <h1 className="font-display text-3xl text-ink">{user.name}</h1>
           <p className="text-sm text-ink-soft">
             {user.provider === "guest"
-              ? "Guest · no email · this browser only"
+              ? "Demo account · this browser only"
               : `${user.email} · ${user.provider}`}
           </p>
         </div>
