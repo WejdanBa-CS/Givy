@@ -36,6 +36,7 @@ if (Test-Path $aab) {
   if ($flutterExit -ne 0) {
     Write-Host "Note: flutter exited with code $flutterExit (often a strip-symbols warning). AAB is still usable."
   }
+  exit 0
 } else {
   Write-Host 'Build finished but AAB was not found.'
   exit 1
