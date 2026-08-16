@@ -225,9 +225,9 @@ class _GivyWebShellState extends State<GivyWebShell> {
   Future<void> _applyPlayUserAgentAndLoad() async {
     try {
       final defaultUa = await _controller.getUserAgent() ?? '';
-      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.3.9');
+      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.0.0');
     } catch (_) {
-      await _controller.setUserAgent('GivyPlayApp/1.3.9');
+      await _controller.setUserAgent('GivyPlayApp/1.0.0');
     }
 
     final start = Uri.tryParse(widget.initialUrl);

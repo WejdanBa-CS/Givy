@@ -10,10 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.9+12`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.0.0+13`**.
 
-- `versionName` (1.3.9) — shown to users  
-- `versionCode` (12) — must increase on every Play upload  
+- `versionName` (1.0.0) — first real public release  
+- `versionCode` (13) — must increase on every Play upload  
 
 ## Google Sign-In (Play WebView)
 
