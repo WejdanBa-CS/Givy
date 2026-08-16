@@ -10,18 +10,19 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.8+11`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.9+12`**.
 
-- `versionName` (1.3.8) — shown to users  
-- `versionCode` (11) — must increase on every Play upload  
+- `versionName` (1.3.9) — shown to users  
+- `versionCode` (12) — must increase on every Play upload  
 
 ## Google Sign-In (Play WebView)
 
 Google blocks OAuth inside embedded WebViews. The shell:
 
 1. Tags its user-agent with `GivyPlayApp`
-2. Opens Supabase / Google in Chrome Custom Tabs
-3. Returns via **`com.givy.givy://auth/callback`** into the WebView to finish PKCE
+2. Starts OAuth through a JS bridge → `flutter_web_auth_2` (Chrome Custom Tab)
+3. Returns via **`com.givy.givy://auth/callback`** into the WebView to finish PKCE  
+   (does **not** leave you stuck on the website in Chrome)
 
 **Required in Supabase** → Authentication → URL configuration → Redirect URLs, add:
 
