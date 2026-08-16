@@ -144,6 +144,12 @@ export async function fetchSessionUser(): Promise<User | null> {
   };
 }
 
+/** Play WebView shell appends this token to its user-agent. */
+function isGivyPlayApp(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /GivyPlayApp/i.test(navigator.userAgent);
+}
+
 export async function signInWithOAuth(
   provider: "google" | "facebook" | "apple",
   next = "/app",
@@ -151,13 +157,24 @@ export async function signInWithOAuth(
   const supabase = createClient();
   const origin = window.location.origin;
   const safeNext = safeNextPath(next, "/app");
-  const { error } = await supabase.auth.signInWithOAuth({
+  const playApp = isGivyPlayApp();
+  // Custom scheme returns into the Android shell so PKCE cookies in the WebView
+  // can finish /auth/callback (Chrome Custom Tabs cannot share that jar).
+  const redirectTo = playApp
+    ? `com.givy.givy://auth/callback?next=${encodeURIComponent(safeNext)}`
+    : `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
+      redirectTo,
+      skipBrowserRedirect: playApp,
     },
   });
   if (error) throw error;
+  if (playApp && data.url) {
+    window.location.assign(data.url);
+  }
 }
 
 export type EmailAuthResult = {
