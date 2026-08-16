@@ -16,6 +16,17 @@ export function safeNextPath(
 
 const BLOCKED_PROTOCOLS = /^(javascript|data|vbscript|file):/i;
 
+/** Field length caps (mirrored in migration 008). */
+export const FIELD_LIMITS = {
+  displayName: 80,
+  listTitle: 120,
+  itemTitle: 120,
+  notes: 2000,
+  description: 2000,
+  recipientAddress: 500,
+  url: 2048,
+} as const;
+
 /** Only allow http(s) absolute URLs for product / support links. */
 export function safeHttpUrl(
   raw: string | null | undefined,
@@ -23,6 +34,7 @@ export function safeHttpUrl(
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed || BLOCKED_PROTOCOLS.test(trimmed)) return null;
+  if (trimmed.length > FIELD_LIMITS.url) return null;
   try {
     const url = new URL(trimmed);
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
@@ -31,6 +43,16 @@ export function safeHttpUrl(
   } catch {
     return null;
   }
+}
+
+/** Gift / image writes: https only (cleartext http rejected). */
+export function safeHttpsUrl(
+  raw: string | null | undefined,
+): string | null {
+  const http = safeHttpUrl(raw);
+  if (!http) return null;
+  if (!http.toLowerCase().startsWith("https://")) return null;
+  return http;
 }
 
 const SUPPORT_HOSTS = new Set([

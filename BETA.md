@@ -2,7 +2,7 @@
 
 ## What is live
 - Google / Facebook / **email+password** sign-in via Supabase Auth
-- Guest mode for quick local testing (browser-only)
+- Guest mode for **local / explicit demo only** (`NEXT_PUBLIC_ALLOW_GUEST=true`); **disabled when** `NEXT_PUBLIC_BETA_REQUIRE_INVITE=true` (production closed beta)
 - Invite-code gate (`/invite`) — enforced in Next **and** Postgres (list/item writes require `beta_unlocked`)
 - Lists + items stored in Postgres with RLS
 - Public share page (`/g/[code]`) never returns shipping address
@@ -20,6 +20,7 @@
    - `supabase/migrations/004_beta_invites_intentional_rls.sql`
    - `supabase/migrations/006_beta_write_gate.sql` (DB invite enforcement)
    - `supabase/migrations/007_purge_demo_invites.sql` (remove any legacy demo invites)
+   - `supabase/migrations/008_claim_orphan_and_limits.sql` (claim orphan cleanup, https gift URLs, length limits, `has_recipient_address`)
    - Optional: `005_enable_index_advisor.sql`
 3. Copy Project URL + anon key into `.env.local` (never commit real keys)
 

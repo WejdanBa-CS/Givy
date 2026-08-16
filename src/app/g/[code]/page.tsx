@@ -126,12 +126,27 @@ function SharedGivyInner() {
       window.location.href = `/login?next=${encodeURIComponent(loginNext)}`;
       return;
     }
+    if (ship === "to_recipient" && !list.hasRecipientAddress) {
+      setClaimError(
+        "Owner hasn’t added a ship-to address. Choose “Ship to me” instead.",
+      );
+      return;
+    }
     setBusy(true);
     setClaimError(null);
     try {
       const result = await claimItem(list.id, activeItem.id, ship);
       if (!result.ok) {
-        setClaimError(result.error ?? "Could not mark this gift");
+        const raw = (result.error ?? "").toLowerCase();
+        if (raw.includes("too many claims")) {
+          setClaimError("Too many claims right now. Try again in a bit.");
+        } else if (raw.includes("already") || raw.includes("claimed")) {
+          setClaimError("Someone just claimed this gift. Pick another.");
+        } else if (raw.includes("sign in")) {
+          setClaimError("Sign in to claim this gift.");
+        } else {
+          setClaimError(result.error ?? "Could not mark this gift");
+        }
         return;
       }
       if (ship === "to_recipient" && result.recipientAddress) {
@@ -328,22 +343,29 @@ function SharedGivyInner() {
                     </span>
                   </span>
                 </label>
-                <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
-                  <input
-                    type="radio"
-                    name="ship"
-                    checked={ship === "to_recipient"}
-                    onChange={() => setShip("to_recipient")}
-                  />
-                  <span>
-                    <span className="block font-semibold">
-                      Ship to {list.ownerName}
+                {list.hasRecipientAddress ? (
+                  <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
+                    <input
+                      type="radio"
+                      name="ship"
+                      checked={ship === "to_recipient"}
+                      onChange={() => setShip("to_recipient")}
+                    />
+                    <span>
+                      <span className="block font-semibold">
+                        Ship to {list.ownerName}
+                      </span>
+                      <span className="block text-sm text-ink-soft">
+                        Address is revealed only after you confirm.
+                      </span>
                     </span>
-                    <span className="block text-sm text-ink-soft">
-                      Address is revealed only after you confirm.
-                    </span>
-                  </span>
-                </label>
+                  </label>
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-line bg-mist/40 p-3 text-sm text-ink-soft">
+                    Owner hasn’t added a ship-to address. You can still claim and
+                    give the gift in person.
+                  </p>
+                )}
               </div>
 
               {claimError && (
