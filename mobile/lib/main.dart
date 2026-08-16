@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -13,7 +15,7 @@ const String kGivyUrl = String.fromEnvironment(
   defaultValue: 'https://givy.onrender.com',
 );
 
-/// Custom scheme so OAuth can return to the app without relying on App Links.
+/// Must match Supabase Redirect URL: com.givy.givy://auth/callback
 const String kOAuthScheme = 'com.givy.givy';
 
 Future<void> main() async {
@@ -65,6 +67,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
   StreamSubscription<Uri>? _linkSub;
   var _loading = true;
   var _progress = 0;
+  var _oauthBusy = false;
   String? _error;
 
   static bool _isOAuthHost(String host) {
@@ -73,12 +76,9 @@ class _GivyWebShellState extends State<GivyWebShell> {
         (h.endsWith('.google.com') && h.contains('account')) ||
         h.contains('facebook.com') ||
         h.contains('fb.com') ||
-        h.contains('appleid.apple.com');
-  }
-
-  static bool _isSupabaseHost(String host) {
-    final h = host.toLowerCase();
-    return h == 'supabase.co' || h.endsWith('.supabase.co');
+        h.contains('appleid.apple.com') ||
+        h.endsWith('.supabase.co') ||
+        h == 'supabase.co';
   }
 
   static bool _isLocalDevHost(String host) {
@@ -95,8 +95,6 @@ class _GivyWebShellState extends State<GivyWebShell> {
         _isLocalDevHost(h);
   }
 
-  /// Only Givy (or local) origins may render inside the trusted shell.
-  /// Supabase authorize pages are opened externally with the OAuth providers.
   bool _isAllowedInApp(Uri uri) {
     if (_isLocalDevHost(uri.host)) {
       return uri.scheme == 'http' || uri.scheme == 'https';
@@ -105,12 +103,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
   }
 
   Future<void> _openExternal(Uri uri) async {
-    // Custom Tabs keep the user in an OS browser UI Google allows for OAuth.
-    final mode = LaunchMode.inAppBrowserView;
-    var ok = await launchUrl(uri, mode: mode);
-    if (!ok) {
-      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not open ${uri.host}')),
@@ -118,26 +111,99 @@ class _GivyWebShellState extends State<GivyWebShell> {
     }
   }
 
-  /// OAuth custom-scheme return → load HTTPS callback in WebView (keeps PKCE cookies).
+  void _loadGivy(Uri uri) {
+    if (!_isAllowedInApp(uri)) return;
+    _controller.loadRequest(uri);
+  }
+
+  /// Finish PKCE in the WebView (cookies live there, not in Chrome).
+  void _finishOAuthWithCode(String code, String next) {
+    final callback = Uri.https('givy.onrender.com', '/auth/callback', {
+      'code': code,
+      'next': next,
+    });
+    _controller.loadRequest(callback);
+  }
+
   void _handleIncomingLink(Uri uri) {
     if (uri.scheme == kOAuthScheme) {
       final code = uri.queryParameters['code'];
       final next = uri.queryParameters['next'] ?? '/app';
       if (code != null && code.isNotEmpty) {
-        final callback = Uri.https('givy.onrender.com', '/auth/callback', {
-          'code': code,
-          'next': next,
-        });
-        _controller.loadRequest(callback);
-        return;
+        _finishOAuthWithCode(code, next);
       }
-      // Fallback: open app home if provider returned without a code.
-      _controller.loadRequest(Uri.parse('https://givy.onrender.com/login'));
       return;
     }
+    _loadGivy(uri);
+  }
 
-    if (_isAllowedInApp(uri)) {
-      _controller.loadRequest(uri);
+  Future<void> _runOAuthSession(String authorizeUrl, String next) async {
+    if (_oauthBusy) return;
+    _oauthBusy = true;
+    try {
+      final result = await FlutterWebAuth2.authenticate(
+        url: authorizeUrl,
+        callbackUrlScheme: kOAuthScheme,
+      );
+      final returned = Uri.parse(result);
+      final code = returned.queryParameters['code'];
+      if (code == null || code.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Google sign-in did not return a code. Try email.'),
+            ),
+          );
+        }
+        return;
+      }
+      _finishOAuthWithCode(code, next);
+    } on PlatformException catch (e) {
+      if (e.code == 'CANCELED') return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Sign-in failed. Add com.givy.givy://auth/callback in Supabase, '
+              'or use email. (${e.message ?? e.code})',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sign-in failed. Try email/password instead.'),
+          ),
+        );
+      }
+    } finally {
+      _oauthBusy = false;
+    }
+  }
+
+  void _onOAuthBridgeMessage(JavaScriptMessage message) {
+    try {
+      final raw = message.message.trim();
+      String authorizeUrl;
+      var next = '/app';
+      if (raw.startsWith('{')) {
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        authorizeUrl = map['url'] as String? ?? '';
+        next = map['next'] as String? ?? '/app';
+      } else {
+        authorizeUrl = raw;
+      }
+      final uri = Uri.tryParse(authorizeUrl);
+      if (uri == null ||
+          (uri.scheme != 'https' && uri.scheme != 'http') ||
+          authorizeUrl.isEmpty) {
+        return;
+      }
+      unawaited(_runOAuthSession(authorizeUrl, next));
+    } catch (_) {
+      /* ignore malformed bridge payloads */
     }
   }
 
@@ -157,12 +223,11 @@ class _GivyWebShellState extends State<GivyWebShell> {
   }
 
   Future<void> _applyPlayUserAgentAndLoad() async {
-    // Lets the website pick the Play-app OAuth redirect (custom scheme).
     try {
       final defaultUa = await _controller.getUserAgent() ?? '';
-      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.3.8');
+      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.3.9');
     } catch (_) {
-      await _controller.setUserAgent('GivyPlayApp/1.3.8');
+      await _controller.setUserAgent('GivyPlayApp/1.3.9');
     }
 
     final start = Uri.tryParse(widget.initialUrl);
@@ -179,6 +244,10 @@ class _GivyWebShellState extends State<GivyWebShell> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFFFEF6EE))
+      ..addJavaScriptChannel(
+        'GivyOAuth',
+        onMessageReceived: _onOAuthBridgeMessage,
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (p) => setState(() => _progress = p),
@@ -195,22 +264,9 @@ class _GivyWebShellState extends State<GivyWebShell> {
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
 
-            // Custom scheme should be handled by the OS / app_links, not WebView.
-            if (uri.scheme == kOAuthScheme) {
-              _handleIncomingLink(uri);
-              return NavigationDecision.prevent;
-            }
-
-            // Google/Facebook/Apple must leave the WebView (embedded OAuth blocked).
+            // OAuth must be started via GivyOAuth bridge (flutter_web_auth_2).
+            // Block accidental top-level navigations so we never dump users into Chrome.
             if (_isOAuthHost(uri.host) && !_isGivyHost(uri.host)) {
-              _openExternal(uri);
-              return NavigationDecision.prevent;
-            }
-
-            // Supabase authorize/start also runs in the system browser so the
-            // full OAuth redirect chain stays in one context until custom scheme return.
-            if (_isSupabaseHost(uri.host)) {
-              _openExternal(uri);
               return NavigationDecision.prevent;
             }
 
@@ -218,7 +274,6 @@ class _GivyWebShellState extends State<GivyWebShell> {
               return NavigationDecision.navigate;
             }
 
-            // Gift / tip / retailer links open in the system browser.
             if (uri.scheme == 'http' || uri.scheme == 'https') {
               _openExternal(uri);
             }
@@ -258,7 +313,6 @@ class _GivyWebShellState extends State<GivyWebShell> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFEF6EE),
-        // Web content owns top safe-area (status bar). Only pad the gesture bar.
         body: SafeArea(
           top: false,
           left: false,
