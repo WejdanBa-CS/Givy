@@ -5,6 +5,7 @@ import {
   normalizeInviteCode,
   paypalMeUrl,
   safeHttpUrl,
+  safeHttpsUrl,
   safeNextPath,
   safeSupportUrl,
 } from "@/lib/security";
@@ -71,6 +72,19 @@ describe("safeHttpUrl", () => {
 
   it("blocks embedded credentials", () => {
     expect(safeHttpUrl("https://user:pass@evil.example")).toBeNull();
+  });
+});
+
+describe("safeHttpsUrl", () => {
+  it("allows https only", () => {
+    expect(safeHttpsUrl("https://shop.example/item")).toBe(
+      "https://shop.example/item",
+    );
+    expect(safeHttpsUrl("http://shop.example/item")).toBeNull();
+  });
+
+  it("blocks dangerous schemes", () => {
+    expect(safeHttpsUrl("javascript:alert(1)")).toBeNull();
   });
 });
 

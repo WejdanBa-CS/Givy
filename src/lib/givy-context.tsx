@@ -29,7 +29,7 @@ import {
   type ClaimResult,
   type EmailAuthResult,
 } from "./api";
-import { clearGuestCookie, isGuestUser, setGuestCookie } from "./guest";
+import { clearGuestCookie, isGuestAllowed, isGuestUser, setGuestCookie } from "./guest";
 import {
   addItem as addItemLocal,
   claimItem as claimItemLocal,
@@ -238,6 +238,9 @@ export function GivyProvider({ children }: { children: ReactNode }) {
       refresh,
       signIn: async (provider, next = "/app") => {
         if (provider === "guest") {
+          if (!isGuestAllowed()) {
+            throw new Error("Guest mode is disabled for this environment.");
+          }
           if (cloud) {
             try {
               await signOutRemote();
