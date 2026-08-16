@@ -150,6 +150,14 @@ function isGivyPlayApp(): boolean {
   return /GivyPlayApp/i.test(navigator.userAgent);
 }
 
+type GivyOAuthBridge = { postMessage: (message: string) => void };
+
+function playOAuthBridge(): GivyOAuthBridge | null {
+  if (typeof window === "undefined") return null;
+  const bridge = (window as unknown as { GivyOAuth?: GivyOAuthBridge }).GivyOAuth;
+  return bridge?.postMessage ? bridge : null;
+}
+
 export async function signInWithOAuth(
   provider: "google" | "facebook" | "apple",
   next = "/app",
@@ -157,9 +165,10 @@ export async function signInWithOAuth(
   const supabase = createClient();
   const origin = window.location.origin;
   const safeNext = safeNextPath(next, "/app");
-  const playApp = isGivyPlayApp();
-  // Custom scheme returns into the Android shell so PKCE cookies in the WebView
-  // can finish /auth/callback (Chrome Custom Tabs cannot share that jar).
+  const bridge = playOAuthBridge();
+  // Only use the custom-scheme Play path when the native bridge is present.
+  // Never window.location to Supabase from the WebView — that dumps users into Chrome.
+  const playApp = isGivyPlayApp() && bridge != null;
   const redirectTo = playApp
     ? `com.givy.givy://auth/callback?next=${encodeURIComponent(safeNext)}`
     : `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
@@ -172,8 +181,8 @@ export async function signInWithOAuth(
     },
   });
   if (error) throw error;
-  if (playApp && data.url) {
-    window.location.assign(data.url);
+  if (playApp && data.url && bridge) {
+    bridge.postMessage(JSON.stringify({ url: data.url, next: safeNext }));
   }
 }
 
