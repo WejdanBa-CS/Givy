@@ -47,8 +47,12 @@ Good-faith research that avoids privacy violations and service disruption is app
 **After cloning or going public:**
 
 1. Run migration `007_purge_demo_invites.sql` in Supabase if the project existed before Aug 2026
-2. Create new private invite codes in SQL — see [`BETA.md`](BETA.md)
-3. Set production env vars in Render (not in git): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Rotate any key that was ever pasted into chat, screenshots, or an old commit
+2. Run migration `008_claim_orphan_and_limits.sql` (orphaned claims, https gift URLs, length limits, public `has_recipient_address`)
+3. Create new private invite codes in SQL — see [`BETA.md`](BETA.md)
+4. Set production env vars in Render (not in git): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_BETA_REQUIRE_INVITE=true`
+5. Do **not** set `NEXT_PUBLIC_ALLOW_GUEST=true` on production closed beta (guest cookie must not bypass invite)
+6. Rotate any key that was ever pasted into chat, screenshots, or an old commit
+
+**Rate limits (process-local unless noted):** gift suggestions ≈ 8/min/user; claims 20/hour/user (Postgres); invite redeem 10 / 15 min / user (Postgres).
 
 CI runs a basic secret pattern scan on every push.

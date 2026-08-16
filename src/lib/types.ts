@@ -44,6 +44,8 @@ export interface GivyList {
   description?: string;
   eventDate: string;
   recipientAddress?: string;
+  /** True on public share payloads when owner set a ship-to address (address itself never returned). */
+  hasRecipientAddress?: boolean;
   /** Public tip / support link for creators (Ko-fi, Buy Me a Coffee, PayPal, etc.) */
   supportUrl?: string;
   /** Button label on the public page. Defaults to "Support me". */

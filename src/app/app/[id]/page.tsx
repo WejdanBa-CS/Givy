@@ -8,9 +8,19 @@ import { Countdown } from "@/components/Countdown";
 import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
-import { paypalMeUrl, safeHttpUrl, safeSupportUrl } from "@/lib/security";
+import { paypalMeUrl, FIELD_LIMITS, safeHttpsUrl, safeHttpUrl, safeSupportUrl } from "@/lib/security";
 import type { GiftItem } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
+
+function parseGiftUrl(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  const https = safeHttpsUrl(trimmed);
+  if (!https) {
+    throw new Error("Gift links must start with https://");
+  }
+  return https;
+}
 
 export default function ManageListPage() {
   const params = useParams<{ id: string }>();
@@ -99,13 +109,18 @@ export default function ManageListPage() {
     if (!list || !editingId || !editTitle.trim()) return;
     setBusy(true);
     try {
+      let url: string | undefined;
+      try {
+        url = parseGiftUrl(editUrl);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Invalid URL");
+        return;
+      }
       await updateItem(list.id, editingId, {
-        title: editTitle.trim(),
+        title: editTitle.trim().slice(0, FIELD_LIMITS.itemTitle),
         price: editPrice ? Number(editPrice) : undefined,
-        url: editUrl.trim()
-          ? (safeHttpUrl(editUrl.trim()) ?? undefined)
-          : undefined,
-        notes: editNotes.trim() || undefined,
+        url,
+        notes: editNotes.trim().slice(0, FIELD_LIMITS.notes) || undefined,
       });
       toast.success("Gift updated");
       setEditingId(null);
@@ -121,13 +136,18 @@ export default function ManageListPage() {
     if (!list || !titleInput.trim()) return;
     setBusy(true);
     try {
+      let url: string | undefined;
+      try {
+        url = parseGiftUrl(urlInput);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Invalid URL");
+        return;
+      }
       await addItem(list.id, {
-        title: titleInput.trim(),
+        title: titleInput.trim().slice(0, FIELD_LIMITS.itemTitle),
         price: priceInput ? Number(priceInput) : undefined,
-        url: urlInput.trim()
-          ? (safeHttpUrl(urlInput.trim()) ?? undefined)
-          : undefined,
-        notes: notesInput.trim() || undefined,
+        url,
+        notes: notesInput.trim().slice(0, FIELD_LIMITS.notes) || undefined,
       });
       setTitleInput("");
       setPriceInput("");
@@ -379,6 +399,7 @@ export default function ManageListPage() {
                       <input
                         className="field"
                         value={editTitle}
+                        maxLength={FIELD_LIMITS.itemTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                       />
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -392,8 +413,9 @@ export default function ManageListPage() {
                         />
                         <input
                           className="field"
-                          placeholder="Product URL"
+                          placeholder="https:// product link"
                           value={editUrl}
+                          maxLength={FIELD_LIMITS.url}
                           onChange={(e) => setEditUrl(e.target.value)}
                         />
                       </div>
@@ -401,6 +423,7 @@ export default function ManageListPage() {
                         className="field"
                         placeholder="Notes"
                         value={editNotes}
+                        maxLength={FIELD_LIMITS.notes}
                         onChange={(e) => setEditNotes(e.target.value)}
                       />
                       <div className="flex flex-wrap gap-2">
@@ -494,6 +517,7 @@ export default function ManageListPage() {
               className="field"
               placeholder="Title"
               value={titleInput}
+              maxLength={FIELD_LIMITS.itemTitle}
               onChange={(e) => setTitleInput(e.target.value)}
               required
             />
@@ -508,8 +532,9 @@ export default function ManageListPage() {
               />
               <input
                 className="field"
-                placeholder="Product URL"
+                placeholder="https:// product link"
                 value={urlInput}
+                maxLength={FIELD_LIMITS.url}
                 onChange={(e) => setUrlInput(e.target.value)}
               />
             </div>
@@ -517,6 +542,7 @@ export default function ManageListPage() {
               className="field"
               placeholder="Notes"
               value={notesInput}
+              maxLength={FIELD_LIMITS.notes}
               onChange={(e) => setNotesInput(e.target.value)}
             />
             <button type="submit" className="btn btn-secondary" disabled={busy}>
@@ -536,6 +562,7 @@ export default function ManageListPage() {
             <textarea
               className="field mt-3 min-h-24"
               value={addressDraft}
+              maxLength={FIELD_LIMITS.recipientAddress}
               onChange={(e) => setAddressDraft(e.target.value)}
               placeholder="123 Gift Lane…"
             />
@@ -625,6 +652,7 @@ export default function ManageListPage() {
           <textarea
             className="field mt-3 min-h-24"
             value={addressDraft}
+            maxLength={FIELD_LIMITS.recipientAddress}
             onChange={(e) => setAddressDraft(e.target.value)}
             placeholder="123 Gift Lane…"
           />
