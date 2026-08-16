@@ -55,6 +55,8 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
         gifts?: RecommendedGift[];
         source?: "ai" | "catalog" | "fallback";
         catalog_hits?: number;
+        openai_configured?: boolean;
+        openai_error?: string;
       };
       if (!res.ok) {
         toast.error(data.error || "Could not recommend gifts");
@@ -67,6 +69,10 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
         toast.message("No ideas in that budget — try widening the range.");
       } else if (data.source === "ai") {
         toast.success("AI recommendations ready");
+      } else if (data.openai_configured === false) {
+        toast.message("OPENAI_API_KEY is not set on the server");
+      } else if (data.openai_error) {
+        toast.message(`AI unavailable (${data.openai_error}) — showing catalog`);
       } else {
         toast.message("Catalog picks (AI offline or unavailable)");
       }

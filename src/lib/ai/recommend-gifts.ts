@@ -53,6 +53,10 @@ export type RecommendResult = {
   gifts: RecommendedGift[];
   source: "ai" | "catalog" | "fallback";
   catalog_hits: number;
+  /** True when OPENAI_API_KEY is present on the server (never exposes the key). */
+  openai_configured: boolean;
+  /** Short reason when AI did not produce gifts (safe for clients). */
+  openai_error?: string;
 };
 
 export const RECOMMEND_LIMITS = {
@@ -534,29 +538,56 @@ function systemPrompt(input: RecommendInput): string {
 
 async function callRecommendAi(
   input: RecommendInput,
-): Promise<{ gifts: RecommendedGift[]; catalogHits: number } | null> {
+): Promise<{
+  gifts: RecommendedGift[];
+  catalogHits: number;
+  error?: string;
+} | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!apiKey) return { gifts: [], catalogHits: 0, error: "missing_key" };
 
   const base = (
     process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1"
   ).replace(/\/$/, "");
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 
+  // Server-side catalog search (same tool the model can call) — seed the prompt.
+  const seedHits = searchGiftCatalog(
+    GIFT_CATEGORY_LABELS[input.category],
+    input.budget_min,
+    input.budget_max,
+    input.category,
+  );
+
   const messages: ChatMessage[] = [
     { role: "system", content: systemPrompt(input) },
     {
       role: "user",
-      content: `Suggest ${input.count} gifts in category "${input.category}" for a ${OCCASION_LABELS[input.occasion]} between $${input.budget_min} and $${input.budget_max}.`,
+      content: [
+        `Suggest ${input.count} gifts in category "${input.category}" for a ${OCCASION_LABELS[input.occasion]} between $${input.budget_min} and $${input.budget_max}.`,
+        seedHits.length
+          ? `Catalog matches to prefer when fitting:\n${JSON.stringify(
+              seedHits.slice(0, 6).map((h) => ({
+                catalog_id: h.id,
+                title: h.title,
+                price: h.price,
+                search_keyword: h.search_keyword,
+              })),
+            )}`
+          : "No catalog hits yet — invent strong buyable ideas in budget, then we will match keywords.",
+        'Respond with ONLY JSON: {"gifts":[...]}',
+      ].join("\n"),
     },
   ];
 
-  let catalogHits = 0;
+  let catalogHits = seedHits.length;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 28_000);
 
   try {
-    for (let round = 0; round < 4; round++) {
+    // Pass 1: optional tool use (auto — not required; some keys/models reject "required")
+    for (let round = 0; round < 3; round++) {
+      const useTools = round < 2;
       const res = await fetch(`${base}/chat/completions`, {
         method: "POST",
         headers: {
@@ -568,21 +599,32 @@ async function callRecommendAi(
           model,
           temperature: 0.7,
           max_tokens: 1200,
-          tools: [SEARCH_GIFT_CATALOG_TOOL],
-          tool_choice: round === 0 ? "required" : "auto",
+          ...(useTools
+            ? { tools: [SEARCH_GIFT_CATALOG_TOOL], tool_choice: "auto" }
+            : { response_format: { type: "json_object" } }),
           messages,
         }),
       });
 
-      if (!res.ok) return null;
+      if (!res.ok) {
+        return {
+          gifts: [],
+          catalogHits,
+          error: `http_${res.status}`,
+        };
+      }
+
       const data = (await res.json()) as {
         choices?: Array<{ message?: ChatMessage }>;
+        error?: { message?: string; code?: string };
       };
       const message = data.choices?.[0]?.message;
-      if (!message) return null;
+      if (!message) {
+        return { gifts: [], catalogHits, error: "empty_response" };
+      }
 
       const toolCalls = message.tool_calls;
-      if (toolCalls && toolCalls.length > 0) {
+      if (useTools && toolCalls && toolCalls.length > 0) {
         messages.push({
           role: "assistant",
           content: message.content ?? null,
@@ -641,22 +683,42 @@ async function callRecommendAi(
             }),
           });
         }
+        // Next round: ask for final JSON
+        messages.push({
+          role: "user",
+          content:
+            'Using the tool results, reply with ONLY JSON: {"gifts":[{"title":"...","short_description":"...","estimated_price":0,"search_keyword":"...","catalog_id":"..."}]}',
+        });
         continue;
       }
 
       const content = message.content;
-      if (!content) return null;
+      if (!content) {
+        if (useTools) {
+          // Force a JSON-only follow-up
+          messages.push({
+            role: "assistant",
+            content: null,
+          });
+          messages.push({
+            role: "user",
+            content:
+              'Reply with ONLY JSON: {"gifts":[{"title":"...","short_description":"...","estimated_price":0,"search_keyword":"..."}]}',
+          });
+          continue;
+        }
+        return { gifts: [], catalogHits, error: "empty_content" };
+      }
 
       let parsed: unknown;
       try {
         const trimmed = content.trim();
-        const jsonSlice =
-          trimmed.startsWith("```")
-            ? trimmed.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "")
-            : trimmed;
+        const jsonSlice = trimmed.startsWith("```")
+          ? trimmed.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "")
+          : trimmed;
         parsed = JSON.parse(jsonSlice);
       } catch {
-        return null;
+        return { gifts: [], catalogHits, error: "parse" };
       }
 
       const list =
@@ -674,12 +736,19 @@ async function callRecommendAi(
         input.budget_min,
         input.budget_max,
       );
-      if (gifts.length === 0) return null;
+      if (gifts.length === 0) {
+        return { gifts: [], catalogHits, error: "no_gifts" };
+      }
       return { gifts, catalogHits };
     }
-    return null;
-  } catch {
-    return null;
+    return { gifts: [], catalogHits, error: "max_rounds" };
+  } catch (err) {
+    const name = err instanceof Error ? err.name : "";
+    return {
+      gifts: [],
+      catalogHits,
+      error: name === "AbortError" ? "timeout" : "network",
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -688,12 +757,14 @@ async function callRecommendAi(
 export async function recommendGifts(
   input: RecommendInput,
 ): Promise<RecommendResult> {
+  const configured = Boolean(process.env.OPENAI_API_KEY?.trim());
   const ai = await callRecommendAi(input);
   if (ai && ai.gifts.length > 0) {
     return {
       gifts: ai.gifts,
       source: "ai",
       catalog_hits: ai.catalogHits,
+      openai_configured: configured,
     };
   }
 
@@ -702,6 +773,8 @@ export async function recommendGifts(
     gifts: fallback,
     source: fallback.some((g) => g.catalog_id) ? "catalog" : "fallback",
     catalog_hits: fallback.filter((g) => g.catalog_id).length,
+    openai_configured: configured,
+    openai_error: ai?.error ?? (configured ? "unknown" : "missing_key"),
   };
 }
 
