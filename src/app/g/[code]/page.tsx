@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
+import { FriendListConfirm } from "@/components/FriendListConfirm";
 import { GiftUnwrapCelebration } from "@/components/GiftUnwrapCelebration";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WishItem } from "@/components/WishItem";
@@ -38,24 +39,60 @@ function SharedGivyInner() {
   const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
   const [reopenedClaim, setReopenedClaim] = useState(false);
   const [unwrapTitle, setUnwrapTitle] = useState<string | null>(null);
+  const [friendConfirmed, setFriendConfirmed] = useState(false);
 
   const clearUnwrap = useCallback(() => setUnwrapTitle(null), []);
+  const markFriendConfirmed = useCallback(() => setFriendConfirmed(true), []);
 
-  useEffect(() => {
-    if (!ready) return;
-    void (async () => {
-      setLoading(true);
-      setLoadError(null);
+  const reloadList = useCallback(
+    async (opts?: { quiet?: boolean }) => {
+      if (!ready) return;
+      if (!opts?.quiet) {
+        setLoading(true);
+        setLoadError(null);
+      }
       try {
         setList(await getByShare(params.code));
+        setLoadError(null);
       } catch {
-        setList(null);
-        setLoadError("Could not load this list. Check your connection and try again.");
+        if (!opts?.quiet) {
+          setList(null);
+          setLoadError(
+            "Could not load this list. Check your connection and try again.",
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!opts?.quiet) setLoading(false);
       }
-    })();
-  }, [ready, params.code, getByShare]);
+    },
+    [ready, params.code, getByShare],
+  );
+
+  useEffect(() => {
+    void reloadList();
+  }, [reloadList]);
+
+  // Keep claimed state fresh for other shoppers / when returning to the tab.
+  useEffect(() => {
+    if (!ready || !list) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void reloadList({ quiet: true });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void reloadList({ quiet: true });
+      }
+    }, 12_000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+      window.clearInterval(poll);
+    };
+  }, [ready, list?.id, reloadList]);
 
   useEffect(() => {
     if (!list || !claimTarget || reopenedClaim) return;
@@ -90,20 +127,7 @@ function SharedGivyInner() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => {
-                  setLoading(true);
-                  void getByShare(params.code)
-                    .then((l) => {
-                      setList(l);
-                      setLoadError(null);
-                    })
-                    .catch(() =>
-                      setLoadError(
-                        "Could not load this list. Check your connection and try again.",
-                      ),
-                    )
-                    .finally(() => setLoading(false));
-                }}
+                onClick={() => void reloadList()}
               >
                 Try again
               </button>
@@ -119,9 +143,14 @@ function SharedGivyInner() {
 
   const openCount = list.items.filter((i) => !i.purchased).length;
   const loginNext = `/g/${params.code}${activeItem ? `?claim=${activeItem.id}` : claimTarget ? `?claim=${claimTarget}` : ""}`;
+  const activeBuyUrl = activeItem ? safeHttpUrl(activeItem.url) : null;
 
   async function confirmClaim() {
     if (!activeItem || !list) return;
+    if (user && !friendConfirmed) {
+      setClaimError("Confirm this is your friend’s list first.");
+      return;
+    }
     if (cloud && !user) {
       window.location.href = `/login?next=${encodeURIComponent(loginNext)}`;
       return;
@@ -142,6 +171,7 @@ function SharedGivyInner() {
           setClaimError("Too many claims right now. Try again in a bit.");
         } else if (raw.includes("already") || raw.includes("claimed")) {
           setClaimError("Someone just claimed this gift. Pick another.");
+          void reloadList({ quiet: true });
         } else if (raw.includes("sign in")) {
           setClaimError("Sign in to claim this gift.");
         } else {
@@ -153,25 +183,43 @@ function SharedGivyInner() {
         setRevealedAddress(result.recipientAddress);
       }
       const claimedTitle = activeItem.title;
+      const claimedId = activeItem.id;
+      // Optimistic mark so the list updates even if refetch is slow.
+      setList((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items.map((i) =>
+                i.id === claimedId
+                  ? {
+                      ...i,
+                      purchased: true,
+                      purchasedAt: new Date().toISOString(),
+                      claimedByMe: true,
+                    }
+                  : i,
+              ),
+            }
+          : prev,
+      );
       setDoneMsg(
         ship === "to_giver"
           ? `Nice. "${claimedTitle}" is yours to wrap.`
           : `Nice. "${claimedTitle}" is marked purchased. Ship it to ${list.ownerName}.`,
       );
-      toast.success("All yours — gift marked purchased", {
+      toast.success("Marked as taken on this list", {
         description:
           ship === "to_giver"
             ? `"${claimedTitle}" is reserved. Wrap it and give it in person.`
             : `"${claimedTitle}" is reserved. Ship it to ${list.ownerName}.`,
       });
-      // Celebration is additive; claim already succeeded.
       try {
         setUnwrapTitle(claimedTitle);
       } catch {
         /* ignore */
       }
-      setList(await getByShare(params.code));
       setActiveItem(null);
+      void reloadList({ quiet: true });
     } catch (err) {
       setClaimError(
         err instanceof Error ? err.message : "Could not mark this gift",
@@ -193,6 +241,16 @@ function SharedGivyInner() {
 
   return (
     <div className="pb-20">
+      {user && list && (
+        <FriendListConfirm
+          shareCode={params.code}
+          ownerName={list.ownerName}
+          listTitle={list.title}
+          signedInAs={user.name}
+          confirmed={friendConfirmed}
+          onConfirmed={markFriendConfirmed}
+        />
+      )}
       <div className="friend-banner">
         Claims stay anonymous · no duplicate gifts
       </div>
@@ -268,20 +326,16 @@ function SharedGivyInner() {
                   actions={
                     !item.purchased ? (
                       <>
-                        {safeHttpUrl(item.url) && (
-                          <Button asChild variant="secondary" size="sm">
-                            <a
-                              href={safeHttpUrl(item.url)!}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Buy
-                            </a>
-                          </Button>
-                        )}
                         <Button
                           size="sm"
                           onClick={() => {
+                            if (user && !friendConfirmed) {
+                              toast.message("Confirm the list owner first", {
+                                description:
+                                  "Make sure this is your friend’s wishlist before reserving a gift.",
+                              });
+                              return;
+                            }
                             setActiveItem(item);
                             setShip("to_giver");
                             setDoneMsg(null);
@@ -289,8 +343,25 @@ function SharedGivyInner() {
                             setRevealedAddress(null);
                           }}
                         >
-                          Claim
+                          I&apos;ll get this
                         </Button>
+                        {safeHttpUrl(item.url) && (
+                          <Button asChild variant="secondary" size="sm">
+                            <a
+                              href={safeHttpUrl(item.url)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => {
+                                toast.message("Then tap “I’ll get this”", {
+                                  description:
+                                    "Shopping the link doesn’t reserve the gift — claim it so others know it’s taken.",
+                                });
+                              }}
+                            >
+                              Shop link
+                            </a>
+                          </Button>
+                        )}
                       </>
                     ) : undefined
                   }
@@ -317,14 +388,25 @@ function SharedGivyInner() {
           {activeItem && (
             <>
               <DialogHeader>
-                <DialogTitle>Claim {activeItem.title}</DialogTitle>
+                <DialogTitle>I&apos;ll get {activeItem.title}</DialogTitle>
                 <DialogDescription>
-                  Others will see it as taken. They won&apos;t see it was you.
+                  This marks it <strong>Taken</strong> on the list so nobody else
+                  buys the same gift. They won&apos;t see it was you.
                 </DialogDescription>
               </DialogHeader>
+              {activeBuyUrl && (
+                <a
+                  href={activeBuyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary mt-3 inline-flex w-full justify-center"
+                >
+                  Open shop link
+                </a>
+              )}
               {cloud && !user && (
                 <p className="mt-3 rounded-2xl bg-mist p-3 text-sm text-ink-soft">
-                  Sign in to mark this gift so claims stay secure across devices.
+                  Sign in to mark this gift so it stays reserved across phones.
                 </p>
               )}
 
@@ -379,8 +461,8 @@ function SharedGivyInner() {
                   {busy
                     ? "Saving…"
                     : cloud && !user
-                      ? "Sign in to claim"
-                      : "Confirm"}
+                      ? "Sign in to reserve"
+                      : "Mark as taken"}
                 </Button>
                 <Button variant="secondary" onClick={() => setActiveItem(null)}>
                   Cancel

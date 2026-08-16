@@ -28,6 +28,7 @@ export default function ManageListPage() {
   const {
     lists,
     ready,
+    refresh,
     addItem,
     updateItem,
     removeItem,
@@ -45,6 +46,9 @@ export default function ManageListPage() {
   const [priceInput, setPriceInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
+  const [quantityInput, setQuantityInput] = useState("");
+  const [quantityNeededInput, setQuantityNeededInput] = useState("");
+  const [priorityInput, setPriorityInput] = useState<"high" | "medium" | "low" | "">("");
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -52,12 +56,17 @@ export default function ManageListPage() {
   const [editPrice, setEditPrice] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [editNotes, setEditNotes] = useState("");
+  const [editQuantity, setEditQuantity] = useState("");
+  const [editQuantityNeeded, setEditQuantityNeeded] = useState("");
+  const [editPriority, setEditPriority] = useState<"high" | "medium" | "low" | "">("");
   const [addressDraft, setAddressDraft] = useState("");
   const [supportUrlDraft, setSupportUrlDraft] = useState("");
   const [supportLabelDraft, setSupportLabelDraft] = useState("Support me");
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [metaDate, setMetaDate] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     setAddressDraft(list?.recipientAddress ?? "");
@@ -66,6 +75,7 @@ export default function ManageListPage() {
     setMetaTitle(list?.title ?? "");
     setMetaDescription(list?.description ?? "");
     setMetaDate(list?.eventDate ?? "");
+    setTags(list?.tags ?? []);
   }, [
     list?.id,
     list?.recipientAddress,
@@ -74,7 +84,28 @@ export default function ManageListPage() {
     list?.title,
     list?.description,
     list?.eventDate,
+    list?.tags,
   ]);
+
+  // Pick up claims made on other phones without a full page reload.
+  useEffect(() => {
+    if (!ready) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refresh();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refresh();
+    }, 15_000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+      window.clearInterval(poll);
+    };
+  }, [ready, params.id, refresh]);
 
   if (!ready) {
     return (
@@ -104,6 +135,9 @@ export default function ManageListPage() {
     setEditPrice(item.price != null ? String(item.price) : "");
     setEditUrl(item.url ?? "");
     setEditNotes(item.notes ?? "");
+    setEditQuantity(item.quantity != null ? String(item.quantity) : "");
+    setEditQuantityNeeded(item.quantityNeeded != null ? String(item.quantityNeeded) : "");
+    setEditPriority(item.priority ?? "");
   }
 
   async function saveEdit() {
@@ -122,6 +156,9 @@ export default function ManageListPage() {
         price: editPrice ? Number(editPrice) : undefined,
         url,
         notes: editNotes.trim().slice(0, FIELD_LIMITS.notes) || undefined,
+        quantity: editQuantity ? Number(editQuantity) : undefined,
+        quantityNeeded: editQuantityNeeded ? Number(editQuantityNeeded) : undefined,
+        priority: editPriority || undefined,
       });
       toast.success("Gift updated");
       setEditingId(null);
@@ -149,11 +186,17 @@ export default function ManageListPage() {
         price: priceInput ? Number(priceInput) : undefined,
         url,
         notes: notesInput.trim().slice(0, FIELD_LIMITS.notes) || undefined,
+        quantity: quantityInput ? Number(quantityInput) : undefined,
+        quantityNeeded: quantityNeededInput ? Number(quantityNeededInput) : undefined,
+        priority: priorityInput || undefined,
       });
       setTitleInput("");
       setPriceInput("");
       setUrlInput("");
       setNotesInput("");
+      setQuantityInput("");
+      setQuantityNeededInput("");
+      setPriorityInput("");
       toast.success("Gift added");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not add gift");
@@ -225,6 +268,7 @@ export default function ManageListPage() {
         title: metaTitle.trim(),
         description: metaDescription.trim() || undefined,
         eventDate: metaDate || list.eventDate,
+        tags,
       });
       toast.success("List details saved");
     } catch (err) {
@@ -373,11 +417,64 @@ export default function ManageListPage() {
                 value={metaDate}
                 onChange={(e) => setMetaDate(e.target.value)}
               />
+              <div>
+                <label className="label">Tags</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-leaf/10 px-3 py-1 text-sm font-semibold text-leaf"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => setTags(tags.filter((t) => t !== tag))}
+                        className="text-leaf hover:text-coral-deep"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    className="field flex-1"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="Add tag..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && tagsInput.trim()) {
+                        e.preventDefault();
+                        if (!tags.includes(tagsInput.trim())) {
+                          setTags([...tags, tagsInput.trim()]);
+                        }
+                        setTagsInput("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      if (tagsInput.trim() && !tags.includes(tagsInput.trim())) {
+                        setTags([...tags, tagsInput.trim()]);
+                        setTagsInput("");
+                      }
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
                 className="btn btn-secondary"
                 disabled={busy}
-                onClick={() => void saveMeta()}
+                onClick={async () => {
+                  await saveMeta();
+                  await updateList(list.id, { tags });
+                  toast.success("Tags saved");
+                }}
               >
                 Save details
               </button>
@@ -419,6 +516,34 @@ export default function ManageListPage() {
                           maxLength={FIELD_LIMITS.url}
                           onChange={(e) => setEditUrl(e.target.value)}
                         />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <input
+                          className="field"
+                          type="number"
+                          min="1"
+                          placeholder="Quantity"
+                          value={editQuantity}
+                          onChange={(e) => setEditQuantity(e.target.value)}
+                        />
+                        <input
+                          className="field"
+                          type="number"
+                          min="1"
+                          placeholder="Needed"
+                          value={editQuantityNeeded}
+                          onChange={(e) => setEditQuantityNeeded(e.target.value)}
+                        />
+                        <select
+                          className="field"
+                          value={editPriority}
+                          onChange={(e) => setEditPriority(e.target.value as "high" | "medium" | "low" | "")}
+                        >
+                          <option value="">Priority</option>
+                          <option value="high">🔴 High</option>
+                          <option value="medium">🟡 Medium</option>
+                          <option value="low">🟢 Low</option>
+                        </select>
                       </div>
                       <input
                         className="field"
@@ -551,6 +676,34 @@ export default function ManageListPage() {
                 maxLength={FIELD_LIMITS.url}
                 onChange={(e) => setUrlInput(e.target.value)}
               />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <input
+                className="field"
+                type="number"
+                min="1"
+                placeholder="Quantity"
+                value={quantityInput}
+                onChange={(e) => setQuantityInput(e.target.value)}
+              />
+              <input
+                className="field"
+                type="number"
+                min="1"
+                placeholder="Needed"
+                value={quantityNeededInput}
+                onChange={(e) => setQuantityNeededInput(e.target.value)}
+              />
+              <select
+                className="field"
+                value={priorityInput}
+                onChange={(e) => setPriorityInput(e.target.value as "high" | "medium" | "low" | "")}
+              >
+                <option value="">Priority</option>
+                <option value="high">🔴 High</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+              </select>
             </div>
             <input
               className="field"
