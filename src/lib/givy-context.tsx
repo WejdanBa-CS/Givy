@@ -14,6 +14,7 @@ import {
   claimItemRemote,
   createListRemote,
   deleteListRemote,
+  duplicateListRemote,
   fetchMyLists,
   fetchPublicList,
   fetchSessionUser,
@@ -52,6 +53,10 @@ import {
   createGiveaway as createGiveawayStore,
   joinGiveaway as joinGiveawayStore,
   drawGiveaway as drawGiveawayStore,
+  duplicateList as duplicateListLocal,
+  searchLists as searchListsLocal,
+  filterListsByTag as filterListsByTagLocal,
+  getAllTags as getAllTagsLocal,
 } from "./store";
 import type {
   ActivityEvent,
@@ -102,11 +107,19 @@ type GivyContextValue = {
     listId: string,
     itemId: string,
     patch: Partial<
-      Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint">
+      Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint" | "quantity" | "quantityNeeded" | "priority">
     >,
   ) => Promise<GiftItem | null>;
   removeItem: (listId: string, itemId: string) => Promise<void>;
   publishList: (listId: string) => Promise<GivyList | null>;
+  duplicateList: (
+    sourceListId: string,
+    newTitle?: string,
+    newEventDate?: string,
+  ) => Promise<GivyList | null>;
+  searchLists: (query: string) => GivyList[];
+  filterListsByTag: (tag: string) => GivyList[];
+  getAllTags: () => string[];
   claimItem: (
     listId: string,
     itemId: string,
@@ -364,6 +377,56 @@ export function GivyProvider({ children }: { children: ReactNode }) {
         await refresh();
         return list;
       },
+      duplicateList: async (sourceListId, newTitle, newEventDate) => {
+        if (!user) return null;
+        if (!localSession) {
+          const list = await duplicateListRemote(sourceListId, user, newTitle, newEventDate);
+          await refresh();
+          return list;
+        }
+        const list = duplicateListLocal(sourceListId, user, newTitle, newEventDate);
+        await refresh();
+        return list;
+      },
+      searchLists: (query) => {
+        if (!user) return [];
+        if (localSession) {
+          return searchListsLocal(query, user.id);
+        }
+        // For cloud mode, filter the already loaded lists
+        if (!query.trim()) return lists;
+        const lowerQuery = query.toLowerCase();
+        return lists.filter(
+          (list) =>
+            list.title.toLowerCase().includes(lowerQuery) ||
+            list.description?.toLowerCase().includes(lowerQuery) ||
+            list.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)),
+        );
+      },
+      filterListsByTag: (tag) => {
+        if (!user) return [];
+        if (localSession) {
+          return filterListsByTagLocal(tag, user.id);
+        }
+        // For cloud mode, filter the already loaded lists
+        if (!tag.trim()) return lists;
+        const lowerTag = tag.toLowerCase();
+        return lists.filter((list) =>
+          list.tags?.some((listTag) => listTag.toLowerCase() === lowerTag),
+        );
+      },
+      getAllTags: () => {
+        if (!user) return [];
+        if (localSession) {
+          return getAllTagsLocal(user.id);
+        }
+        // For cloud mode, extract tags from loaded lists
+        const tagSet = new Set<string>();
+        lists.forEach((list) => {
+          list.tags?.forEach((tag) => tagSet.add(tag));
+        });
+        return Array.from(tagSet).sort();
+      },
       claimItem: async (listId, itemId, shipPreference) => {
         if (localSession) {
           const localList = getListById(listId);
@@ -418,13 +481,20 @@ export function GivyProvider({ children }: { children: ReactNode }) {
       getList: (id) =>
         localSession ? getListById(id) : lists.find((l) => l.id === id) ?? null,
       getByShare: async (code) => {
-        if (localSession) {
-          const local = getPublicListByShareCode(code);
-          if (local) return local;
-          if (cloud) return fetchPublicList(code);
-          return null;
+        // Always prefer the cloud share when configured so claims from other
+        // devices show up (localStorage copies are device-local / stale).
+        if (cloud) {
+          try {
+            const remote = await fetchPublicList(code);
+            if (remote) return remote;
+          } catch {
+            /* fall through to local demo lists */
+          }
         }
-        return fetchPublicList(code);
+        if (localSession) {
+          return getPublicListByShareCode(code);
+        }
+        return null;
       },
     }),
     [
