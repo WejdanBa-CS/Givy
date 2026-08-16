@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Countdown } from "@/components/Countdown";
+import { AiGiftRecommend } from "@/components/AiGiftRecommend";
 import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
@@ -499,6 +500,19 @@ export default function ManageListPage() {
               ))}
             </ul>
           )}
+
+          <AiGiftRecommend
+            occasion={list.occasion}
+            onUse={(g) => {
+              setTitleInput(g.title);
+              setNotesInput(g.short_description);
+              setPriceInput(String(g.estimated_price));
+              // Prefer https search landing; user pastes real product URL
+              setUrlInput(
+                `https://www.google.com/search?q=${encodeURIComponent(g.search_keyword)}`,
+              );
+            }}
+          />
 
           <SuggestGiftsPanel
             occasion={list.occasion}
