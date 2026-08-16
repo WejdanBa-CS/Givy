@@ -30,7 +30,13 @@ if (-not $storePass) {
   exit 1
 }
 
-$out = & keytool -list -v -keystore $keystore -alias $alias -storepass $storePass 2>&1 | Out-String
+$keytool = @(
+  "${env:ProgramFiles}\Android\Android Studio\jbr\bin\keytool.exe",
+  "${env:ProgramFiles}\Java\jdk-21\bin\keytool.exe",
+  'keytool'
+) | Where-Object { $_ -eq 'keytool' -or (Test-Path $_) } | Select-Object -First 1
+
+$out = & $keytool -list -v -keystore $keystore -alias $alias -storepass $storePass 2>&1 | Out-String
 $m = [regex]::Match($out, 'SHA256:\s*([0-9A-Fa-f:]+)')
 if (-not $m.Success) {
   Write-Host 'Could not parse SHA256 from keytool output.'
