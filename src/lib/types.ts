@@ -13,6 +13,8 @@ export type ShipPreference = "to_giver" | "to_recipient";
 
 export type GiveawayStatus = "open" | "drawn" | "closed";
 
+export type PriorityLevel = "high" | "medium" | "low";
+
 export interface User {
   id: string;
   name: string;
@@ -33,6 +35,9 @@ export interface GiftItem {
   purchasedAt?: string;
   claimedByMe?: boolean;
   shipPreference?: ShipPreference;
+  quantity?: number;
+  quantityNeeded?: number;
+  priority?: PriorityLevel;
 }
 
 export interface GivyList {
@@ -53,6 +58,9 @@ export interface GivyList {
   shareCode: string;
   published: boolean;
   items: GiftItem[];
+  tags?: string[];
+  isTemplate?: boolean;
+  templateSourceId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -100,6 +108,18 @@ export const OCCASION_EMOJI: Record<Occasion, string> = {
   graduation: "🎓",
   creator: "🎥",
   other: "✨",
+};
+
+export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
+  high: "High priority",
+  medium: "Medium priority",
+  low: "Low priority",
+};
+
+export const PRIORITY_EMOJI: Record<PriorityLevel, string> = {
+  high: "🔴",
+  medium: "🟡",
+  low: "🟢",
 };
 
 export const DEMO_SEED_ITEMS: Omit<GiftItem, "id" | "purchased">[] = [

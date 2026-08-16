@@ -449,7 +449,7 @@ export function updateItem(
   listId: string,
   itemId: string,
   patch: Partial<
-    Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint">
+    Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint" | "quantity" | "quantityNeeded" | "priority">
   >,
 ): GiftItem | null {
   const list = getListById(listId);
@@ -502,6 +502,78 @@ export function publishList(listId: string): GivyList | null {
     });
   }
   return list;
+}
+
+export function duplicateList(
+  sourceListId: string,
+  owner: User,
+  newTitle?: string,
+  newEventDate?: string,
+): GivyList | null {
+  const sourceList = getListById(sourceListId);
+  if (!sourceList) return null;
+
+  const now = new Date().toISOString();
+  const duplicatedList: GivyList = {
+    ...sourceList,
+    id: uid("givy"),
+    ownerId: owner.id,
+    ownerName: owner.name,
+    title: newTitle || sourceList.title,
+    eventDate: newEventDate || sourceList.eventDate,
+    shareCode: uid("share").replace("share_", "").slice(0, 10),
+    published: false,
+    items: sourceList.items.map((item) => ({
+      ...item,
+      id: uid("gift"),
+      purchased: false,
+      purchasedAt: undefined,
+      claimedByMe: undefined,
+    })),
+    templateSourceId: sourceListId,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  saveLists([...getLists(), duplicatedList]);
+  pushActivity({
+    type: "create",
+    message: `Duplicated “${duplicatedList.title}”`,
+    listId: duplicatedList.id,
+  });
+  return duplicatedList;
+}
+
+export function searchLists(query: string, userId: string): GivyList[] {
+  const userLists = getListsForUser(userId);
+  if (!query.trim()) return userLists;
+
+  const lowerQuery = query.toLowerCase();
+  return userLists.filter(
+    (list) =>
+      list.title.toLowerCase().includes(lowerQuery) ||
+      list.description?.toLowerCase().includes(lowerQuery) ||
+      list.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)),
+  );
+}
+
+export function filterListsByTag(tag: string, userId: string): GivyList[] {
+  const userLists = getListsForUser(userId);
+  if (!tag.trim()) return userLists;
+
+  const lowerTag = tag.toLowerCase();
+  return userLists.filter((list) =>
+    list.tags?.some((listTag) => listTag.toLowerCase() === lowerTag),
+  );
+}
+
+export function getAllTags(userId: string): string[] {
+  const userLists = getListsForUser(userId);
+  const tagSet = new Set<string>();
+  userLists.forEach((list) => {
+    list.tags?.forEach((tag) => tagSet.add(tag));
+  });
+  return Array.from(tagSet).sort();
 }
 
 export function createGiveaway(input: {

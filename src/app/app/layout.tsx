@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AppNav } from "@/components/AppNav";
+import { ClaimNotificationWatcher } from "@/components/ClaimNotificationWatcher";
 import { Logo } from "@/components/Logo";
 import { useGivy } from "@/lib/givy-context";
 
@@ -58,6 +59,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div
         className={`shell app-content ${showNav ? "pb-28 lg:pb-32" : "pb-8 lg:pb-12"}`}
       >
+        <div className="mb-4 empty:hidden">
+          <ClaimNotificationWatcher />
+        </div>
         {children}
       </div>
 

@@ -6,6 +6,7 @@ import { GiftGlyph } from "@/components/GiftGlyph";
 import { formatMoney } from "@/lib/api";
 import { springs } from "@/lib/motion-presets";
 import type { GiftItem } from "@/lib/types";
+import { PRIORITY_EMOJI } from "@/lib/types";
 
 type Props = {
   item: GiftItem;
@@ -15,6 +16,13 @@ type Props = {
 
 export function WishItem({ item, actions, footer }: Props) {
   const reduce = useReducedMotion();
+  
+  const quantityDisplay = item.quantity && item.quantityNeeded
+    ? `${item.quantity}/${item.quantityNeeded}`
+    : item.quantity
+    ? `${item.quantity}`
+    : null;
+
   return (
     <m.article
       layout
@@ -29,11 +37,21 @@ export function WishItem({ item, actions, footer }: Props) {
       <div className="wish-item-body">
         <div className="wish-item-top">
           <h3 className="wish-item-title">{item.title}</h3>
-          {item.purchased ? (
-            <span className="wish-item-status">Taken</span>
-          ) : item.price != null ? (
-            <span className="wish-item-price">{formatMoney(item.price)}</span>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {item.priority && (
+              <span className="text-xs" title={item.priority}>
+                {PRIORITY_EMOJI[item.priority]}
+              </span>
+            )}
+            {item.purchased ? (
+              <span className="wish-item-status">Taken</span>
+            ) : item.price != null ? (
+              <span className="wish-item-price">{formatMoney(item.price)}</span>
+            ) : null}
+            {quantityDisplay && (
+              <span className="text-xs text-ink-soft">×{quantityDisplay}</span>
+            )}
+          </div>
         </div>
         {item.notes && <p className="wish-item-notes">{item.notes}</p>}
         {footer}
