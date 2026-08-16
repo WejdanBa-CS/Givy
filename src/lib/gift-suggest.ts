@@ -18,6 +18,8 @@ export type SuggestInput = {
 export type SuggestResult = {
   suggestions: GiftSuggestion[];
   source: "ai" | "fallback";
+  openai_configured?: boolean;
+  openai_error?: string;
 };
 
 const OCCASIONS = new Set<string>(Object.keys(OCCASION_LABELS));
@@ -509,9 +511,9 @@ function buildPrompt(input: SuggestInput): string {
 
 async function callOpenAiCompatible(
   input: SuggestInput,
-): Promise<GiftSuggestion[] | null> {
+): Promise<{ suggestions: GiftSuggestion[] } | { error: string }> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!apiKey) return { error: "missing_key" };
 
   const base = (
     process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1"
@@ -545,18 +547,18 @@ async function callOpenAiCompatible(
       }),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) return { error: `http_${res.status}` };
     const data = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
     const content = data.choices?.[0]?.message?.content;
-    if (!content) return null;
+    if (!content) return { error: "empty_content" };
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(content);
     } catch {
-      return null;
+      return { error: "parse" };
     }
 
     const list =
@@ -567,20 +569,32 @@ async function callOpenAiCompatible(
         : parsed;
 
     const clean = sanitizeSuggestions(list, input.count);
-    return clean.length > 0 ? clean : null;
-  } catch {
-    return null;
+    if (clean.length === 0) return { error: "no_gifts" };
+    return { suggestions: clean };
+  } catch (err) {
+    const name = err instanceof Error ? err.name : "";
+    return { error: name === "AbortError" ? "timeout" : "network" };
   } finally {
     clearTimeout(timer);
   }
 }
 
 export async function suggestGifts(input: SuggestInput): Promise<SuggestResult> {
+  const configured = Boolean(process.env.OPENAI_API_KEY?.trim());
   const ai = await callOpenAiCompatible(input);
-  if (ai && ai.length > 0) {
-    return { suggestions: ai, source: "ai" };
+  if ("suggestions" in ai && ai.suggestions.length > 0) {
+    return {
+      suggestions: ai.suggestions,
+      source: "ai",
+      openai_configured: configured,
+    };
   }
-  return { suggestions: curatedSuggestions(input), source: "fallback" };
+  return {
+    suggestions: curatedSuggestions(input),
+    source: "fallback",
+    openai_configured: configured,
+    openai_error: "error" in ai ? ai.error : "unknown",
+  };
 }
 
 /** Simple sliding-window rate limit (per-process; fine for MVP). */
