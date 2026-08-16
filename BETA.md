@@ -51,8 +51,11 @@ Redirect URLs must still include `https://givy.onrender.com/auth/callback` (and 
 5. Request email permission; set Live (or add testers in Development)
 
 In **Supabase** → Authentication → URL configuration:
-- Site URL: `http://localhost:3000` (and prod later)
-- Redirect URLs: `http://localhost:3000/auth/callback`, prod callback
+- Site URL: `https://givy.onrender.com` (use localhost only for local Site URL if preferred)
+- Redirect URLs must include:
+  - `http://localhost:3000/auth/callback`
+  - `https://givy.onrender.com/auth/callback`
+  - `com.givy.givy://auth/callback` (Play app Google/Facebook return)
 
 ### 3. Invites
 Do **not** use committed starter codes. Create invites only in the SQL editor:

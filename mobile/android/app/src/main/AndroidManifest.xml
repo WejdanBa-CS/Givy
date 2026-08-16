@@ -32,6 +32,13 @@
                 <data android:scheme="https" android:host="givy.onrender.com" android:pathPrefix="/invite"/>
                 <data android:scheme="https" android:host="givy.onrender.com" android:pathPrefix="/auth"/>
             </intent-filter>
+            <!-- OAuth return from Custom Tabs (Google blocks WebView OAuth) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.givy.givy" android:host="auth" android:pathPrefix="/callback"/>
+            </intent-filter>
         </activity>
         <meta-data
             android:name="flutterEmbedding"
