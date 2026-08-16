@@ -10,10 +10,26 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.7+10`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.8+11`**.
 
-- `versionName` (1.3.7) — shown to users  
-- `versionCode` (10) — must increase on every Play upload  
+- `versionName` (1.3.8) — shown to users  
+- `versionCode` (11) — must increase on every Play upload  
+
+## Google Sign-In (Play WebView)
+
+Google blocks OAuth inside embedded WebViews. The shell:
+
+1. Tags its user-agent with `GivyPlayApp`
+2. Opens Supabase / Google in Chrome Custom Tabs
+3. Returns via **`com.givy.givy://auth/callback`** into the WebView to finish PKCE
+
+**Required in Supabase** → Authentication → URL configuration → Redirect URLs, add:
+
+```
+com.givy.givy://auth/callback
+```
+
+(Keep existing `https://givy.onrender.com/auth/callback` for the normal website.)
 
 ## App Links (Digital Asset Links)
 
@@ -25,7 +41,11 @@ Share / invite / auth-callback URLs on `https://givy.onrender.com` can open in t
 4. Verify: https://developers.google.com/digital-asset-links/tools/generator  
    (package `com.givy.givy`, host `givy.onrender.com`)
 
-Until the real fingerprint is published, links may still open in Chrome.
+5. **Play App Signing:** For installs from Play, also add the **App signing key**
+   SHA-256 from Play Console → Setup → App integrity (not only the upload keystore)
+   into `assetlinks.json`. Without it, https App Links may not open the app after OAuth.
+
+Until fingerprints match, links may still open in Chrome — OAuth still returns via the `com.givy.givy://` scheme above.
 
 ## One-time signing setup
 

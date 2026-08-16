@@ -13,6 +13,9 @@ const String kGivyUrl = String.fromEnvironment(
   defaultValue: 'https://givy.onrender.com',
 );
 
+/// Custom scheme so OAuth can return to the app without relying on App Links.
+const String kOAuthScheme = 'com.givy.givy';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -73,6 +76,11 @@ class _GivyWebShellState extends State<GivyWebShell> {
         h.contains('appleid.apple.com');
   }
 
+  static bool _isSupabaseHost(String host) {
+    final h = host.toLowerCase();
+    return h == 'supabase.co' || h.endsWith('.supabase.co');
+  }
+
   static bool _isLocalDevHost(String host) {
     final h = host.toLowerCase();
     return h == 'localhost' || h == '10.0.2.2' || h == '127.0.0.1';
@@ -88,6 +96,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
   }
 
   /// Only Givy (or local) origins may render inside the trusted shell.
+  /// Supabase authorize pages are opened externally with the OAuth providers.
   bool _isAllowedInApp(Uri uri) {
     if (_isLocalDevHost(uri.host)) {
       return uri.scheme == 'http' || uri.scheme == 'https';
@@ -96,7 +105,12 @@ class _GivyWebShellState extends State<GivyWebShell> {
   }
 
   Future<void> _openExternal(Uri uri) async {
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // Custom Tabs keep the user in an OS browser UI Google allows for OAuth.
+    final mode = LaunchMode.inAppBrowserView;
+    var ok = await launchUrl(uri, mode: mode);
+    if (!ok) {
+      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not open ${uri.host}')),
@@ -104,30 +118,64 @@ class _GivyWebShellState extends State<GivyWebShell> {
     }
   }
 
-  void _loadAllowed(Uri uri) {
-    if (!_isAllowedInApp(uri)) return;
-    _controller.loadRequest(uri);
+  /// OAuth custom-scheme return → load HTTPS callback in WebView (keeps PKCE cookies).
+  void _handleIncomingLink(Uri uri) {
+    if (uri.scheme == kOAuthScheme) {
+      final code = uri.queryParameters['code'];
+      final next = uri.queryParameters['next'] ?? '/app';
+      if (code != null && code.isNotEmpty) {
+        final callback = Uri.https('givy.onrender.com', '/auth/callback', {
+          'code': code,
+          'next': next,
+        });
+        _controller.loadRequest(callback);
+        return;
+      }
+      // Fallback: open app home if provider returned without a code.
+      _controller.loadRequest(Uri.parse('https://givy.onrender.com/login'));
+      return;
+    }
+
+    if (_isAllowedInApp(uri)) {
+      _controller.loadRequest(uri);
+    }
   }
 
   Future<void> _initDeepLinks() async {
     try {
       final initial = await _appLinks.getInitialLink();
       if (initial != null) {
-        _loadAllowed(initial);
+        _handleIncomingLink(initial);
       }
     } catch (_) {
       /* ignore cold-start link errors */
     }
     _linkSub = _appLinks.uriLinkStream.listen(
-      _loadAllowed,
+      _handleIncomingLink,
       onError: (_) {},
     );
+  }
+
+  Future<void> _applyPlayUserAgentAndLoad() async {
+    // Lets the website pick the Play-app OAuth redirect (custom scheme).
+    try {
+      final defaultUa = await _controller.getUserAgent() ?? '';
+      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.3.8');
+    } catch (_) {
+      await _controller.setUserAgent('GivyPlayApp/1.3.8');
+    }
+
+    final start = Uri.tryParse(widget.initialUrl);
+    if (start != null && _isAllowedInApp(start)) {
+      await _controller.loadRequest(start);
+    } else {
+      await _controller.loadRequest(Uri.parse('https://givy.onrender.com'));
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    final start = Uri.tryParse(widget.initialUrl);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFFFEF6EE))
@@ -147,8 +195,21 @@ class _GivyWebShellState extends State<GivyWebShell> {
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
 
-            // OAuth must leave the WebView (Google blocks embedded WebViews).
+            // Custom scheme should be handled by the OS / app_links, not WebView.
+            if (uri.scheme == kOAuthScheme) {
+              _handleIncomingLink(uri);
+              return NavigationDecision.prevent;
+            }
+
+            // Google/Facebook/Apple must leave the WebView (embedded OAuth blocked).
             if (_isOAuthHost(uri.host) && !_isGivyHost(uri.host)) {
+              _openExternal(uri);
+              return NavigationDecision.prevent;
+            }
+
+            // Supabase authorize/start also runs in the system browser so the
+            // full OAuth redirect chain stays in one context until custom scheme return.
+            if (_isSupabaseHost(uri.host)) {
               _openExternal(uri);
               return NavigationDecision.prevent;
             }
@@ -166,12 +227,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
         ),
       );
 
-    if (start != null && _isAllowedInApp(start)) {
-      _controller.loadRequest(start);
-    } else {
-      _controller.loadRequest(Uri.parse('https://givy.onrender.com'));
-    }
-
+    unawaited(_applyPlayUserAgentAndLoad());
     unawaited(_initDeepLinks());
   }
 
