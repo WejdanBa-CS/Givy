@@ -215,7 +215,11 @@ export function getListByShareCode(code: string): GivyList | null {
 export function getPublicListByShareCode(code: string): GivyList | null {
   const list = getListByShareCode(code);
   if (!list) return null;
-  return { ...list, recipientAddress: undefined };
+  return {
+    ...list,
+    hasRecipientAddress: Boolean(list.recipientAddress?.trim()),
+    recipientAddress: undefined,
+  };
 }
 
 export function getGiveaways(): Giveaway[] {

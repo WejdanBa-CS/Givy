@@ -10,10 +10,22 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.3+6`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.3.6+9`**.
 
-- `versionName` (1.3.2) — shown to users  
-- `versionCode` (5) — must increase on every Play upload  
+- `versionName` (1.3.6) — shown to users  
+- `versionCode` (9) — must increase on every Play upload  
+
+## App Links (Digital Asset Links)
+
+Share / invite / auth-callback URLs on `https://givy.onrender.com` can open in the Play app when App Links are verified.
+
+1. Locally: `cd mobile` → `.\tool\print_assetlinks_sha.ps1`
+2. Paste the SHA-256 into `public/.well-known/assetlinks.json` (replace `REPLACE_WITH_UPLOAD_CERT_SHA256`)
+3. Deploy the web app to Render
+4. Verify: https://developers.google.com/digital-asset-links/tools/generator  
+   (package `com.givy.givy`, host `givy.onrender.com`)
+
+Until the real fingerprint is published, links may still open in Chrome.
 
 ## One-time signing setup
 

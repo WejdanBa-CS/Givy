@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -55,6 +58,8 @@ class GivyWebShell extends StatefulWidget {
 
 class _GivyWebShellState extends State<GivyWebShell> {
   late final WebViewController _controller;
+  final _appLinks = AppLinks();
+  StreamSubscription<Uri>? _linkSub;
   var _loading = true;
   var _progress = 0;
   String? _error;
@@ -68,13 +73,26 @@ class _GivyWebShellState extends State<GivyWebShell> {
         h.contains('appleid.apple.com');
   }
 
+  static bool _isLocalDevHost(String host) {
+    final h = host.toLowerCase();
+    return h == 'localhost' || h == '10.0.2.2' || h == '127.0.0.1';
+  }
+
   static bool _isGivyHost(String host) {
     final h = host.toLowerCase();
     return h == 'givy.onrender.com' ||
         h == 'www.givy.onrender.com' ||
-        h == 'localhost' ||
-        h == '10.0.2.2' ||
-        h == '127.0.0.1';
+        h == 'givy.app' ||
+        h == 'www.givy.app' ||
+        _isLocalDevHost(h);
+  }
+
+  /// Only Givy (or local) origins may render inside the trusted shell.
+  bool _isAllowedInApp(Uri uri) {
+    if (_isLocalDevHost(uri.host)) {
+      return uri.scheme == 'http' || uri.scheme == 'https';
+    }
+    return uri.scheme == 'https' && _isGivyHost(uri.host);
   }
 
   Future<void> _openExternal(Uri uri) async {
@@ -86,9 +104,30 @@ class _GivyWebShellState extends State<GivyWebShell> {
     }
   }
 
+  void _loadAllowed(Uri uri) {
+    if (!_isAllowedInApp(uri)) return;
+    _controller.loadRequest(uri);
+  }
+
+  Future<void> _initDeepLinks() async {
+    try {
+      final initial = await _appLinks.getInitialLink();
+      if (initial != null) {
+        _loadAllowed(initial);
+      }
+    } catch (_) {
+      /* ignore cold-start link errors */
+    }
+    _linkSub = _appLinks.uriLinkStream.listen(
+      _loadAllowed,
+      onError: (_) {},
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    final start = Uri.tryParse(widget.initialUrl);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFFFEF6EE))
@@ -107,20 +146,39 @@ class _GivyWebShellState extends State<GivyWebShell> {
           onNavigationRequest: (request) {
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
-            if (uri.scheme != 'http' && uri.scheme != 'https') {
-              _openExternal(uri);
-              return NavigationDecision.prevent;
-            }
-            // Google blocks OAuth inside embedded WebViews — use the system browser.
+
+            // OAuth must leave the WebView (Google blocks embedded WebViews).
             if (_isOAuthHost(uri.host) && !_isGivyHost(uri.host)) {
               _openExternal(uri);
               return NavigationDecision.prevent;
             }
-            return NavigationDecision.navigate;
+
+            if (_isAllowedInApp(uri)) {
+              return NavigationDecision.navigate;
+            }
+
+            // Gift / tip / retailer links open in the system browser.
+            if (uri.scheme == 'http' || uri.scheme == 'https') {
+              _openExternal(uri);
+            }
+            return NavigationDecision.prevent;
           },
         ),
-      )
-      ..loadRequest(Uri.parse(widget.initialUrl));
+      );
+
+    if (start != null && _isAllowedInApp(start)) {
+      _controller.loadRequest(start);
+    } else {
+      _controller.loadRequest(Uri.parse('https://givy.onrender.com'));
+    }
+
+    unawaited(_initDeepLinks());
+  }
+
+  @override
+  void dispose() {
+    _linkSub?.cancel();
+    super.dispose();
   }
 
   Future<bool> _onWillPop() async {

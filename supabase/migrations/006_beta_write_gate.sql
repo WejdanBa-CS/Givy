@@ -63,11 +63,10 @@ create trigger trg_enforce_beta_items
   before insert or update or delete on public.items
   for each row execute function public.enforce_beta_on_items();
 
--- Existing accounts were using the app with invite flag off — unlock them once
--- so this migration does not lock out current users. New signups stay locked
--- until redeem_invite (default beta_unlocked = false).
-select set_config('givy.allow_beta_unlock', '1', true);
-update public.profiles set beta_unlocked = true where beta_unlocked = false;
+-- Existing accounts were unlocked once when this gate was introduced.
+-- Do NOT mass-unlock here: re-running this migration would defeat closed beta.
+-- New signups stay locked until redeem_invite (default beta_unlocked = false).
+-- If you ever need a one-off unlock, run a dated ops script outside migrations.
 
 -- ─── Immutable share_code ─────────────────────────────────────────────────────
 create or replace function public.freeze_share_code()

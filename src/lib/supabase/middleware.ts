@@ -43,7 +43,21 @@ export async function updateSession(request: NextRequest) {
   const isApp = path.startsWith("/app");
   const requireInvite = process.env.NEXT_PUBLIC_BETA_REQUIRE_INVITE === "true";
 
-  const isGuest = request.cookies.get("givy_guest")?.value === "1";
+  // Mirror src/lib/guest.ts isGuestAllowed() (server-side).
+  // Guest never skips invite; with cloud auth, guest is opt-in only.
+  const guestExplicitlyOn = process.env.NEXT_PUBLIC_ALLOW_GUEST === "true";
+  const guestAllowed = !requireInvite && guestExplicitlyOn;
+  const hasGuestCookie = request.cookies.get("givy_guest")?.value === "1";
+  const isGuest = guestAllowed && hasGuestCookie;
+
+  if (isApp && hasGuestCookie && !guestAllowed) {
+    const redirect = request.nextUrl.clone();
+    redirect.pathname = "/login";
+    redirect.searchParams.set("next", path);
+    const res = NextResponse.redirect(redirect);
+    res.cookies.set("givy_guest", "", { path: "/", maxAge: 0 });
+    return res;
+  }
 
   // Guest testers skip OAuth / email — session lives in the browser only.
   if (isApp && !user && !isGuest) {

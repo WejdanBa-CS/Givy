@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useGivy } from "@/lib/givy-context";
-import { paypalMeUrl, safeSupportUrl } from "@/lib/security";
+import { paypalMeUrl, FIELD_LIMITS, safeSupportUrl } from "@/lib/security";
 import type { Occasion } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
@@ -91,6 +91,7 @@ export default function CreatePage() {
             id="title"
             className="field"
             value={title}
+            maxLength={FIELD_LIMITS.listTitle}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Alex's birthday"
             required
@@ -140,6 +141,7 @@ export default function CreatePage() {
             id="description"
             className="field min-h-24 resize-y"
             value={description}
+            maxLength={FIELD_LIMITS.description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="A few things I'd love. No pressure, just ideas."
           />
@@ -153,6 +155,7 @@ export default function CreatePage() {
             id="address"
             className="field"
             value={address}
+            maxLength={FIELD_LIMITS.recipientAddress}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Shown when someone ships directly to you"
           />

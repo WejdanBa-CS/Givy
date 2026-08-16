@@ -1,6 +1,6 @@
 import { customAlphabet } from "nanoid";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { safeHttpUrl, safeSupportUrl } from "@/lib/security";
+import { safeHttpsUrl, safeSupportUrl } from "@/lib/security";
 import { safeNextPath } from "@/lib/safe-next";
 import type {
   AuthProvider,
@@ -14,7 +14,11 @@ import { DEMO_SEED_ITEMS } from "@/lib/types";
 
 function sanitizeItemUrl(url?: string | null): string | null {
   if (!url) return null;
-  return safeHttpUrl(url);
+  const https = safeHttpsUrl(url);
+  if (!https) {
+    throw new Error("Gift links must use https://");
+  }
+  return https;
 }
 
 function sanitizeSupportUrl(url?: string | null): string | null {
@@ -453,6 +457,7 @@ export async function fetchPublicList(
     owner_name: string;
     support_url?: string | null;
     support_label?: string | null;
+    has_recipient_address?: boolean;
     items: Array<{
       id: string;
       title: string;
@@ -480,6 +485,7 @@ export async function fetchPublicList(
     recipientAddress: undefined,
     supportUrl: payload.support_url ?? undefined,
     supportLabel: payload.support_label ?? undefined,
+    hasRecipientAddress: Boolean(payload.has_recipient_address),
     createdAt: "",
     updatedAt: "",
     items: (payload.items ?? []).map((i) => ({
