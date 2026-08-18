@@ -30,34 +30,34 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Givy · gifts without the guesswork",
+    default: "Givy · One list. Zero awkward duplicates.",
     template: "%s · Givy",
   },
   description:
-    "Build a wishlist, share one link, and let friends claim gifts in private. No duplicates, no awkward moments.",
+    "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
   applicationName: "Givy",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: siteUrl,
     siteName: "Givy",
-    title: "Givy · gifts without the guesswork",
+    title: "Givy · One list. Zero awkward duplicates.",
     description:
-      "Build a wishlist, share one link, and let friends claim gifts in private.",
+      "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
     images: [
       {
         url: "/givy-hero.jpg",
         width: 1536,
         height: 1024,
-        alt: "Givy — a wrapped gift",
+        alt: "A wrapped cream gift tied with a ribbon",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Givy · gifts without the guesswork",
+    title: "Givy · One list. Zero awkward duplicates.",
     description:
-      "Build a wishlist, share one link, and let friends claim gifts in private.",
+      "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
     images: ["/givy-hero.jpg"],
   },
   icons: {
