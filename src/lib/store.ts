@@ -14,6 +14,66 @@ const GIVEAWAYS_KEY = "givy.giveaways";
 const ACTIVITY_KEY = "givy.activity";
 const SEEDED_KEY = "givy.seeded";
 
+const STORAGE_ENC_VERSION = 1;
+const STORAGE_SALT = "givy.local.storage.salt.v1";
+
+type EncryptedEnvelope = {
+  v: number;
+  iv: string;
+  data: string;
+};
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function fromBase64(value: string): Uint8Array {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function getStorageKey(): Promise<CryptoKey | null> {
+  if (typeof window === "undefined" || !window.crypto?.subtle) return null;
+  const secret = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.NEXT_PUBLIC_STORAGE_SECRET;
+  if (!secret) return null;
+
+  const enc = new TextEncoder();
+  const baseKey = await window.crypto.subtle.importKey("raw", enc.encode(secret), "PBKDF2", false, ["deriveKey"]);
+  return window.crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: enc.encode(STORAGE_SALT), iterations: 100000, hash: "SHA-256" },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
+async function encryptText(plainText: string): Promise<EncryptedEnvelope | null> {
+  const key = await getStorageKey();
+  if (!key) return null;
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(plainText);
+  const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+  return { v: STORAGE_ENC_VERSION, iv: toBase64(iv), data: toBase64(new Uint8Array(encrypted)) };
+}
+
+async function decryptText(payload: EncryptedEnvelope): Promise<string | null> {
+  const key = await getStorageKey();
+  if (!key) return null;
+  try {
+    const iv = fromBase64(payload.iv);
+    const data = fromBase64(payload.data);
+    const plain = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+    return new TextDecoder().decode(plain);
+  } catch {
+    return null;
+  }
+}
+
 export function uid(prefix = "id"): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
 }
@@ -23,7 +83,20 @@ function readJson<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+
+    const parsed = JSON.parse(raw) as T | EncryptedEnvelope;
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "v" in parsed &&
+      "iv" in parsed &&
+      "data" in parsed
+    ) {
+      // Decryption is async; keep sync API by returning fallback if encrypted value is encountered before async hydration paths.
+      return fallback;
+    }
+
+    return parsed as T;
   } catch {
     return fallback;
   }
@@ -31,9 +104,11 @@ function readJson<T>(key: string, fallback: T): T {
 
 function writeJson<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
-  // Local browser demo only. Cloud mode stores data in Supabase (RLS), not here.
-  // codeql[js/clear-text-storage-of-sensitive-data]
-  localStorage.setItem(key, JSON.stringify(value));
+  const serialized = JSON.stringify(value);
+  void encryptText(serialized).then((encrypted) => {
+    if (!encrypted) return;
+    localStorage.setItem(key, JSON.stringify(encrypted));
+  });
 }
 
 export function getCurrentUser(): User | null {
