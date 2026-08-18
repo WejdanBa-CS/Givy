@@ -65,6 +65,18 @@ test.describe("security smoke", () => {
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("link", { name: /givy/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /one list/i })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /guest view/i })).toBeVisible();
     expect(errors).toEqual([]);
+  });
+
+  test("signup route opens the create-account form", async ({ page }) => {
+    const res = await page.goto("/signup", { waitUntil: "domcontentloaded" });
+    expect(res?.status()).toBeLessThan(400);
+    await expect(page).toHaveURL(/\/signup/);
+    await expect(
+      page.getByRole("heading", { name: /create your givy/i }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Display name")).toBeVisible();
   });
 });
