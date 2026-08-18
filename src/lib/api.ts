@@ -4,6 +4,7 @@ import { safeHttpsUrl, safeSupportUrl } from "@/lib/security";
 import { safeNextPath } from "@/lib/safe-next";
 import type {
   AuthProvider,
+  FundingMode,
   GiftItem,
   GivyList,
   Occasion,
@@ -11,6 +12,7 @@ import type {
   User,
 } from "@/lib/types";
 import { DEMO_SEED_ITEMS } from "@/lib/types";
+import { mapFundingRpcError } from "@/lib/site";
 
 function sanitizeItemUrl(url?: string | null): string | null {
   if (!url) return null;
@@ -66,6 +68,11 @@ type ItemRow = {
   quantity?: number | null;
   quantity_needed?: number | null;
   priority?: string | null;
+  funding_mode?: string | null;
+  goal_minor?: number | null;
+  funded_minor?: number | null;
+  campaign_state?: string | null;
+  contributor_count?: number | null;
   created_at: string;
 };
 
@@ -74,6 +81,11 @@ function ownerNameFrom(row: ListRow): string {
   if (!p) return "Someone";
   if (Array.isArray(p)) return p[0]?.display_name ?? "Someone";
   return p.display_name ?? "Someone";
+}
+
+function mapFundingMode(raw: string | null | undefined): FundingMode {
+  if (raw === "cash_fund" || raw === "locker_affiliate") return raw;
+  return "direct_purchase";
 }
 
 function mapItem(row: ItemRow, claimedByMe = false): GiftItem {
@@ -94,6 +106,18 @@ function mapItem(row: ItemRow, claimedByMe = false): GiftItem {
     quantityNeeded:
       row.quantity_needed == null ? undefined : Number(row.quantity_needed),
     priority,
+    fundingMode: mapFundingMode(row.funding_mode),
+    goalMinor: row.goal_minor == null ? undefined : Number(row.goal_minor),
+    fundedMinor: row.funded_minor == null ? undefined : Number(row.funded_minor),
+    campaignState:
+      row.campaign_state === "open" ||
+      row.campaign_state === "funded" ||
+      row.campaign_state === "closed" ||
+      row.campaign_state === "paid_out"
+        ? row.campaign_state
+        : undefined,
+    contributorCount:
+      row.contributor_count == null ? undefined : Number(row.contributor_count),
   };
 }
 
@@ -302,10 +326,27 @@ export async function fetchMyLists(
 
   if (itemsError) throw itemsError;
 
+  const { data: campaigns } = await supabase
+    .from("funding_campaigns")
+    .select("item_id, funded_minor, target_minor, state")
+    .in("list_id", ids);
+
+  const campaignByItem = new Map(
+    (campaigns ?? []).map((c) => [c.item_id as string, c]),
+  );
+
   const byList = new Map<string, GiftItem[]>();
   for (const item of items ?? []) {
     const arr = byList.get(item.list_id) ?? [];
-    arr.push(mapItem(item as ItemRow));
+    const camp = campaignByItem.get(item.id);
+    arr.push(
+      mapItem({
+        ...(item as ItemRow),
+        funded_minor: camp?.funded_minor ?? null,
+        goal_minor: camp?.target_minor ?? (item as ItemRow).goal_minor,
+        campaign_state: camp?.state ?? null,
+      }),
+    );
     byList.set(item.list_id, arr);
   }
 
@@ -359,6 +400,8 @@ export async function createListRemote(input: {
       image_url: sanitizeItemUrl(d.imageHint),
       emoji: null,
       is_claimed: false,
+      funding_mode: d.fundingMode ?? "direct_purchase",
+      goal_minor: d.goalMinor ?? null,
     }));
     const { data: inserted, error: itemErr } = await supabase
       .from("items")
@@ -427,6 +470,8 @@ export async function addItemRemote(
       quantity: item.quantity ?? 1,
       quantity_needed: item.quantityNeeded ?? item.quantity ?? 1,
       priority: item.priority ?? null,
+      funding_mode: item.fundingMode ?? "direct_purchase",
+      goal_minor: item.goalMinor ?? null,
     })
     .select("*")
     .single();
@@ -461,6 +506,8 @@ export async function updateItemRemote(
       | "quantity"
       | "quantityNeeded"
       | "priority"
+      | "fundingMode"
+      | "goalMinor"
     >
   >,
 ): Promise<GiftItem> {
@@ -478,6 +525,8 @@ export async function updateItemRemote(
     payload.quantity_needed = patch.quantityNeeded;
   }
   if (patch.priority !== undefined) payload.priority = patch.priority;
+  if (patch.fundingMode !== undefined) payload.funding_mode = patch.fundingMode;
+  if (patch.goalMinor !== undefined) payload.goal_minor = patch.goalMinor;
 
   const { data, error } = await supabase
     .from("items")
@@ -529,6 +578,11 @@ export async function fetchPublicList(
       quantity?: number | null;
       quantity_needed?: number | null;
       priority?: string | null;
+      funding_mode?: string | null;
+      goal_minor?: number | null;
+      funded_minor?: number | null;
+      campaign_state?: string | null;
+      contributor_count?: number | null;
     }>;
   };
 
@@ -567,7 +621,59 @@ export async function fetchPublicList(
         i.priority === "low"
           ? i.priority
           : undefined,
+      fundingMode: mapFundingMode(i.funding_mode),
+      goalMinor: i.goal_minor == null ? undefined : Number(i.goal_minor),
+      fundedMinor: i.funded_minor == null ? undefined : Number(i.funded_minor),
+      campaignState:
+        i.campaign_state === "open" ||
+        i.campaign_state === "funded" ||
+        i.campaign_state === "closed" ||
+        i.campaign_state === "paid_out"
+          ? i.campaign_state
+          : undefined,
+      contributorCount:
+        i.contributor_count == null ? undefined : Number(i.contributor_count),
     })),
+  };
+}
+
+export type PledgeResult = {
+  ok: boolean;
+  fundedMinor: number;
+  targetMinor: number;
+  state: string;
+  contributorCount: number;
+};
+
+export async function pledgeContributionRemote(input: {
+  itemId: string;
+  amountMinor: number;
+  giverName?: string;
+  message?: string;
+  anonymous?: boolean;
+}): Promise<PledgeResult> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("pledge_contribution", {
+    p_item_id: input.itemId,
+    p_amount_minor: input.amountMinor,
+    p_giver_name: input.giverName ?? null,
+    p_message: input.message ?? null,
+    p_anonymous: input.anonymous ?? true,
+  });
+  if (error) throw mapFundingRpcError(error.message);
+  const payload = data as {
+    ok?: boolean;
+    funded_minor?: number;
+    target_minor?: number;
+    state?: string;
+    contributor_count?: number;
+  };
+  return {
+    ok: Boolean(payload?.ok),
+    fundedMinor: Number(payload?.funded_minor ?? 0),
+    targetMinor: Number(payload?.target_minor ?? 0),
+    state: String(payload?.state ?? "open"),
+    contributorCount: Number(payload?.contributor_count ?? 0),
   };
 }
 

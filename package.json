@@ -1,6 +1,6 @@
 {
   "name": "givy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Gift wishlists without awkward duplicates — share one link, claim gifts anonymously.",
   "author": "Wejdan Al Amri",
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/WejdanBa-CS/Givy.git"
   },
-  "homepage": "https://givy.onrender.com",
+  "homepage": "https://www.givy.gifts",
   "bugs": {
     "url": "https://github.com/WejdanBa-CS/Givy/issues"
   },

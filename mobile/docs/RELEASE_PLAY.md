@@ -4,7 +4,7 @@
 
 Native Android shell (`com.givy.givy`) that loads the live site:
 
-**https://givy.onrender.com**
+**https://www.givy.gifts**
 
 Same product as the website (lists, invites, email/password, Google, Facebook, guest). Google Sign-In may open the system browser briefly (Google blocks OAuth inside embedded WebViews).
 
@@ -30,17 +30,17 @@ Google blocks OAuth inside embedded WebViews. The shell:
 com.givy.givy://auth/callback
 ```
 
-(Keep existing `https://givy.onrender.com/auth/callback` for the normal website.)
+(Keep `https://www.givy.gifts/auth/callback` and the legacy `https://givy.onrender.com/auth/callback`.)
 
 ## App Links (Digital Asset Links)
 
-Share / invite / auth-callback URLs on `https://givy.onrender.com` can open in the Play app when App Links are verified.
+Share / invite / auth-callback URLs on `https://www.givy.gifts` can open in the Play app when App Links are verified.
 
 1. Locally: `cd mobile` → `.\tool\print_assetlinks_sha.ps1`
 2. Paste the SHA-256 into `public/.well-known/assetlinks.json` (replace `REPLACE_WITH_UPLOAD_CERT_SHA256`)
 3. Deploy the web app to Render
 4. Verify: https://developers.google.com/digital-asset-links/tools/generator  
-   (package `com.givy.givy`, host `givy.onrender.com`)
+   (package `com.givy.givy`, host `www.givy.gifts`)
 
 5. **Play App Signing:** For installs from Play, also add the **App signing key**
    SHA-256 from Play Console → Setup → App integrity (not only the upload keystore)
@@ -66,11 +66,11 @@ cd mobile
 
 Output: `build/app/outputs/bundle/release/app-release.aab`
 
-Release builds always load **https://givy.onrender.com** (no local dart-define).
+Release builds always load **https://www.givy.gifts** (no local dart-define).
 
 ## Before upload — production checklist
 
-1. **Render** has redeployed latest `master` (confirm https://givy.onrender.com/login shows email Sign in / Create account).
+1. **Render** has redeployed latest `master` (confirm https://www.givy.gifts/login shows email Sign in / Create account).
 2. **Supabase → Authentication → Providers → Email** is enabled.
 3. For Play review convenience, optionally disable **Confirm email** during closed beta.
 4. Use your existing invite code for reviewers (do not publish it on GitHub or the store listing). Example for your own records only: create or reuse a high `max_uses` row in `beta_invites` via the Supabase SQL Editor.
@@ -86,9 +86,9 @@ Release builds always load **https://givy.onrender.com** (no local dart-define).
    - Feature graphic (1024×500)
    - At least 2 phone screenshots
    - Short + full description
-4. Privacy: `https://givy.onrender.com/privacy`
-5. Terms: `https://givy.onrender.com/terms`
-6. Account deletion: `https://givy.onrender.com/delete-account`
+4. Privacy: `https://www.givy.gifts/privacy`
+5. Terms: `https://www.givy.gifts/terms`
+6. Account deletion: `https://www.givy.gifts/delete-account`
 7. **App content → App access**: **Yes** (restricted)
    - Provide review email, password, and invite steps (open app → Sign in with email → if asked, open `/invite` and enter code)
 7. Add tester emails or share the opt-in URL

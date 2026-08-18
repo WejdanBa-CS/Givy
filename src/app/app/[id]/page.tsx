@@ -49,6 +49,7 @@ export default function ManageListPage() {
   const [quantityInput, setQuantityInput] = useState("");
   const [quantityNeededInput, setQuantityNeededInput] = useState("");
   const [priorityInput, setPriorityInput] = useState<"high" | "medium" | "low" | "">("");
+  const [fundingMode, setFundingMode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -181,6 +182,10 @@ export default function ManageListPage() {
         toast.error(err instanceof Error ? err.message : "Invalid URL");
         return;
       }
+      if (fundingMode && !priceInput) {
+        toast.error("Group-fund gifts need a price so there is a goal.");
+        return;
+      }
       await addItem(list.id, {
         title: titleInput.trim().slice(0, FIELD_LIMITS.itemTitle),
         price: priceInput ? Number(priceInput) : undefined,
@@ -189,6 +194,10 @@ export default function ManageListPage() {
         quantity: quantityInput ? Number(quantityInput) : undefined,
         quantityNeeded: quantityNeededInput ? Number(quantityNeededInput) : undefined,
         priority: priorityInput || undefined,
+        fundingMode: fundingMode ? "cash_fund" : "direct_purchase",
+        goalMinor: fundingMode && priceInput
+          ? Math.round(Number(priceInput) * 100)
+          : undefined,
       });
       setTitleInput("");
       setPriceInput("");
@@ -197,6 +206,7 @@ export default function ManageListPage() {
       setQuantityInput("");
       setQuantityNeededInput("");
       setPriorityInput("");
+      setFundingMode(false);
       toast.success("Gift added");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not add gift");
@@ -712,6 +722,18 @@ export default function ManageListPage() {
               maxLength={FIELD_LIMITS.notes}
               onChange={(e) => setNotesInput(e.target.value)}
             />
+            <label className="flex items-start gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={fundingMode}
+                onChange={(e) => setFundingMode(e.target.checked)}
+              />
+              <span>
+                <strong>Group fund this gift.</strong> Friends chip in toward the
+                price instead of buying it alone. Set a price so there is a goal.
+              </span>
+            </label>
             <button type="submit" className="btn btn-secondary" disabled={busy}>
               Add to list
             </button>

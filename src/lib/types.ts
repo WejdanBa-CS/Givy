@@ -15,6 +15,10 @@ export type GiveawayStatus = "open" | "drawn" | "closed";
 
 export type PriorityLevel = "high" | "medium" | "low";
 
+export type FundingMode = "direct_purchase" | "cash_fund" | "locker_affiliate";
+
+export type CampaignState = "open" | "funded" | "closed" | "paid_out";
+
 export interface User {
   id: string;
   name: string;
@@ -38,6 +42,11 @@ export interface GiftItem {
   quantity?: number;
   quantityNeeded?: number;
   priority?: PriorityLevel;
+  fundingMode?: FundingMode;
+  goalMinor?: number;
+  fundedMinor?: number;
+  campaignState?: CampaignState;
+  contributorCount?: number;
 }
 
 export interface GivyList {
@@ -122,6 +131,20 @@ export const PRIORITY_EMOJI: Record<PriorityLevel, string> = {
   low: "🟢",
 };
 
+export function isGroupFund(item: GiftItem): boolean {
+  return item.fundingMode === "cash_fund";
+}
+
+export function isFunded(item: GiftItem): boolean {
+  if (!isGroupFund(item)) return item.purchased;
+  if (item.campaignState === "funded" || item.campaignState === "paid_out") {
+    return true;
+  }
+  const goal = item.goalMinor ?? 0;
+  const funded = item.fundedMinor ?? 0;
+  return goal > 0 && funded >= goal;
+}
+
 export const DEMO_SEED_ITEMS: Omit<GiftItem, "id" | "purchased">[] = [
   {
     title: "Wool beanie",
@@ -157,5 +180,17 @@ export const DEMO_SEED_ITEMS: Omit<GiftItem, "id" | "purchased">[] = [
     url: "https://www.example.com/giftcard",
     price: 50,
     imageHint: "card",
+  },
+  {
+    title: "Weekend cabin stay",
+    notes: "Friends can chip in together toward this.",
+    url: "https://www.example.com/cabin",
+    price: 180,
+    imageHint: "default",
+    fundingMode: "cash_fund",
+    goalMinor: 18000,
+    fundedMinor: 4500,
+    contributorCount: 2,
+    campaignState: "open",
   },
 ];

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ContributeSheet } from "@/components/ContributeSheet";
 import { Countdown } from "@/components/Countdown";
 import { FriendListConfirm } from "@/components/FriendListConfirm";
 import { GiftUnwrapCelebration } from "@/components/GiftUnwrapCelebration";
@@ -19,19 +20,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useGivy } from "@/lib/givy-context";
-import { safeHttpUrl } from "@/lib/security";
+import { safeHttpUrl, shopHref } from "@/lib/security";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
-import { OCCASION_LABELS } from "@/lib/types";
+import { isFunded, isGroupFund, OCCASION_LABELS } from "@/lib/types";
 
 function SharedGivyInner() {
   const params = useParams<{ code: string }>();
   const search = useSearchParams();
   const claimTarget = search.get("claim");
-  const { ready, cloud, user, getByShare, claimItem } = useGivy();
+  const { ready, cloud, user, getByShare, claimItem, pledgeContribution } = useGivy();
   const [list, setList] = useState<GivyList | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<GiftItem | null>(null);
+  const [fundItem, setFundItem] = useState<GiftItem | null>(null);
   const [ship, setShip] = useState<ShipPreference>("to_giver");
   const [doneMsg, setDoneMsg] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -252,7 +254,7 @@ function SharedGivyInner() {
         />
       )}
       <div className="friend-banner">
-        Claims stay anonymous · no duplicate gifts
+        Ensure you received this link directly from the gift receiver.
       </div>
       <div className="shell">
         <SiteHeader />
@@ -312,7 +314,11 @@ function SharedGivyInner() {
                 No gifts on this list yet. Check back soon.
               </li>
             )}
-            {list.items.map((item) => (
+            {list.items.map((item) => {
+              const group = isGroupFund(item);
+              const funded = isFunded(item);
+              const buyHref = shopHref(item);
+              return (
               <li key={item.id}>
                 <WishItem
                   item={item}
@@ -324,41 +330,55 @@ function SharedGivyInner() {
                     ) : null
                   }
                   actions={
-                    !item.purchased ? (
+                    !funded ? (
                       <>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            if (user && !friendConfirmed) {
-                              toast.message("Confirm the list owner first", {
-                                description:
-                                  "Make sure this is your friend’s wishlist before reserving a gift.",
-                              });
-                              return;
-                            }
-                            setActiveItem(item);
-                            setShip("to_giver");
-                            setDoneMsg(null);
-                            setClaimError(null);
-                            setRevealedAddress(null);
-                          }}
-                        >
-                          I&apos;ll get this
-                        </Button>
-                        {safeHttpUrl(item.url) && (
+                        {group ? (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (user && !friendConfirmed) {
+                                toast.message("Confirm the list owner first", {
+                                  description:
+                                    "Make sure this is your friend’s wishlist before contributing.",
+                                });
+                                return;
+                              }
+                              setFundItem(item);
+                            }}
+                          >
+                            Contribute now
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (user && !friendConfirmed) {
+                                toast.message("Confirm the list owner first", {
+                                  description:
+                                    "Make sure this is your friend’s wishlist before reserving a gift.",
+                                });
+                                return;
+                              }
+                              setActiveItem(item);
+                              setShip("to_giver");
+                              setDoneMsg(null);
+                              setClaimError(null);
+                              setRevealedAddress(null);
+                            }}
+                          >
+                            I&apos;ll get this
+                          </Button>
+                        )}
+                        {buyHref && (
                           <Button asChild variant="secondary" size="sm">
                             <a
-                              href={safeHttpUrl(item.url)!}
-                              target="_blank"
+                              href={buyHref}
                               rel="noopener noreferrer"
-                              onClick={() => {
-                                toast.message("Then tap “I’ll get this”", {
-                                  description:
-                                    "Shopping the link doesn’t reserve the gift — claim it so others know it’s taken.",
-                                });
-                              }}
+                              {...(buyHref.startsWith("http")
+                                ? { target: "_blank" }
+                                : {})}
                             >
-                              Shop link
+                              {group ? "Buy from retailer" : "Shop link"}
                             </a>
                           </Button>
                         )}
@@ -367,10 +387,54 @@ function SharedGivyInner() {
                   }
                 />
               </li>
-            ))}
+              );
+            })}
           </ul>
+          <p className="mt-8 mb-4 text-center text-sm text-ink-soft">
+            Ensure you received this link directly from the gift receiver.
+          </p>
         </main>
       </div>
+
+      <ContributeSheet
+        item={fundItem}
+        ownerName={list.ownerName}
+        onClose={() => setFundItem(null)}
+        onPledge={async (input) => {
+          if (!fundItem) return;
+          const result = await pledgeContribution({
+            listId: list.id,
+            itemId: fundItem.id,
+            ...input,
+          });
+          toast.success("Pledge recorded");
+          setFundItem(null);
+          setList((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  items: prev.items.map((it) =>
+                    it.id === fundItem.id
+                      ? {
+                          ...it,
+                          fundedMinor: result.fundedMinor,
+                          goalMinor: result.targetMinor,
+                          campaignState:
+                            result.state === "funded" ||
+                            result.state === "open" ||
+                            result.state === "closed" ||
+                            result.state === "paid_out"
+                              ? result.state
+                              : it.campaignState,
+                          contributorCount: result.contributorCount,
+                        }
+                      : it,
+                  ),
+                }
+              : prev,
+          );
+        }}
+      />
 
       <GiftUnwrapCelebration
         open={Boolean(unwrapTitle)}

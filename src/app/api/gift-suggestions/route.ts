@@ -6,6 +6,7 @@ import {
   SUGGEST_LIMITS,
 } from "@/lib/gift-suggest";
 import { createClient } from "@/lib/supabase/server";
+import { siteOriginSet } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -23,21 +24,7 @@ function clientKey(req: Request, userId?: string): string {
 }
 
 function allowedOrigins(): Set<string> {
-  const set = new Set<string>([
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:10000",
-    "http://127.0.0.1:10000",
-  ]);
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (site) {
-    try {
-      set.add(new URL(site).origin);
-    } catch {
-      /* ignore bad SITE_URL */
-    }
-  }
-  return set;
+  return siteOriginSet();
 }
 
 function originAllowed(req: Request): boolean {

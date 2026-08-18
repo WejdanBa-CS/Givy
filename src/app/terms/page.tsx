@@ -13,7 +13,7 @@ export default function TermsPage() {
         <SiteHeader />
         <main className="mx-auto mt-10 max-w-2xl animate-rise">
           <h1 className="font-display text-4xl tracking-tight text-ink">Terms</h1>
-          <p className="mt-2 text-sm text-ink-soft">Last updated: August 14, 2026</p>
+          <p className="mt-2 text-sm text-ink-soft">Last updated: August 18, 2026</p>
 
           <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-ink-soft">
             <p>
@@ -24,9 +24,17 @@ export default function TermsPage() {
             <section>
               <h2 className="font-display text-2xl text-ink">The service</h2>
               <p className="mt-2">
-                Givy is a gift list and claim coordination tool. We help people share
-                wishlists and avoid duplicate gifts. Purchases happen on third-party
-                retailer sites, not on Givy.
+                Givy is a gift list, claim coordination, and discovery layer. We help
+                people share wishlists, avoid duplicate gifts, and optionally chip in
+                toward a group-funded item. For retailer purchases, the merchant
+                remains responsible for inventory, shipping, returns, and product
+                quality. Purchases happen on third-party sites, not on Givy.
+              </p>
+              <p className="mt-2">
+                Group-fund pledges currently record progress on the list. Givy does
+                not yet process card payments or hold funds. When cash checkout
+                launches, Givy will remain the intermediary for payment handling,
+                refunds, and payouts — not the product seller.
               </p>
             </section>
 
