@@ -79,4 +79,83 @@ test.describe("security smoke", () => {
     ).toBeVisible();
     await expect(page.getByLabel("Display name")).toBeVisible();
   });
+
+  test("Start free on the landing page opens signup", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: /start free/i }).first().click();
+    await expect(page).toHaveURL(/\/signup/);
+    await expect(
+      page.getByRole("heading", { name: /create your givy/i }),
+    ).toBeVisible();
+  });
+
+  test("landing preview shows group-fund contribute copy", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("tab", { name: /guest view/i })).toBeVisible();
+    await expect(page.getByText("Contribute now")).toBeVisible();
+    await page.getByRole("tab", { name: /your view/i }).click();
+    await expect(page.getByRole("tab", { name: /your view/i })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("privacy and terms pages load", async ({ page }) => {
+    await page.goto("/privacy", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /^privacy$/i })).toBeVisible();
+    await page.goto("/terms", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /^terms$/i })).toBeVisible();
+    await expect(
+      page.getByText(/does not yet process card payments/i),
+    ).toBeVisible();
+  });
+
+  test("invalid shop redirect is a 404, not a 500", async ({ request }) => {
+    const bad = await request.get("/go/not-a-uuid", { maxRedirects: 0 });
+    expect(bad.status()).toBeGreaterThanOrEqual(400);
+    expect(bad.status()).toBeLessThan(500);
+
+    const localId = await request.get("/go/gift_localdemo", { maxRedirects: 0 });
+    expect(localId.status()).toBeGreaterThanOrEqual(400);
+    expect(localId.status()).toBeLessThan(500);
+  });
+
+  test("guest testers can pledge on a shared demo list", async ({ page }) => {
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    const guest = page.getByRole("button", { name: /continue as guest/i });
+    if (!(await guest.isVisible())) {
+      test.skip(true, "Guest mode is off in this environment");
+      return;
+    }
+    await guest.click();
+    await expect(page).toHaveURL(/\/app/, { timeout: 30_000 });
+    await page.getByRole("link", { name: /shared view/i }).click();
+    await expect(page).toHaveURL(/\/g\//);
+    const confirm = page.getByRole("button", { name: /yes — this is/i });
+    if (await confirm.isVisible()) {
+      await confirm.click();
+    }
+    await expect(
+      page.getByText(/ensure you received this link/i).first(),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /contribute now/i }).click();
+    await expect(page.getByText(/nothing is charged here/i)).toBeVisible();
+    await page.getByLabel(/amount \(usd\)/i).fill("10");
+    await page.getByRole("button", { name: /^contribute now$/i }).last().click();
+    await expect(page.getByText(/pledge recorded/i)).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+});
+
+test.describe("mobile landing", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("hero and Start free stay usable on a phone", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /one list/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /start free/i }).first(),
+    ).toBeVisible();
+  });
 });
