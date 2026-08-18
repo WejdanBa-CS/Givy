@@ -11,6 +11,24 @@ import { DEMO_SEED_ITEMS } from "./types";
 const USER_KEY = "givy.user";
 const LISTS_KEY = "givy.lists";
 const GIVEAWAYS_KEY = "givy.giveaways";
+
+function secureRandomInt(maxExclusive: number): number {
+  if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
+    throw new Error("maxExclusive must be a positive integer.");
+  }
+
+  const UINT32_RANGE = 0x1_0000_0000; // 2^32
+  const limit = UINT32_RANGE - (UINT32_RANGE % maxExclusive);
+  const buffer = new Uint32Array(1);
+
+  while (true) {
+    crypto.getRandomValues(buffer);
+    const value = buffer[0];
+    if (value < limit) {
+      return value % maxExclusive;
+    }
+  }
+}
 const ACTIVITY_KEY = "givy.activity";
 const SEEDED_KEY = "givy.seeded";
 
@@ -152,7 +170,7 @@ export function signInWithEmailLocal(
       name: displayName?.trim() || normalized.split("@")[0] || "Givy user",
       email: normalized,
       provider: "email",
-      avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+      avatarHue: secureRandomInt(360),
     };
     accounts[normalized] = { password, user };
     writeJson(LOCAL_EMAIL_AUTH_KEY, accounts);
