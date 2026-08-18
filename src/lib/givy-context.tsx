@@ -19,6 +19,7 @@ import {
   fetchPublicList,
   fetchSessionUser,
   isSupabaseConfigured,
+  pledgeContributionRemote,
   publishListRemote,
   removeItemRemote,
   signInWithOAuth,
@@ -29,6 +30,7 @@ import {
   updateListRemote,
   type ClaimResult,
   type EmailAuthResult,
+  type PledgeResult,
 } from "./api";
 import { clearGuestCookie, isGuestAllowed, isGuestUser, setGuestCookie } from "./guest";
 import {
@@ -43,6 +45,7 @@ import {
   getListById,
   getPublicListByShareCode,
   getListsForUser,
+  pledgeItem as pledgeItemLocal,
   publishList as publishListLocal,
   removeItem as removeItemLocal,
   signIn as signInLocal,
@@ -107,7 +110,7 @@ type GivyContextValue = {
     listId: string,
     itemId: string,
     patch: Partial<
-      Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint" | "quantity" | "quantityNeeded" | "priority">
+      Pick<GiftItem, "title" | "notes" | "url" | "price" | "imageHint" | "quantity" | "quantityNeeded" | "priority" | "fundingMode" | "goalMinor">
     >,
   ) => Promise<GiftItem | null>;
   removeItem: (listId: string, itemId: string) => Promise<void>;
@@ -125,6 +128,14 @@ type GivyContextValue = {
     itemId: string,
     shipPreference: ShipPreference,
   ) => Promise<ClaimResult>;
+  pledgeContribution: (input: {
+    listId: string;
+    itemId: string;
+    amountMinor: number;
+    giverName?: string;
+    message?: string;
+    anonymous?: boolean;
+  }) => Promise<PledgeResult>;
   createGiveaway: (input: {
     title: string;
     description: string;
@@ -459,6 +470,41 @@ export function GivyProvider({ children }: { children: ReactNode }) {
           return { ok: false, error: "Could not mark as purchased" };
         }
         return claimItemRemote(itemId, shipPreference);
+      },
+      pledgeContribution: async (input) => {
+        if (localSession) {
+          const localList = getListById(input.listId);
+          if (localList) {
+            const next = pledgeItemLocal(
+              input.listId,
+              input.itemId,
+              input.amountMinor,
+            );
+            if (!next) {
+              throw new Error("Could not record this pledge");
+            }
+            await refresh();
+            return {
+              ok: true,
+              fundedMinor: next.fundedMinor ?? input.amountMinor,
+              targetMinor: next.goalMinor ?? 0,
+              state: next.campaignState ?? "open",
+              contributorCount: next.contributorCount ?? 1,
+            };
+          }
+          if (!cloud) {
+            throw new Error("Could not record this pledge");
+          }
+        }
+        const result = await pledgeContributionRemote({
+          itemId: input.itemId,
+          amountMinor: input.amountMinor,
+          giverName: input.giverName,
+          message: input.message,
+          anonymous: input.anonymous,
+        });
+        await refresh();
+        return result;
       },
       createGiveaway: (input) => {
         if (!user || !localSession) return null;

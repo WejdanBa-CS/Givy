@@ -2,8 +2,8 @@
 
 **Gift lists without awkward duplicates.** Create a wishlist, share one link, and let friends claim gifts anonymously.
 
-**Live demo:** [givy.onrender.com](https://www.givy.gifts)  
-**Latest release:** [v1.3.0](https://github.com/WejdanBa-CS/Givy/releases/tag/v1.3.0)
+**Live site:** [www.givy.gifts](https://www.givy.gifts)  
+**Latest release:** [v1.1.0](https://github.com/WejdanBa-CS/Givy/releases/tag/v1.1.0)
 
 ![Givy hero](public/givy-hero.jpg)
 
@@ -12,6 +12,7 @@
 - Create & manage gift lists (occasion, date, items, links, prices)
 - Share a unique `/g/[code]` link — shipping address hidden until claim
 - Anonymous “mark purchased” with optional unwrap celebration
+- **Group fund** — mark a high-value gift as cash-fund so friends can chip in
 - **Support me** — PayPal.me / allowlisted tip links (cards never touch Givy)
 - **Suggest gifts** — AI ideas (OpenAI) with curated offline fallback
 - Google sign-in via Supabase (optional closed-beta invite gate)
@@ -70,9 +71,11 @@ Optional: `OPENAI_API_KEY` (gift suggestions), `NEXT_PUBLIC_BETA_REQUIRE_INVITE=
    - `supabase/migrations/004_beta_invites_intentional_rls.sql`
    - `supabase/migrations/006_beta_write_gate.sql`
    - `supabase/migrations/007_purge_demo_invites.sql`
-   - `005_enable_index_advisor.sql` (optional)
+   - `supabase/migrations/009_claim_notifications.sql`
+   - `supabase/migrations/010_item_enhancements.sql`
+   - `supabase/migrations/011_group_funding.sql`
 3. Enable Google (and optional Facebook) under Authentication → Providers
-4. Set Site URL + redirect URLs to your domain and `/auth/callback`
+4. Set Site URL + redirect URLs to `https://www.givy.gifts` and `https://www.givy.gifts/auth/callback` (keep the Render URL as a legacy redirect if needed)
 5. Create invite codes in SQL (see `BETA.md`) — do **not** reuse demo seeds from migrations in production
 
 Full checklist: [`BETA.md`](BETA.md)
@@ -103,7 +106,7 @@ src/components/   UI, motion, panels
 src/lib/          API, security, store, Supabase client
 supabase/         SQL migrations
 e2e/              Playwright tests
-mobile/           Flutter Google Play shell (loads givy.onrender.com)
+mobile/           Flutter Google Play shell (loads www.givy.gifts)
 ```
 
 ## License & copyright
@@ -118,4 +121,4 @@ Report issues responsibly — see [`SECURITY.md`](SECURITY.md).
 
 ## Contact
 
-Questions: [hello@givy.app](mailto:hello@givy.app)
+Questions: [hello@givy.gifts](mailto:hello@givy.gifts)

@@ -21,13 +21,16 @@
    - `supabase/migrations/006_beta_write_gate.sql` (DB invite enforcement)
    - `supabase/migrations/007_purge_demo_invites.sql` (remove any legacy demo invites)
    - `supabase/migrations/008_claim_orphan_and_limits.sql` (claim orphan cleanup, https gift URLs, length limits, `has_recipient_address`)
+   - `supabase/migrations/009_claim_notifications.sql`
+   - `supabase/migrations/010_item_enhancements.sql`
+   - `supabase/migrations/011_group_funding.sql`
    - Optional: `005_enable_index_advisor.sql`
 3. Copy Project URL + anon key into `.env.local` (never commit real keys)
 
 ### 2. Google OAuth
 Create an OAuth client in Google Cloud Console. Use placeholders in docs — paste the real Client ID only into Supabase / `.env.local`:
 
-- Authorized JavaScript origins: `http://localhost:3000`, your prod domain
+- Authorized JavaScript origins: `http://localhost:3000`, `https://www.givy.gifts`
 - Authorized redirect URIs: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
 
 In **Supabase** → Authentication → Providers → Google:
@@ -41,7 +44,7 @@ In **Supabase** → Authentication → Providers → **Email**:
 - For fastest closed beta: turn **Confirm email** OFF (users can sign in immediately)
 - Or leave confirmation ON — Givy will tell them to check their inbox after signup
 
-Redirect URLs must still include `https://givy.onrender.com/auth/callback` (and localhost for local dev).
+Redirect URLs must still include `https://www.givy.gifts/auth/callback` (and localhost for local dev). Keep `https://givy.onrender.com/auth/callback` until the Render hostname is fully retired.
 
 ### 2b. Facebook OAuth (optional)
 1. Create an app at [Meta for Developers](https://developers.facebook.com/apps/)
@@ -51,9 +54,10 @@ Redirect URLs must still include `https://givy.onrender.com/auth/callback` (and 
 5. Request email permission; set Live (or add testers in Development)
 
 In **Supabase** → Authentication → URL configuration:
-- Site URL: `https://givy.onrender.com` (use localhost only for local Site URL if preferred)
+- Site URL: `https://www.givy.gifts` (use localhost only for local Site URL if preferred)
 - Redirect URLs must include:
   - `http://localhost:3000/auth/callback`
+  - `https://www.givy.gifts/auth/callback`
   - `https://givy.onrender.com/auth/callback`
   - `com.givy.givy://auth/callback` (Play app Google/Facebook return)
 
@@ -72,10 +76,10 @@ Use long random codes only you share privately (e.g. `openssl rand -hex 8`). Nev
 Send testers a link instead of asking them to type the code:
 
 ```
-https://givy.onrender.com/invite/GIVY-FRIEND-001
+https://www.givy.gifts/invite/GIVY-FRIEND-001
 ```
 
-Or with query param: `https://givy.onrender.com/invite?code=GIVY-FRIEND-001`
+Or with query param: `https://www.givy.gifts/invite?code=GIVY-FRIEND-001`
 
 Flow: open link → sign in with Google → invite redeems automatically → `/app`.
 

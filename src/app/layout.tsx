@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { Skimlinks } from "@/components/Skimlinks";
 import { GivyProvider } from "@/lib/givy-context";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const display = Fraunces({
@@ -16,10 +17,6 @@ const body = DM_Sans({
   variable: "--font-body",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://givy.onrender.com";
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -28,7 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "Givy · One list. Zero awkward duplicates.",
     template: "%s · Givy",
@@ -39,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: siteUrl,
+    url: siteUrl(),
     siteName: "Givy",
     title: "Givy · One list. Zero awkward duplicates.",
     description:

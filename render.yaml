@@ -14,7 +14,7 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: NEXT_PUBLIC_SITE_URL
-        value: https://givy.onrender.com
+        value: https://www.givy.gifts
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY

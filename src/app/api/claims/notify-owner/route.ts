@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
+import { siteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -87,9 +88,7 @@ export async function POST(req: Request) {
 
   const from =
     process.env.RESEND_FROM_EMAIL?.trim() || "Givy <onboarding@resend.dev>";
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "https://givy.onrender.com";
+  const site = siteUrl();
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
