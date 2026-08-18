@@ -2,7 +2,7 @@
 
 **Gift lists without awkward duplicates.** Create a wishlist, share one link, and let friends claim gifts anonymously.
 
-**Live demo:** [givy.onrender.com](https://givy.onrender.com)  
+**Live demo:** [givy.onrender.com](https://www.givy.gifts)  
 **Latest release:** [v1.3.0](https://github.com/WejdanBa-CS/Givy/releases/tag/v1.3.0)
 
 ![Givy hero](public/givy-hero.jpg)
