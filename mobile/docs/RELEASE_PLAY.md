@@ -10,10 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.0.0+13`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.0+14`**.
 
-- `versionName` (1.0.0) — first real public release  
-- `versionCode` (13) — must increase on every Play upload  
+- `versionName` (1.1.0) — loads **www.givy.gifts** (matches web 1.1.0)  
+- `versionCode` (14) — must increase on every Play upload  
 
 ## Google Sign-In (Play WebView)
 

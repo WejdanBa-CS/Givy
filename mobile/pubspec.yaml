@@ -1,7 +1,7 @@
 name: givy
 description: "Givy â€” gift wishlists without awkward duplicates. Share one link, claim gifts anonymously."
 publish_to: 'none'
-version: 1.0.0+13
+version: 1.1.0+14
 
 environment:
   sdk: ^3.12.2
