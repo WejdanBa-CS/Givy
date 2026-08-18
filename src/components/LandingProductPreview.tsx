@@ -26,6 +26,10 @@ const demoItems: GiftItem[] = [
     notes: "Two nights, anywhere quiet.",
     price: 180,
     purchased: false,
+    fundingMode: "cash_fund",
+    goalMinor: 18000,
+    fundedMinor: 4500,
+    contributorCount: 2,
   },
 ];
 
@@ -152,7 +156,11 @@ export function LandingProductPreview() {
                   </div>
                   {view === "guest" && !item.purchased && (
                     <div className="wish-item-actions" aria-hidden>
-                      <span className="landing-preview-claim">I’ll get this</span>
+                      <span className="landing-preview-claim">
+                        {item.fundingMode === "cash_fund"
+                          ? "Contribute now"
+                          : "I’ll get this"}
+                      </span>
                     </div>
                   )}
                 </article>

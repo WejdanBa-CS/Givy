@@ -12,7 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// Override for local testing, e.g. `--dart-define=GIVY_URL=http://10.0.2.2:3000`
 const String kGivyUrl = String.fromEnvironment(
   'GIVY_URL',
-  defaultValue: 'https://givy.onrender.com',
+  defaultValue: 'https://www.givy.gifts',
 );
 
 /// Must match Supabase Redirect URL: com.givy.givy://auth/callback
@@ -88,10 +88,10 @@ class _GivyWebShellState extends State<GivyWebShell> {
 
   static bool _isGivyHost(String host) {
     final h = host.toLowerCase();
-    return h == 'givy.onrender.com' ||
+    return h == 'www.givy.gifts' ||
+        h == 'givy.gifts' ||
+        h == 'givy.onrender.com' ||
         h == 'www.givy.onrender.com' ||
-        h == 'givy.app' ||
-        h == 'www.givy.app' ||
         _isLocalDevHost(h);
   }
 
@@ -118,10 +118,16 @@ class _GivyWebShellState extends State<GivyWebShell> {
 
   /// Finish PKCE in the WebView (cookies live there, not in Chrome).
   void _finishOAuthWithCode(String code, String next) {
-    final callback = Uri.https('givy.onrender.com', '/auth/callback', {
-      'code': code,
-      'next': next,
-    });
+    final base = Uri.parse(kGivyUrl);
+    final callback = Uri(
+      scheme: base.scheme,
+      host: base.host,
+      path: '/auth/callback',
+      queryParameters: {
+        'code': code,
+        'next': next,
+      },
+    );
     _controller.loadRequest(callback);
   }
 
@@ -234,7 +240,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
     if (start != null && _isAllowedInApp(start)) {
       await _controller.loadRequest(start);
     } else {
-      await _controller.loadRequest(Uri.parse('https://givy.onrender.com'));
+      await _controller.loadRequest(Uri.parse(kGivyUrl));
     }
   }
 

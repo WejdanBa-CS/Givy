@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   inviteLinkPath,
+  isCloudItemId,
   isPaypalSupportUrl,
   normalizeInviteCode,
   paypalMeUrl,
@@ -8,6 +9,7 @@ import {
   safeHttpsUrl,
   safeNextPath,
   safeSupportUrl,
+  shopHref,
 } from "@/lib/security";
 
 describe("safeNextPath", () => {
@@ -111,5 +113,24 @@ describe("safeSupportUrl / PayPal", () => {
   it("detects PayPal support links", () => {
     expect(isPaypalSupportUrl("https://paypal.me/givy")).toBe(true);
     expect(isPaypalSupportUrl("https://ko-fi.com/givy")).toBe(false);
+  });
+});
+
+describe("shopHref / cloud item ids", () => {
+  it("routes UUID gifts through /go", () => {
+    const id = "11111111-2222-4333-a444-555555555555";
+    expect(isCloudItemId(id)).toBe(true);
+    expect(shopHref({ id, url: "https://shop.example/hat" })).toBe(`/go/${id}`);
+  });
+
+  it("opens local demo gift URLs directly", () => {
+    expect(isCloudItemId("gift_abc123")).toBe(false);
+    expect(
+      shopHref({ id: "gift_abc123", url: "https://www.example.com/cabin" }),
+    ).toBe("https://www.example.com/cabin");
+  });
+
+  it("returns null when a local gift has no safe URL", () => {
+    expect(shopHref({ id: "gift_abc123", url: "javascript:alert(1)" })).toBeNull();
   });
 });

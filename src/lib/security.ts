@@ -132,3 +132,23 @@ export function inviteLinkPath(
   const base = siteUrl?.trim().replace(/\/$/, "");
   return base ? `${base}${path}` : path;
 }
+
+const CLOUD_ITEM_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Supabase gift ids are UUIDs; local demo ids look like `gift_…`. */
+export function isCloudItemId(id: string | null | undefined): boolean {
+  return Boolean(id && CLOUD_ITEM_ID.test(id));
+}
+
+/**
+ * Cloud gifts go through `/go` so the buy URL stays on the server.
+ * Local demo lists open the saved http(s) URL directly.
+ */
+export function shopHref(item: {
+  id: string;
+  url?: string | null;
+}): string | null {
+  if (isCloudItemId(item.id)) return `/go/${item.id}`;
+  return safeHttpUrl(item.url);
+}
