@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <SiteHeader />
         <main className="mx-auto mt-10 max-w-2xl animate-rise">
           <h1 className="font-display text-4xl tracking-tight text-ink">Privacy</h1>
-          <p className="mt-2 text-sm text-ink-soft">Last updated: August 14, 2026</p>
+          <p className="mt-2 text-sm text-ink-soft">Last updated: August 19, 2026</p>
 
           <div className="prose-givy mt-8 space-y-6 text-[15px] leading-relaxed text-ink-soft">
             <p>
@@ -28,6 +28,11 @@ export default function PrivacyPage() {
                 <li>Lists, gift items, notes, and optional ship-to addresses you add.</li>
                 <li>Claim records (that a gift was marked purchased—not who claimed it, for list owners).</li>
                 <li>Basic technical logs needed to run and secure the service.</li>
+                <li>
+                  Usage analytics via Google Analytics (pages visited, device and
+                  approximate location). This is aggregated traffic data, not your
+                  gift lists or shipping address.
+                </li>
               </ul>
             </section>
 
@@ -38,6 +43,7 @@ export default function PrivacyPage() {
                 <li>To reveal a shipping address only to a claimer who chooses “ship to recipient.”</li>
                 <li>To keep claims anonymous from list owners.</li>
                 <li>To improve reliability and prevent abuse.</li>
+                <li>To understand which pages people use so we can improve Givy.</li>
               </ul>
             </section>
 
@@ -47,6 +53,15 @@ export default function PrivacyPage() {
                 We do not sell your personal data. Shared list pages show gift ideas and
                 claim status. Shipping addresses are never shown on the public list;
                 they appear only after a successful claim with “ship to recipient.”
+                Google Analytics is provided by Google; see{" "}
+                <a
+                  className="font-semibold text-coral-deep underline-offset-2 hover:underline"
+                  href="https://policies.google.com/privacy"
+                  rel="noopener noreferrer"
+                >
+                  Google’s privacy policy
+                </a>
+                .
               </p>
             </section>
 

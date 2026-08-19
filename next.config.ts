@@ -17,11 +17,11 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       // Next.js still needs inline for bootstrap; avoid unsafe-eval in production builds.
-      "script-src 'self' 'unsafe-inline' https://accounts.google.com https://s.skimresources.com",
+      "script-src 'self' 'unsafe-inline' https://accounts.google.com https://s.skimresources.com https://www.googletagmanager.com https://www.google-analytics.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.groq.com https://accounts.google.com https://*.skimresources.com https://*.redirectingat.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.groq.com https://accounts.google.com https://*.skimresources.com https://*.redirectingat.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com",
       "frame-src 'self' https://accounts.google.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",

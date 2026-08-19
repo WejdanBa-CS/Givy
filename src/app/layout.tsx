@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Skimlinks } from "@/components/Skimlinks";
 import { GivyProvider } from "@/lib/givy-context";
 import { siteUrl } from "@/lib/site";
@@ -95,6 +96,7 @@ export default function RootLayout({
                 },
               }}
             />
+            <GoogleAnalytics />
             <Skimlinks />
           </GivyProvider>
         </MotionProvider>
