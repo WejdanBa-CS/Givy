@@ -1,5 +1,6 @@
 import type { Occasion } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
+import { resolveAiBaseUrl } from "@/lib/api-security";
 
 export type GiftSuggestion = {
   title: string;
@@ -515,9 +516,7 @@ async function callOpenAiCompatible(
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return { error: "missing_key" };
 
-  const base = (
-    process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1"
-  ).replace(/\/$/, "");
+  const base = resolveAiBaseUrl();
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 
   const controller = new AbortController();
