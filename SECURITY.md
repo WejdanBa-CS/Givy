@@ -53,6 +53,22 @@ Good-faith research that avoids privacy violations and service disruption is app
 5. Do **not** set `NEXT_PUBLIC_ALLOW_GUEST=true` on production closed beta (guest cookie must not bypass invite)
 6. Rotate any key that was ever pasted into chat, screenshots, or an old commit
 
-**Rate limits (process-local unless noted):** gift suggestions ≈ 8/min/user; claims 20/hour/user (Postgres); invite redeem 10 / 15 min / user (Postgres).
+**Rate limits:** gift suggestions ≈ 8/min/user (process-local); AI recommendations ≈ 6/min/user; claims 20/hour/user (Postgres); invite redeem 10 / 15 min / user (Postgres); pledges 30/hour/user + 80/hour/gift (Postgres, migration `012`); claim-owner email API 5/hour/user (process-local).
+
+**OWASP-aligned controls in code:**
+
+| Area | Control |
+|------|---------|
+| Auth / session | Supabase SSR cookies; `/app` gate; invite write gate |
+| XSS | React escaping; `plainText()` on AI output; CSP headers |
+| CSRF | Same-site `Origin` checks on all POST API routes |
+| Access control | RLS + SECURITY DEFINER RPCs; no public item SELECT |
+| Open redirect | `safeNextPath()` on auth `next` |
+| SSRF | `OPENAI_BASE_URL` host allowlist (`api.openai.com`, `api.groq.com`) |
+| Rate limiting | Postgres + in-memory buckets (see above) |
+| Clickjacking | `X-Frame-Options: DENY`, `frame-ancestors 'none'` |
+| Secrets | Service role server-only; CI secret scan |
+
+Run migration `012_owasp_hardening.sql` in Supabase for pledge limits and https-only buy URLs.
 
 CI runs a basic secret pattern scan on every push.

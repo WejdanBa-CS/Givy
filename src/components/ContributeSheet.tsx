@@ -112,7 +112,8 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
                     id="pledge-name"
                     className="field"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    maxLength={80}
+                  onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
                   />
                 </div>

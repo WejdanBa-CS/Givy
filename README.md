@@ -74,6 +74,7 @@ Optional: `OPENAI_API_KEY` (gift suggestions), `NEXT_PUBLIC_BETA_REQUIRE_INVITE=
    - `supabase/migrations/009_claim_notifications.sql`
    - `supabase/migrations/010_item_enhancements.sql`
    - `supabase/migrations/011_group_funding.sql`
+   - `supabase/migrations/012_owasp_hardening.sql`
 3. Enable Google (and optional Facebook) under Authentication → Providers
 4. Set Site URL + redirect URLs to `https://www.givy.gifts` and `https://www.givy.gifts/auth/callback` (keep the Render URL as a legacy redirect if needed)
 5. Create invite codes in SQL (see `BETA.md`) — do **not** reuse demo seeds from migrations in production

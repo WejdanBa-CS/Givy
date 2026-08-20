@@ -24,6 +24,7 @@
    - `supabase/migrations/009_claim_notifications.sql`
    - `supabase/migrations/010_item_enhancements.sql`
    - `supabase/migrations/011_group_funding.sql`
+   - `supabase/migrations/012_owasp_hardening.sql`
    - Optional: `005_enable_index_advisor.sql`
 3. Copy Project URL + anon key into `.env.local` (never commit real keys)
 
