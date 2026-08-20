@@ -1,5 +1,6 @@
 import type { Occasion } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
+import { resolveAiBaseUrl } from "@/lib/api-security";
 import { plainText } from "@/lib/gift-suggest";
 
 /** Shopper categories for the AI recommendation engine. */
@@ -546,9 +547,7 @@ async function callRecommendAi(
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return { gifts: [], catalogHits: 0, error: "missing_key" };
 
-  const base = (
-    process.env.OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1"
-  ).replace(/\/$/, "");
+  const base = resolveAiBaseUrl();
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 
   // Server-side catalog search (same tool the model can call) — seed the prompt.

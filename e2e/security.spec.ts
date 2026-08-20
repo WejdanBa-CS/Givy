@@ -120,6 +120,17 @@ test.describe("security smoke", () => {
     expect(localId.status()).toBeLessThan(500);
   });
 
+  test("notify-owner rejects cross-site POST", async ({ request }) => {
+    const res = await request.post("/api/claims/notify-owner", {
+      headers: {
+        "Content-Type": "application/json",
+        origin: "https://evil.example",
+      },
+      data: { itemId: "11111111-2222-4333-a444-555555555555" },
+    });
+    expect(res.status()).toBe(403);
+  });
+
   test("guest testers can pledge on a shared demo list", async ({ page }) => {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
     const guest = page.getByRole("button", { name: /continue as guest/i });

@@ -1,6 +1,6 @@
 import { customAlphabet } from "nanoid";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-import { safeHttpsUrl, safeSupportUrl } from "@/lib/security";
+import { safeHttpsUrl, safeSupportUrl, normalizeInviteCode } from "@/lib/security";
 import { safeNextPath } from "@/lib/safe-next";
 import type {
   AuthProvider,
@@ -295,8 +295,8 @@ export async function signOutRemote() {
 
 export async function redeemInvite(code: string) {
   const supabase = createClient();
-  const normalized = code.trim();
-  if (!normalized) throw new Error("Enter an invite code.");
+  const normalized = normalizeInviteCode(code);
+  if (!normalized) throw new Error("Enter a valid invite code.");
   const { error } = await supabase.rpc("redeem_invite", {
     invite_code: normalized,
   });
@@ -652,6 +652,13 @@ export async function pledgeContributionRemote(input: {
   message?: string;
   anonymous?: boolean;
 }): Promise<PledgeResult> {
+  if (
+    !Number.isFinite(input.amountMinor) ||
+    input.amountMinor < 100 ||
+    input.amountMinor > 5000000
+  ) {
+    throw new Error("Pledge must be between $1 and $50,000");
+  }
   const supabase = createClient();
   const { data, error } = await supabase.rpc("pledge_contribution", {
     p_item_id: input.itemId,
@@ -698,6 +705,7 @@ export async function claimItemRemote(
     // Fire-and-forget owner email (in-app notification is written in claim_item).
     void fetch("/api/claims/notify-owner", {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ itemId }),
     }).catch(() => {});
