@@ -1,15 +1,33 @@
 import { NextResponse } from "next/server";
+import {
+  allowRate,
+  clientKey,
+  forbiddenOriginResponse,
+  originAllowed,
+} from "@/lib/api-security";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { siteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
 
+const MAX_BODY_BYTES = 512;
+const MAX_EMAILS_PER_HOUR = 5;
+
 /**
  * After a successful claim, email the list owner (if Resend + service role set).
  * Caller’s session must own the claim row for this item.
  */
 export async function POST(req: Request) {
+  if (!originAllowed(req)) {
+    return forbiddenOriginResponse();
+  }
+
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Request too large" }, { status: 413 });
+  }
+
   let body: { itemId?: string };
   try {
     body = (await req.json()) as { itemId?: string };
@@ -18,7 +36,7 @@ export async function POST(req: Request) {
   }
 
   const itemId = typeof body.itemId === "string" ? body.itemId.trim() : "";
-  if (!itemId) {
+  if (!itemId || !/^[0-9a-f-]{36}$/i.test(itemId)) {
     return NextResponse.json({ error: "itemId required" }, { status: 400 });
   }
 
@@ -28,6 +46,19 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  }
+
+  if (
+    !allowRate(
+      `notify-owner:${clientKey(req, user.id)}`,
+      MAX_EMAILS_PER_HOUR,
+      60 * 60 * 1000,
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Too many notification requests. Try again later." },
+      { status: 429 },
+    );
   }
 
   const { data: claim, error: claimErr } = await supabase
@@ -114,14 +145,13 @@ export async function POST(req: Request) {
   });
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
+    console.error(
+      "notify-owner: resend failed",
+      res.status,
+      await res.text().catch(() => ""),
+    );
     return NextResponse.json(
-      {
-        ok: false,
-        emailed: false,
-        error: "email_failed",
-        detail: detail.slice(0, 200),
-      },
+      { ok: false, emailed: false, error: "email_failed" },
       { status: 502 },
     );
   }
