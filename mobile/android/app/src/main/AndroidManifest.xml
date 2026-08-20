@@ -22,20 +22,15 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Open Givy links inside the Play app -->
+            <!-- App Links: www only. Apex and onrender 308/301 to www and fail Play domain checks. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- www only: apex givy.gifts 301s to www, which fails Play domain checks -->
                 <data android:scheme="https" android:host="www.givy.gifts"/>
                 <data android:scheme="https" android:host="www.givy.gifts" android:pathPrefix="/g"/>
                 <data android:scheme="https" android:host="www.givy.gifts" android:pathPrefix="/invite"/>
                 <data android:scheme="https" android:host="www.givy.gifts" android:pathPrefix="/auth"/>
-                <data android:scheme="https" android:host="givy.onrender.com"/>
-                <data android:scheme="https" android:host="givy.onrender.com" android:pathPrefix="/g"/>
-                <data android:scheme="https" android:host="givy.onrender.com" android:pathPrefix="/invite"/>
-                <data android:scheme="https" android:host="givy.onrender.com" android:pathPrefix="/auth"/>
             </intent-filter>
         </activity>
         <!-- flutter_web_auth_2 captures OAuth return (do not also put this on MainActivity) -->
