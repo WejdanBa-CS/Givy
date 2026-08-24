@@ -1,11 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("security smoke", () => {
-  test("unauthenticated /app redirects to login", async ({ request }) => {
-    const res = await request.get("/app", { maxRedirects: 0 });
-    expect([302, 303, 307, 308]).toContain(res.status());
-    const location = res.headers().location ?? "";
-    expect(location).toMatch(/\/login/);
+  test("unauthenticated /app redirects to login", async ({ page }) => {
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
   });
 
   test("open-redirect next= stays on-site after login page load", async ({
