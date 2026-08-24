@@ -89,6 +89,21 @@ test.describe("security smoke", () => {
     ).toBeVisible();
   });
 
+  test("authentication controls expose tabs and password recovery", async ({ page }) => {
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("tablist", { name: /account access/i })).toBeVisible();
+    const signInTab = page.getByRole("tab", { name: /sign in/i });
+    const signUpTab = page.getByRole("tab", { name: /create account/i });
+    await expect(signInTab).toHaveAttribute("aria-selected", "true");
+    await expect(signUpTab).toHaveAttribute("aria-selected", "false");
+    await expect(page.getByRole("button", { name: /forgot password/i })).toBeVisible();
+    await page.getByRole("button", { name: /show password/i }).click();
+    await expect(page.getByRole("textbox", { name: "Password" })).toHaveAttribute("type", "text");
+    await signUpTab.click();
+    await expect(signUpTab).toHaveAttribute("aria-selected", "true");
+    await expect(signInTab).toHaveAttribute("aria-selected", "false");
+  });
+
   test("landing preview shows group-fund contribute copy", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("tab", { name: /guest view/i })).toBeVisible();

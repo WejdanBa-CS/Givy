@@ -2,7 +2,7 @@
 
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { editorialEase } from "@/lib/motion-presets";
 
@@ -24,13 +24,17 @@ export function CollapsiblePanel({
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const reduce = useReducedMotion();
+  const contentId = useId();
+  const triggerId = useId();
 
   return (
     <div className={cn("panel overflow-hidden", className)}>
       <button
+        id={triggerId}
         type="button"
-        className="flex w-full items-start justify-between gap-3 p-5 text-left transition-colors hover:bg-mist-deep/20"
+        className="flex w-full items-start justify-between gap-3 p-5 text-left transition-colors hover:bg-mist-deep/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-coral/40"
         aria-expanded={open}
+        aria-controls={contentId}
         onClick={() => setOpen((v) => !v)}
       >
         <span className="min-w-0 flex-1">
@@ -56,6 +60,9 @@ export function CollapsiblePanel({
             animate={{ height: "auto", opacity: 1 }}
             exit={reduce ? undefined : { height: 0, opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.35, ease: editorialEase }}
+            id={contentId}
+            role="region"
+            aria-labelledby={triggerId}
             className="overflow-hidden"
           >
             <div className="border-t border-line px-5 pb-5 pt-4">{children}</div>

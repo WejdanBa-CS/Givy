@@ -12,10 +12,12 @@ import {
 import {
   fetchSessionUser,
   isSupabaseConfigured,
+  requestPasswordReset as requestPasswordResetRemote,
   signInWithEmail as signInWithEmailRemote,
   signInWithOAuth,
   signOutRemote,
   signUpWithEmail as signUpWithEmailRemote,
+  updatePassword as updatePasswordRemote,
   type EmailAuthResult,
 } from "@/lib/api";
 import { clearGuestCookie, isGuestAllowed, isGuestUser, setGuestCookie } from "@/lib/guest";
@@ -120,6 +122,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         signInWithEmailLocal(email, password, "signin");
+        await refresh();
+      },
+      requestPasswordReset: async (email: string) => {
+        if (!cloud) {
+          throw new Error("Password reset is available when Supabase authentication is configured.");
+        }
+        await requestPasswordResetRemote(email);
+      },
+      updatePassword: async (password: string) => {
+        if (!cloud) {
+          throw new Error("Password updates are available when Supabase authentication is configured.");
+        }
+        await updatePasswordRemote(password);
         await refresh();
       },
       signUpWithEmail: async (

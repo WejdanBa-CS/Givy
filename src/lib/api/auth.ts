@@ -91,11 +91,16 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function assertEmailPassword(email: string, password: string): string {
+function assertEmail(email: string): string {
   const normalized = normalizeEmail(email);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
     throw new Error("Enter a valid email address.");
   }
+  return normalized;
+}
+
+function assertEmailPassword(email: string, password: string): string {
+  const normalized = assertEmail(email);
   if (password.length < 8) throw new Error("Password must be at least 8 characters.");
   return normalized;
 }
@@ -107,6 +112,21 @@ export async function signInWithEmail(email: string, password: string): Promise<
     email: normalized,
     password,
   });
+  if (error) throw new Error(error.message);
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  const supabase = createClient();
+  const normalized = assertEmail(email);
+  const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`;
+  const { error } = await supabase.auth.resetPasswordForEmail(normalized, { redirectTo });
+  if (error) throw new Error(error.message);
+}
+
+export async function updatePassword(password: string): Promise<void> {
+  if (password.length < 8) throw new Error("Password must be at least 8 characters.");
+  const supabase = createClient();
+  const { error } = await supabase.auth.updateUser({ password });
   if (error) throw new Error(error.message);
 }
 
