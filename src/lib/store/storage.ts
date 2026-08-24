@@ -39,6 +39,17 @@ function fromBase64(value: string): Uint8Array {
   return out;
 }
 
+/**
+ * The Web Crypto DOM types require an ArrayBuffer-backed BufferSource.
+ * Copying normalizes typed arrays that may otherwise be inferred as
+ * Uint8Array<ArrayBufferLike> by newer TypeScript versions.
+ */
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+
 function getOrCreateLocalSecret(): string {
   const existing = localStorage.getItem(STORAGE_CRYPTO_KEY);
   if (existing) return existing;
@@ -51,16 +62,16 @@ function getOrCreateLocalSecret(): string {
 async function getAesKey(): Promise<CryptoKey> {
   const secret = getOrCreateLocalSecret();
   const keyBytes = fromBase64(secret);
-  return crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt", "decrypt"]);
+  return crypto.subtle.importKey("raw", toArrayBuffer(keyBytes), "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
 async function encryptString(plainText: string): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await getAesKey();
   const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
     key,
-    textEncoder.encode(plainText),
+    toArrayBuffer(textEncoder.encode(plainText)),
   );
   const cipherBytes = new Uint8Array(encrypted);
   return `${ENC_PREFIX}${toBase64(iv)}:${toBase64(cipherBytes)}`;
@@ -75,9 +86,9 @@ async function decryptString(payload: string): Promise<string> {
   const cipherBytes = fromBase64(cipherB64);
   const key = await getAesKey();
   const plainBuffer = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
     key,
-    cipherBytes,
+    toArrayBuffer(cipherBytes),
   );
   return textDecoder.decode(plainBuffer);
 }
