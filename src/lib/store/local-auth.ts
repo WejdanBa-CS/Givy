@@ -72,7 +72,7 @@ export function signIn(provider: AuthProvider): User {
     name: names[provider],
     email: emails[provider],
     provider,
-    avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+    avatarHue: crypto.randomInt(360),
     betaUnlocked: provider === "guest" ? true : undefined,
   };
   saved[provider] = user;
@@ -115,7 +115,7 @@ export function signInWithEmailLocal(
       name: displayName?.trim() || normalized.split("@")[0] || "Givy user",
       email: normalized,
       provider: "email",
-      avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+      avatarHue: crypto.randomInt(360),
     };
     accounts[normalized] = { password, user };
     writeJson(STORAGE_KEYS.emailAccounts, accounts);
