@@ -91,9 +91,26 @@ Replace the code in the URL with your row from `beta_invites`. Links are private
 NEXT_PUBLIC_BETA_REQUIRE_INVITE=true
 ```
 
-### 5. Run web
+### 5. Staging environment
+Staging must use a **separate Supabase project**. Do not use production credentials, production OAuth secrets, production invite codes, or production data in staging.
+
+1. Create a second Supabase project and apply the same migrations listed above.
+2. In Supabase staging, set **Site URL** to `https://givy-staging.onrender.com` and add this callback to **Redirect URLs**: `https://givy-staging.onrender.com/auth/callback`.
+3. In Google Cloud, add `https://givy-staging.onrender.com` as an authorized JavaScript origin. The Supabase OAuth callback remains `https://YOUR_STAGING_PROJECT_REF.supabase.co/auth/v1/callback`.
+4. Create the `givy-staging` Render Blueprint service from the `staging` branch. Set its `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values from the staging Supabase project only.
+5. Keep `NEXT_PUBLIC_BETA_REQUIRE_INVITE=true` and `NEXT_PUBLIC_ALLOW_GUEST=false` for staging. Use separate, throwaway staging invites.
+
+### 6. Sentry monitoring
+The repository sends browser, server, edge, and App Router error-boundary errors to Sentry when a DSN is set.
+
+- Create one `Givy Web` Sentry project and use the same DSN in both Render services.
+- Set `NEXT_PUBLIC_SENTRY_DSN` for both services; set `NEXT_PUBLIC_SENTRY_ENVIRONMENT=production` on `givy` and `NEXT_PUBLIC_SENTRY_ENVIRONMENT=staging` on `givy-staging`.
+- Optionally set `SENTRY_AUTH_TOKEN` in Render only to upload source maps during builds. Never commit it.
+- In Sentry, filter issues by the `staging` environment before treating them as production incidents.
+
+### 7. Run web
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 

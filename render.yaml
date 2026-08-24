@@ -1,5 +1,9 @@
 # Render Blueprint — https://render.com
 # Dashboard: New → Blueprint → connect WejdanBa-CS/Givy
+#
+# `givy` is production. `givy-staging` deploys the protected `staging` branch
+# against a separate Supabase project. Never copy production database or secret
+# values into the staging service.
 services:
   - type: web
     name: givy
@@ -7,7 +11,7 @@ services:
     plan: free
     region: oregon
     branch: master
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /
     envVars:
@@ -21,3 +25,36 @@ services:
         sync: false
       - key: NEXT_PUBLIC_BETA_REQUIRE_INVITE
         value: "true"
+      - key: NEXT_PUBLIC_ALLOW_GUEST
+        value: "false"
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_ENVIRONMENT
+        value: production
+
+  - type: web
+    name: givy-staging
+    runtime: node
+    plan: free
+    region: oregon
+    branch: staging
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://givy-staging.onrender.com
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: NEXT_PUBLIC_BETA_REQUIRE_INVITE
+        value: "true"
+      - key: NEXT_PUBLIC_ALLOW_GUEST
+        value: "false"
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_ENVIRONMENT
+        value: staging
