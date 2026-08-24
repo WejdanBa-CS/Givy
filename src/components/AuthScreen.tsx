@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, Suspense, useEffect, useState } from "react";
+import { FormEvent, KeyboardEvent, Suspense, useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useGivy } from "@/lib/givy-context";
@@ -62,8 +62,15 @@ function ProviderIcon({ id }: { id: "google" | "facebook" }) {
 }
 
 function AuthInner() {
-  const { user, ready, cloud, signIn, signInWithEmail, signUpWithEmail } =
-    useGivy();
+  const {
+    user,
+    ready,
+    cloud,
+    signIn,
+    signInWithEmail,
+    signUpWithEmail,
+    requestPasswordReset,
+  } = useGivy();
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -79,6 +86,7 @@ function AuthInner() {
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -136,6 +144,27 @@ function AuthInner() {
     }
   }
 
+  function onModeTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      setMode(event.key === "ArrowLeft" || event.key === "Home" ? "signin" : "signup");
+    }
+  }
+
+  async function onForgotPassword() {
+    setBusy("reset");
+    setMessage(null);
+    setInfo(null);
+    try {
+      await requestPasswordReset(email);
+      setInfo("If that email has a Givy account, we sent a password-reset link. Check your inbox and spam folder.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not request a password reset.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const errorText =
     message ??
     (error === "auth"
@@ -169,33 +198,47 @@ function AuthInner() {
           )}
 
           <form onSubmit={onEmailSubmit} className="mt-7 space-y-3">
-            <div className="flex gap-2 rounded-2xl border border-line bg-mist/40 p-1">
+            <div className="flex gap-2 rounded-2xl border border-line bg-mist/40 p-1" role="tablist" aria-label="Account access">
               <button
+                id="auth-tab-signin"
                 type="button"
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                  mode === "signin"
-                    ? "bg-paper text-ink shadow-sm"
-                    : "text-ink-soft"
+                role="tab"
+                aria-selected={mode === "signin"}
+                aria-controls="auth-panel"
+                tabIndex={mode === "signin" ? 0 : -1}
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
+                  mode === "signin" ? "bg-paper text-ink shadow-sm" : "text-ink-soft"
                 }`}
                 disabled={busy !== null}
                 onClick={() => setMode("signin")}
+                onKeyDown={onModeTabKeyDown}
               >
                 Sign in
               </button>
               <button
+                id="auth-tab-signup"
                 type="button"
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                  mode === "signup"
-                    ? "bg-paper text-ink shadow-sm"
-                    : "text-ink-soft"
+                role="tab"
+                aria-selected={mode === "signup"}
+                aria-controls="auth-panel"
+                tabIndex={mode === "signup" ? 0 : -1}
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
+                  mode === "signup" ? "bg-paper text-ink shadow-sm" : "text-ink-soft"
                 }`}
                 disabled={busy !== null}
                 onClick={() => setMode("signup")}
+                onKeyDown={onModeTabKeyDown}
               >
                 Create account
               </button>
             </div>
 
+            <div
+              id="auth-panel"
+              role="tabpanel"
+              aria-labelledby={mode === "signin" ? "auth-tab-signin" : "auth-tab-signup"}
+              className="space-y-3"
+            >
             {mode === "signup" && (
               <div>
                 <label className="label" htmlFor="name">
@@ -228,38 +271,38 @@ function AuthInner() {
                 disabled={busy !== null}
               />
             </div>
-            <div>
-              <label className="label" htmlFor="password">
-                Password
-              </label>
+            <div className="relative">
+              <label className="label" htmlFor="password">Password</label>
               <input
                 id="password"
-                type="password"
-                className="field"
+                type={showPassword ? "text" : "password"}
+                className="field pr-20"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 required
                 minLength={8}
-                autoComplete={
-                  mode === "signup" ? "new-password" : "current-password"
-                }
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 disabled={busy !== null}
               />
+              <button
+                type="button"
+                className="absolute bottom-2 right-2 rounded-lg px-2 py-1 text-xs font-bold text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
             </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={busy !== null}
-            >
-              {busy === "email"
-                ? mode === "signup"
-                  ? "Creating…"
-                  : "Signing in…"
-                : mode === "signup"
-                  ? "Create account"
-                  : "Sign in with email"}
+            {mode === "signin" && (
+              <button type="button" className="text-sm font-semibold text-coral-deep underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40" disabled={busy !== null} onClick={() => void onForgotPassword()}>
+                {busy === "reset" ? "Sending reset link…" : "Forgot password?"}
+              </button>
+            )}
+            <button type="submit" className="btn btn-primary w-full" disabled={busy !== null}>
+              {busy === "email" ? mode === "signup" ? "Creating…" : "Signing in…" : mode === "signup" ? "Create account" : "Sign in with email"}
             </button>
+            </div>
           </form>
 
           <div className="relative my-6">

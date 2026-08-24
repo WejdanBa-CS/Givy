@@ -17,6 +17,8 @@ export type AuthContextValue = {
   refresh: () => Promise<void>;
   signIn: (provider: AuthProvider, next?: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signUpWithEmail: (
     email: string,
     password: string,
