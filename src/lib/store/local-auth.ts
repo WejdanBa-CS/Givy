@@ -9,6 +9,24 @@ type LocalEmailAccount = {
   user: User;
 };
 
+function getSecureRandomInt(maxExclusive: number): number {
+  if (!Number.isSafeInteger(maxExclusive) || maxExclusive <= 0) {
+    throw new Error("maxExclusive must be a positive safe integer.");
+  }
+
+  const maxUint32 = 0x100000000; // 2^32
+  const limit = Math.floor(maxUint32 / maxExclusive) * maxExclusive;
+  const buffer = new Uint32Array(1);
+
+  let value: number;
+  do {
+    crypto.getRandomValues(buffer);
+    value = buffer[0];
+  } while (value >= limit);
+
+  return value % maxExclusive;
+}
+
 export function getCurrentUser(): User | null {
   const user = readJson<User | null>(STORAGE_KEYS.user, null);
   if (!user || user.provider !== "guest") return user;
@@ -72,7 +90,7 @@ export function signIn(provider: AuthProvider): User {
     name: names[provider],
     email: emails[provider],
     provider,
-    avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+    avatarHue: getSecureRandomInt(360),
     betaUnlocked: provider === "guest" ? true : undefined,
   };
   saved[provider] = user;
@@ -115,7 +133,7 @@ export function signInWithEmailLocal(
       name: displayName?.trim() || normalized.split("@")[0] || "Givy user",
       email: normalized,
       provider: "email",
-      avatarHue: crypto.getRandomValues(new Uint32Array(1))[0] % 360,
+      avatarHue: getSecureRandomInt(360),
     };
     accounts[normalized] = { password, user };
     writeJson(STORAGE_KEYS.emailAccounts, accounts);
