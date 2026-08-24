@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input, Label, Textarea } from "@/components/ui/input";
 import { useGivy } from "@/lib/givy-context";
 import { paypalMeUrl, FIELD_LIMITS, safeSupportUrl } from "@/lib/security";
 import type { Occasion } from "@/lib/types";
@@ -84,12 +86,9 @@ export default function CreatePage() {
         className="panel mt-6 space-y-4 p-4 sm:p-6 lg:mt-8 lg:space-y-5 lg:p-8"
       >
         <div>
-          <label className="label" htmlFor="title">
-            List title
-          </label>
-          <input
+          <Label htmlFor="title">List title</Label>
+          <Input
             id="title"
-            className="field"
             value={title}
             maxLength={FIELD_LIMITS.listTitle}
             onChange={(e) => setTitle(e.target.value)}
@@ -99,34 +98,32 @@ export default function CreatePage() {
         </div>
 
         <div>
-          <p className="label">Occasion</p>
+          <Label>Occasion</Label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {(Object.keys(OCCASION_LABELS) as Occasion[]).map((key) => (
-              <button
+              <Button
                 key={key}
                 type="button"
-                className={`rounded-2xl border px-3 py-3 text-left text-sm font-semibold ${
+                variant="secondary"
+                className={`h-auto justify-start rounded-2xl px-3 py-3 text-left text-sm ${
                   occasion === key
                     ? "border-coral bg-coral/10 text-ink"
-                    : "border-line bg-white/70 text-ink-soft"
+                    : "bg-white/70 text-ink-soft"
                 }`}
                 onClick={() => setOccasion(key)}
               >
                 <span className="block text-lg">{OCCASION_EMOJI[key]}</span>
                 {OCCASION_LABELS[key]}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="label" htmlFor="date">
-            Event date
-          </label>
-          <input
+          <Label htmlFor="date">Event date</Label>
+          <Input
             id="date"
             type="date"
-            className="field"
             value={eventDate}
             onChange={(e) => setEventDate(e.target.value)}
             required
@@ -134,12 +131,9 @@ export default function CreatePage() {
         </div>
 
         <div>
-          <label className="label" htmlFor="description">
-            Note for friends (optional)
-          </label>
-          <textarea
+          <Label htmlFor="description">Note for friends (optional)</Label>
+          <Textarea
             id="description"
-            className="field min-h-24 resize-y"
             value={description}
             maxLength={FIELD_LIMITS.description}
             onChange={(e) => setDescription(e.target.value)}
@@ -148,12 +142,9 @@ export default function CreatePage() {
         </div>
 
         <div>
-          <label className="label" htmlFor="address">
-            Ship-to-me address (optional)
-          </label>
-          <input
+          <Label htmlFor="address">Ship-to-me address (optional)</Label>
+          <Input
             id="address"
-            className="field"
             value={address}
             maxLength={FIELD_LIMITS.recipientAddress}
             onChange={(e) => setAddress(e.target.value)}
@@ -165,7 +156,7 @@ export default function CreatePage() {
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"
-              className="mt-1"
+              className="mt-1 h-4 w-4 rounded border-line accent-coral focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2"
               checked={enableSupport}
               onChange={(e) => setEnableSupport(e.target.checked)}
             />
@@ -181,16 +172,14 @@ export default function CreatePage() {
           </label>
           {enableSupport && (
             <div className="mt-4 space-y-3">
-              <input
-                className="field"
+              <Input
                 type="url"
                 value={supportUrl}
                 onChange={(e) => setSupportUrl(e.target.value)}
                 placeholder="https://www.paypal.com/paypalme/yourname"
                 required={enableSupport}
               />
-              <input
-                className="field"
+              <Input
                 value={supportLabel}
                 onChange={(e) => setSupportLabel(e.target.value)}
                 placeholder="Support with PayPal"
@@ -202,7 +191,7 @@ export default function CreatePage() {
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-paper/70 p-3">
           <input
             type="checkbox"
-            className="mt-1"
+            className="mt-1 h-4 w-4 rounded border-line accent-coral focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2"
             checked={withDemo}
             onChange={(e) => setWithDemo(e.target.checked)}
           />
@@ -216,9 +205,9 @@ export default function CreatePage() {
           </span>
         </label>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={busy}>
+        <Button type="submit" className="w-full" disabled={busy}>
           {busy ? "Creating…" : "Create Givy"}
-        </button>
+        </Button>
       </form>
     </div>
   );

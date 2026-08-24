@@ -82,7 +82,7 @@ test.describe("security smoke", () => {
 
   test("Start free on the landing page opens signup", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: /start free/i }).first().click();
+    await page.getByRole("link", { name: /start free/i }).first().click();
     await expect(page).toHaveURL(/\/signup/);
     await expect(
       page.getByRole("heading", { name: /create your givy/i }),
@@ -166,7 +166,7 @@ test.describe("mobile landing", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: /one list/i })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /start free/i }).first(),
+      page.getByRole("link", { name: /start free/i }).first(),
     ).toBeVisible();
   });
 });

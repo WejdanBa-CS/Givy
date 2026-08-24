@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 /** Giveaways are paused until the cloud API ships. Keep route for old links. */
