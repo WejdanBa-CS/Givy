@@ -1,6 +1,6 @@
 "use client";
 
-/** Soft letter tile instead of emoji stickers */
+/** Soft letter tile instead of emoji stickers. */
 export function GiftGlyph({
   title,
   hint,
@@ -13,12 +13,14 @@ export function GiftGlyph({
   const letter = (title?.trim()?.[0] || hint?.trim()?.[0] || "G").toUpperCase();
   let hue = 12;
   const seed = title || hint || "g";
-  for (let i = 0; i < seed.length; i++) hue = (hue + seed.charCodeAt(i) * 17) % 360;
+  for (let index = 0; index < seed.length; index += 1) {
+    hue = (hue + seed.charCodeAt(index) * 17) % 360;
+  }
 
   return (
     <span
       aria-hidden
-      className={`wish-glyph ${claimed ? "is-claimed" : ""}`}
+      className={`grid h-[2.85rem] w-[2.85rem] shrink-0 place-items-center rounded-[.875rem] font-display text-[1.35rem] font-semibold sm:h-[3.25rem] sm:w-[3.25rem] sm:rounded-2xl lg:h-14 lg:w-14 ${claimed ? "opacity-70" : ""}`}
       style={{
         background: claimed
           ? "var(--mist-deep)"

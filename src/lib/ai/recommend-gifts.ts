@@ -2,35 +2,22 @@ import type { Occasion } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
 import { resolveAiBaseUrl } from "@/lib/api-security";
 import { plainText } from "@/lib/gift-suggest";
+import { createRateLimiter } from "./rate-limit";
+import {
+  GIFT_CATALOG,
+  GIFT_CATEGORIES,
+  GIFT_CATEGORY_LABELS,
+  type CatalogItem,
+  type GiftCategory,
+} from "./catalog";
 
-/** Shopper categories for the AI recommendation engine. */
-export const GIFT_CATEGORIES = [
-  "tech",
-  "home",
-  "fashion",
-  "food",
-  "experience",
-  "wellness",
-  "books",
-  "kids",
-  "outdoor",
-  "other",
-] as const;
-
-export type GiftCategory = (typeof GIFT_CATEGORIES)[number];
-
-export const GIFT_CATEGORY_LABELS: Record<GiftCategory, string> = {
-  tech: "Tech & gadgets",
-  home: "Home & living",
-  fashion: "Fashion & accessories",
-  food: "Food & drink",
-  experience: "Experiences",
-  wellness: "Wellness & self-care",
-  books: "Books & stationery",
-  kids: "Kids & baby",
-  outdoor: "Outdoor & sport",
-  other: "Other",
-};
+export {
+  GIFT_CATALOG,
+  GIFT_CATEGORIES,
+  GIFT_CATEGORY_LABELS,
+  type CatalogItem,
+  type GiftCategory,
+} from "./catalog";
 
 export type RecommendedGift = {
   title: string;
@@ -54,9 +41,7 @@ export type RecommendResult = {
   gifts: RecommendedGift[];
   source: "ai" | "catalog" | "fallback";
   catalog_hits: number;
-  /** True when OPENAI_API_KEY is present on the server (never exposes the key). */
   openai_configured: boolean;
-  /** Short reason when AI did not produce gifts (safe for clients). */
   openai_error?: string;
 };
 
@@ -71,196 +56,6 @@ export const RECOMMEND_LIMITS = {
   rateMaxPerWindow: 6,
 } as const;
 
-export type CatalogItem = {
-  id: string;
-  title: string;
-  category: GiftCategory;
-  price: number;
-  search_keyword: string;
-  blurb: string;
-  /** Placeholder for future affiliate / merchant URL */
-  product_url?: string;
-};
-
-/** Seed catalog — swap for DB / affiliate API later. */
-export const GIFT_CATALOG: CatalogItem[] = [
-  {
-    id: "tech-earbuds",
-    title: "Noise-cancelling wireless earbuds",
-    category: "tech",
-    price: 89,
-    search_keyword: "wireless noise cancelling earbuds",
-    blurb: "Daily-driver audio without the cable tangle.",
-  },
-  {
-    id: "tech-charger",
-    title: "Compact GaN USB-C charger (65W)",
-    category: "tech",
-    price: 42,
-    search_keyword: "65W GaN USB-C charger",
-    blurb: "One brick for laptop + phone on the go.",
-  },
-  {
-    id: "tech-stand",
-    title: "Adjustable aluminum laptop stand",
-    category: "tech",
-    price: 55,
-    search_keyword: "aluminum laptop stand adjustable",
-    blurb: "Clean desk posture upgrade.",
-  },
-  {
-    id: "home-candle",
-    title: "Soy candle 3-pack (seasonal scents)",
-    category: "home",
-    price: 36,
-    search_keyword: "soy candle gift set 3 pack",
-    blurb: "Warm ambience without synthetic overload.",
-  },
-  {
-    id: "home-throw",
-    title: "Chunky knit throw blanket",
-    category: "home",
-    price: 68,
-    search_keyword: "chunky knit throw blanket",
-    blurb: "Couch-ready comfort for slow evenings.",
-  },
-  {
-    id: "home-mug",
-    title: "Handmade ceramic mug set (2)",
-    category: "home",
-    price: 48,
-    search_keyword: "handmade ceramic mug set of 2",
-    blurb: "Artisan feel for morning coffee.",
-  },
-  {
-    id: "fashion-scarf",
-    title: "Merino wool scarf",
-    category: "fashion",
-    price: 58,
-    search_keyword: "merino wool scarf unisex",
-    blurb: "Lightweight warmth that looks intentional.",
-  },
-  {
-    id: "fashion-bag",
-    title: "Structured crossbody bag",
-    category: "fashion",
-    price: 95,
-    search_keyword: "leather crossbody bag everyday",
-    blurb: "Hands-free carry for city days.",
-  },
-  {
-    id: "food-coffee",
-    title: "Specialty coffee subscription (3 months)",
-    category: "food",
-    price: 72,
-    search_keyword: "specialty coffee subscription 3 month",
-    blurb: "Fresh beans without the guessing.",
-  },
-  {
-    id: "food-olive",
-    title: "Extra-virgin olive oil tasting trio",
-    category: "food",
-    price: 45,
-    search_keyword: "olive oil tasting gift set",
-    blurb: "Kitchen upgrade they will actually use.",
-  },
-  {
-    id: "exp-class",
-    title: "Local cooking class voucher",
-    category: "experience",
-    price: 85,
-    search_keyword: "cooking class gift voucher near me",
-    blurb: "A memory instead of more clutter.",
-  },
-  {
-    id: "exp-spa",
-    title: "Spa massage gift certificate",
-    category: "experience",
-    price: 120,
-    search_keyword: "spa massage gift certificate",
-    blurb: "Reset day, fully booked for them.",
-  },
-  {
-    id: "well-diffuser",
-    title: "Ultrasonic essential oil diffuser",
-    category: "wellness",
-    price: 40,
-    search_keyword: "ultrasonic essential oil diffuser",
-    blurb: "Calm evenings with a soft glow.",
-  },
-  {
-    id: "well-mat",
-    title: "Cork yoga mat + strap",
-    category: "wellness",
-    price: 78,
-    search_keyword: "cork yoga mat with strap",
-    blurb: "Grip that improves with practice.",
-  },
-  {
-    id: "books-novel",
-    title: "Hardcover novel + reading light",
-    category: "books",
-    price: 38,
-    search_keyword: "hardcover bestseller and book light",
-    blurb: "Tonight’s chapter, no squinting.",
-  },
-  {
-    id: "books-journal",
-    title: "Linen-bound journal + fountain pen",
-    category: "books",
-    price: 52,
-    search_keyword: "linen journal fountain pen set",
-    blurb: "For lists, sketches, and quiet thoughts.",
-  },
-  {
-    id: "kids-blocks",
-    title: "Wooden building block set",
-    category: "kids",
-    price: 44,
-    search_keyword: "wooden building blocks toddler set",
-    blurb: "Open-ended play that lasts years.",
-  },
-  {
-    id: "kids-soft",
-    title: "Organic cotton soft toy",
-    category: "kids",
-    price: 32,
-    search_keyword: "organic cotton soft toy baby",
-    blurb: "Soft, washable, gift-wrap ready.",
-  },
-  {
-    id: "out-bottle",
-    title: "Insulated trail bottle 32oz",
-    category: "outdoor",
-    price: 40,
-    search_keyword: "insulated stainless water bottle 32oz",
-    blurb: "Hikes and desk days covered.",
-  },
-  {
-    id: "out-hammock",
-    title: "Portable camping hammock",
-    category: "outdoor",
-    price: 65,
-    search_keyword: "portable camping hammock with straps",
-    blurb: "Shade + swing wherever trees allow.",
-  },
-  {
-    id: "other-frame",
-    title: "Custom photo print + frame",
-    category: "other",
-    price: 49,
-    search_keyword: "custom photo print framed gift",
-    blurb: "Personal without being cheesy.",
-  },
-  {
-    id: "other-puzzle",
-    title: "1000-piece art puzzle",
-    category: "other",
-    price: 28,
-    search_keyword: "1000 piece art jigsaw puzzle",
-    blurb: "Rainy-day table project.",
-  },
-];
 
 export function isGiftCategory(value: unknown): value is GiftCategory {
   return (
@@ -777,18 +572,7 @@ export async function recommendGifts(
   };
 }
 
-const rateBuckets = new Map<string, number[]>();
-
-export function allowRecommendRequest(key: string): boolean {
-  const now = Date.now();
-  const windowMs = RECOMMEND_LIMITS.rateWindowMs;
-  const prev = rateBuckets.get(key) ?? [];
-  const recent = prev.filter((t) => now - t < windowMs);
-  if (recent.length >= RECOMMEND_LIMITS.rateMaxPerWindow) {
-    rateBuckets.set(key, recent);
-    return false;
-  }
-  recent.push(now);
-  rateBuckets.set(key, recent);
-  return true;
-}
+export const allowRecommendRequest = createRateLimiter(
+  RECOMMEND_LIMITS.rateWindowMs,
+  RECOMMEND_LIMITS.rateMaxPerWindow,
+);

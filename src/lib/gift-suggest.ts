@@ -1,6 +1,8 @@
 import type { Occasion } from "@/lib/types";
 import { OCCASION_LABELS } from "@/lib/types";
 import { resolveAiBaseUrl } from "@/lib/api-security";
+import { CURATED_GIFT_SUGGESTIONS } from "@/lib/ai/catalog";
+import { createRateLimiter } from "@/lib/ai/rate-limit";
 
 export type GiftSuggestion = {
   title: string;
@@ -129,274 +131,6 @@ export function sanitizeSuggestions(
   return out;
 }
 
-const CURATED: Record<Occasion, GiftSuggestion[]> = {
-  birthday: [
-    {
-      title: "Personalized star map print",
-      notes: "Night sky from a meaningful date",
-      priceHint: 45,
-      why: "Keepsake with a story",
-    },
-    {
-      title: "Small-batch coffee tasting set",
-      notes: "Three origin bags + tasting card",
-      priceHint: 38,
-      why: "Everyday ritual upgrade",
-    },
-    {
-      title: "Compact travel journal + fountain pen",
-      notes: "Softcover, A6 size",
-      priceHint: 42,
-      why: "Quiet creative gift",
-    },
-    {
-      title: "Indoor herb grow kit",
-      notes: "Basil, mint, and chives",
-      priceHint: 32,
-      why: "Useful and a little playful",
-    },
-    {
-      title: "Wireless earbuds case in leather",
-      notes: "Monogram optional",
-      priceHint: 28,
-      why: "Practical everyday accessory",
-    },
-    {
-      title: "Board-game night duo pack",
-      notes: "Two quick 20-minute games",
-      priceHint: 55,
-      why: "Shared experience over stuff",
-    },
-  ],
-  wedding: [
-    {
-      title: "Linen table runner set",
-      notes: "Natural flax, washable",
-      priceHint: 60,
-      why: "Home they will actually use",
-    },
-    {
-      title: "Couples cooking class voucher",
-      notes: "Local studio or online kit",
-      priceHint: 120,
-      why: "Memory over more registry clutter",
-    },
-    {
-      title: "Artisan cheese + honey board kit",
-      notes: "Ready for a quiet evening in",
-      priceHint: 48,
-      why: "Celebrate without another appliance",
-    },
-    {
-      title: "Framed first-home map print",
-      notes: "Neighborhood they just moved to",
-      priceHint: 55,
-      why: "Personal and displayable",
-    },
-    {
-      title: "Quality kitchen towel + soap set",
-      notes: "Elevated everyday linens",
-      priceHint: 35,
-      why: "Registry gap filler that feels thoughtful",
-    },
-    {
-      title: "Weekend picnic backpack",
-      notes: "Blankets and utensils included",
-      priceHint: 75,
-      why: "Date-night ready",
-    },
-  ],
-  holiday: [
-    {
-      title: "Spiced cocoa + mug duo",
-      notes: "Ceramic mugs with mix sachets",
-      priceHint: 36,
-      why: "Cozy without being generic",
-    },
-    {
-      title: "Wool throw in a deep color",
-      notes: "Not white — forest or rust",
-      priceHint: 68,
-      why: "Useful through winter",
-    },
-    {
-      title: "Ornament they can hang every year",
-      notes: "Hand-blown or ceramic, dated",
-      priceHint: 24,
-      why: "Tradition starter",
-    },
-    {
-      title: "Puzzle of a favorite city skyline",
-      notes: "500–1000 pieces",
-      priceHint: 30,
-      why: "Quiet holiday afternoon activity",
-    },
-    {
-      title: "Candle trio with seasonal scents",
-      notes: "Soy wax, travel tins",
-      priceHint: 40,
-      why: "Atmosphere gift",
-    },
-    {
-      title: "Hot toddy / mulled wine spice kit",
-      notes: "Reusable spice sachets",
-      priceHint: 22,
-      why: "Entertaining-ready",
-    },
-  ],
-  baby: [
-    {
-      title: "Organic swaddle set (3)",
-      notes: "Breathable muslin, neutral tones",
-      priceHint: 45,
-      why: "Parents always need more",
-    },
-    {
-      title: "White-noise travel machine",
-      notes: "Compact, USB-C",
-      priceHint: 40,
-      why: "Sleep helper on the go",
-    },
-    {
-      title: "Board book bundle (favorites)",
-      notes: "3 sturdy classics",
-      priceHint: 28,
-      why: "Screen-free bonding",
-    },
-    {
-      title: "Meal-train grocery gift card",
-      notes: "Local market or delivery service",
-      priceHint: 75,
-      why: "Practical kindness",
-    },
-    {
-      title: "Soft knit lovey + teether set",
-      notes: "Machine washable",
-      priceHint: 32,
-      why: "Daily comfort item",
-    },
-    {
-      title: "Parent care kit",
-      notes: "Lip balm, hand cream, eye mask",
-      priceHint: 35,
-      why: "Gift for the grown-ups too",
-    },
-  ],
-  graduation: [
-    {
-      title: "Leather folio for interviews",
-      notes: "Slim padfolio with card slots",
-      priceHint: 55,
-      why: "Career-ready without flash",
-    },
-    {
-      title: "Noise-cancelling over-ears (budget)",
-      notes: "Solid mid-range model",
-      priceHint: 89,
-      why: "Study / commute upgrade",
-    },
-    {
-      title: "Desk plant + ceramic planter",
-      notes: "Low-light friendly",
-      priceHint: 30,
-      why: "First apartment energy",
-    },
-    {
-      title: "Quality pen + notebook set",
-      notes: "Refillable ink",
-      priceHint: 42,
-      why: "Classic milestone gift",
-    },
-    {
-      title: "City discovery day pass",
-      notes: "Museum or transit day ticket",
-      priceHint: 50,
-      why: "Celebrate with an outing",
-    },
-    {
-      title: "Portable power bank (high capacity)",
-      notes: "USB-C PD",
-      priceHint: 45,
-      why: "Useful from day one",
-    },
-  ],
-  creator: [
-    {
-      title: "Softbox lighting kit (desk size)",
-      notes: "Daylight bulbs included",
-      priceHint: 65,
-      why: "Instant production upgrade",
-    },
-    {
-      title: "Shotgun mic for phone / camera",
-      notes: "With deadcat windscreen",
-      priceHint: 79,
-      why: "Audio matters more than gear flex",
-    },
-    {
-      title: "Color-calibrated monitor hood",
-      notes: "Fits 24–27″ screens",
-      priceHint: 38,
-      why: "Editing comfort",
-    },
-    {
-      title: "Cable management + desk mat set",
-      notes: "Felt mat + adhesive clips",
-      priceHint: 34,
-      why: "Cleaner setup on camera",
-    },
-    {
-      title: "Thumbnail / brand style swatch book",
-      notes: "Printed color references",
-      priceHint: 28,
-      why: "Creative workflow gift",
-    },
-    {
-      title: "Portable SSD (1TB)",
-      notes: "USB-C, bus powered",
-      priceHint: 95,
-      why: "Storage always fills up",
-    },
-  ],
-  other: [
-    {
-      title: "Unexpected bookstore gift card",
-      notes: "Independent shop if possible",
-      priceHint: 40,
-      why: "Lets them choose the joy",
-    },
-    {
-      title: "Weekend hiking daypack",
-      notes: "Lightweight, water bottle pocket",
-      priceHint: 58,
-      why: "Adventure-ready",
-    },
-    {
-      title: "Ceramic pour-over set",
-      notes: "Dripper + two cups",
-      priceHint: 48,
-      why: "Morning ritual upgrade",
-    },
-    {
-      title: "Vinyl of a shared favorite album",
-      notes: "Or a rediscovered classic",
-      priceHint: 35,
-      why: "Nostalgia with presence",
-    },
-    {
-      title: "Quality socks + candle pairing",
-      notes: "Not boring — bold pattern + scent",
-      priceHint: 32,
-      why: "Small but considered",
-    },
-    {
-      title: "Experience: pottery or painting night",
-      notes: "Local studio voucher",
-      priceHint: 70,
-      why: "Memory over more shelf clutter",
-    },
-  ],
-};
 
 function interestTokens(interests: string): string[] {
   return interests
@@ -418,7 +152,7 @@ function scoreAgainstInterests(s: GiftSuggestion, tokens: string[]): number {
 }
 
 export function curatedSuggestions(input: SuggestInput): GiftSuggestion[] {
-  const pool = [...CURATED[input.occasion]];
+  const pool = [...CURATED_GIFT_SUGGESTIONS[input.occasion]];
   const tokens = interestTokens(input.interests);
 
   // Light interest-aware extras when keywords appear.
@@ -596,19 +330,8 @@ export async function suggestGifts(input: SuggestInput): Promise<SuggestResult> 
   };
 }
 
-/** Simple sliding-window rate limit (per-process; fine for MVP). */
-const rateBuckets = new Map<string, number[]>();
-
-export function allowSuggestRequest(key: string): boolean {
-  const now = Date.now();
-  const windowMs = SUGGEST_LIMITS.rateWindowMs;
-  const prev = rateBuckets.get(key) ?? [];
-  const recent = prev.filter((t) => now - t < windowMs);
-  if (recent.length >= SUGGEST_LIMITS.rateMaxPerWindow) {
-    rateBuckets.set(key, recent);
-    return false;
-  }
-  recent.push(now);
-  rateBuckets.set(key, recent);
-  return true;
-}
+/** Shared per-process sliding-window limiter for the suggestion endpoint. */
+export const allowSuggestRequest = createRateLimiter(
+  SUGGEST_LIMITS.rateWindowMs,
+  SUGGEST_LIMITS.rateMaxPerWindow,
+);
