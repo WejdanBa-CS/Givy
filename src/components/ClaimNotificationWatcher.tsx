@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -8,11 +9,13 @@ import {
   markClaimNotificationsRead,
   type ClaimNotification,
 } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { useGivy } from "@/lib/givy-context";
 import { formatShortDate } from "@/lib/store";
 
 /** Polls for new claim alerts and toasts the owner when something is taken. */
 export function ClaimNotificationWatcher() {
+  const router = useRouter();
   const { user, cloud, localSession, ready } = useGivy();
   const seen = useRef<Set<string>>(new Set());
   const [items, setItems] = useState<ClaimNotification[]>([]);
@@ -35,7 +38,7 @@ export function ClaimNotificationWatcher() {
               action: {
                 label: "View",
                 onClick: () => {
-                  window.location.href = `/app/${n.listId}`;
+                  router.push(`/app/${n.listId}`);
                 },
               },
             });
@@ -60,7 +63,7 @@ export function ClaimNotificationWatcher() {
       window.clearInterval(id);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [ready, cloud, localSession, user]);
+  }, [ready, cloud, localSession, router, user]);
 
   const unread = items.filter((i) => !i.read);
 
@@ -79,9 +82,11 @@ export function ClaimNotificationWatcher() {
               : `${unread.length} gifts were marked as taken`}
           </p>
         </div>
-        <button
+        <Button
           type="button"
-          className="text-xs font-semibold text-coral-deep"
+          variant="ghost"
+          size="sm"
+          className="h-auto px-1 py-1 text-xs text-coral-deep"
           onClick={() => {
             void markClaimNotificationsRead(unread.map((u) => u.id)).then(() =>
               setItems((prev) =>
@@ -95,7 +100,7 @@ export function ClaimNotificationWatcher() {
           }}
         >
           Mark read
-        </button>
+        </Button>
       </div>
       <ul className="mt-3 space-y-2">
         {unread.slice(0, 5).map((n) => (

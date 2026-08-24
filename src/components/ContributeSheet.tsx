@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input, Label } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -80,12 +81,9 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
             </p>
             <form onSubmit={onSubmit} className="mt-3 space-y-3">
               <div>
-                <label className="label" htmlFor="pledge-amount">
-                  Amount (USD)
-                </label>
-                <input
+                <Label htmlFor="pledge-amount">Amount (USD)</Label>
+                <Input
                   id="pledge-amount"
-                  className="field"
                   type="number"
                   min="1"
                   step="1"
@@ -98,6 +96,7 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
               <label className="flex items-center gap-2 text-sm text-ink">
                 <input
                   type="checkbox"
+                  className="h-4 w-4 rounded border-line accent-coral focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2"
                   checked={anonymous}
                   onChange={(e) => setAnonymous(e.target.checked)}
                 />
@@ -105,12 +104,9 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
               </label>
               {!anonymous && (
                 <div>
-                  <label className="label" htmlFor="pledge-name">
-                    Name
-                  </label>
-                  <input
+                  <Label htmlFor="pledge-name">Name</Label>
+                  <Input
                     id="pledge-name"
-                    className="field"
                     value={name}
                     maxLength={80}
                   onChange={(e) => setName(e.target.value)}
@@ -119,12 +115,9 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
                 </div>
               )}
               <div>
-                <label className="label" htmlFor="pledge-message">
-                  Note (optional)
-                </label>
-                <input
+                <Label htmlFor="pledge-message">Note (optional)</Label>
+                <Input
                   id="pledge-message"
-                  className="field"
                   value={message}
                   maxLength={280}
                   onChange={(e) => setMessage(e.target.value)}
