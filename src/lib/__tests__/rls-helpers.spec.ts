@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 describe('RLS Helper Functions', () => {
-  let supabaseClient: any;
+  let supabaseClient: SupabaseClient;
   
   beforeEach(() => {
     // Initialize test Supabase client
