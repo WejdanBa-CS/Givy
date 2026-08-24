@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export function FriendListConfirm({
   onConfirmed,
 }: Props) {
   const [ready, setReady] = useState(false);
+  const confirmedAction = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export function FriendListConfirm({
   }, [shareCode, onConfirmed]);
 
   function confirm() {
+    confirmedAction.current = true;
     try {
       sessionStorage.setItem(storageKey(shareCode), "1");
     } catch {
@@ -53,7 +55,7 @@ export function FriendListConfirm({
     <AlertDialog.Root
       open
       onOpenChange={(open) => {
-        if (!open) router.push("/app/lists");
+        if (!open && !confirmedAction.current) router.push("/app/lists");
       }}
     >
       <AlertDialog.Portal>
