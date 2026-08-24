@@ -16,9 +16,12 @@ const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
 export function uid(prefix = "id"): string {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now()
+  const randomPart = crypto
+    .getRandomValues(new Uint32Array(1))[0]
     .toString(36)
-    .slice(-4)}`;
+    .padStart(8, "0")
+    .slice(0, 8);
+  return `${prefix}_${randomPart}${Date.now().toString(36).slice(-4)}`;
 }
 
 function toBase64(bytes: Uint8Array): string {
