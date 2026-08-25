@@ -16,7 +16,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       - key: NEXT_PUBLIC_SITE_URL
         value: https://www.givy.gifts
       - key: NEXT_PUBLIC_SUPABASE_URL
@@ -43,7 +43,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       - key: NEXT_PUBLIC_SITE_URL
         value: https://givy-staging.onrender.com
       - key: NEXT_PUBLIC_SUPABASE_URL
