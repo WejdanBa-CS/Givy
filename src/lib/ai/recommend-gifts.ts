@@ -268,6 +268,17 @@ export const SEARCH_GIFT_CATALOG_TOOL = {
   },
 };
 
+export function isGroqGptOssModel(baseUrl: string, model: string): boolean {
+  try {
+    return (
+      new URL(baseUrl).hostname.toLowerCase() === "api.groq.com" &&
+      model.startsWith("openai/gpt-oss-")
+    );
+  } catch {
+    return false;
+  }
+}
+
 function catalogFallback(input: RecommendInput): RecommendedGift[] {
   const hits = searchGiftCatalog(
     GIFT_CATEGORY_LABELS[input.category],
@@ -323,7 +334,7 @@ function systemPrompt(input: RecommendInput): string {
     `Occasion: ${OCCASION_LABELS[input.occasion]}.`,
     `Budget: $${input.budget_min}–$${input.budget_max} USD inclusive. Every estimated_price MUST be inside this range.`,
     `Return exactly ${input.count} gift ideas.`,
-    "Always call search_gift_catalog at least once with a relevant query before your final answer, so recommendations can map to catalog / affiliate inventory.",
+    "Use supplied catalog matches whenever they fit. If search_gift_catalog is available, call it before your final answer.",
     "After tool results, respond with ONLY valid JSON (no markdown):",
     '{"gifts":[{"title":"...","short_description":"...","estimated_price":0,"search_keyword":"...","catalog_id":"optional-id-from-catalog"}]}',
     "short_description explains why it fits category + budget + occasion.",
@@ -344,6 +355,7 @@ async function callRecommendAi(
 
   const base = resolveAiBaseUrl();
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const groqGptOss = isGroqGptOssModel(base, model);
 
   // Server-side catalog search (same tool the model can call) — seed the prompt.
   const seedHits = searchGiftCatalog(
@@ -353,26 +365,30 @@ async function callRecommendAi(
     input.category,
   );
 
-  const messages: ChatMessage[] = [
-    { role: "system", content: systemPrompt(input) },
-    {
-      role: "user",
-      content: [
-        `Suggest ${input.count} gifts in category "${input.category}" for a ${OCCASION_LABELS[input.occasion]} between $${input.budget_min} and $${input.budget_max}.`,
-        seedHits.length
-          ? `Catalog matches to prefer when fitting:\n${JSON.stringify(
-              seedHits.slice(0, 6).map((h) => ({
-                catalog_id: h.id,
-                title: h.title,
-                price: h.price,
-                search_keyword: h.search_keyword,
-              })),
-            )}`
-          : "No catalog hits yet — invent strong buyable ideas in budget, then we will match keywords.",
-        'Respond with ONLY JSON: {"gifts":[...]}',
-      ].join("\n"),
-    },
-  ];
+  const userPrompt = [
+    `Suggest ${input.count} gifts in category "${input.category}" for a ${OCCASION_LABELS[input.occasion]} between $${input.budget_min} and $${input.budget_max}.`,
+    seedHits.length
+      ? `Catalog matches to prefer when fitting:\n${JSON.stringify(
+          seedHits.slice(0, 6).map((h) => ({
+            catalog_id: h.id,
+            title: h.title,
+            price: h.price,
+            search_keyword: h.search_keyword,
+          })),
+        )}`
+      : "No catalog hits yet — invent strong buyable ideas in budget, then we will match keywords.",
+    'Respond with ONLY JSON: {"gifts":[...]}',
+  ].join("\n");
+
+  // Groq’s GPT-OSS guidance recommends user-message instructions and JSON mode.
+  // Catalog matches are already supplied above, so local tool orchestration is
+  // optional and should not prevent gift recommendations from being returned.
+  const messages: ChatMessage[] = groqGptOss
+    ? [{ role: "user", content: `${systemPrompt(input)}\n\n${userPrompt}` }]
+    : [
+        { role: "system", content: systemPrompt(input) },
+        { role: "user", content: userPrompt },
+      ];
 
   let catalogHits = seedHits.length;
   const controller = new AbortController();
@@ -381,7 +397,7 @@ async function callRecommendAi(
   try {
     // Pass 1: optional tool use (auto — not required; some keys/models reject "required")
     for (let round = 0; round < 3; round++) {
-      const useTools = round < 2;
+      const useTools = !groqGptOss && round < 2;
       const res = await fetch(`${base}/chat/completions`, {
         method: "POST",
         headers: {
@@ -392,7 +408,8 @@ async function callRecommendAi(
         body: JSON.stringify({
           model,
           temperature: 0.7,
-          max_tokens: 1200,
+          max_completion_tokens: 1200,
+          ...(groqGptOss ? { include_reasoning: false } : {}),
           ...(useTools
             ? { tools: [SEARCH_GIFT_CATALOG_TOOL], tool_choice: "auto" }
             : { response_format: { type: "json_object" } }),
@@ -401,6 +418,13 @@ async function callRecommendAi(
       });
 
       if (!res.ok) {
+        const providerError = (await res.text()).slice(0, 500);
+        console.warn("Givy AI provider request failed", {
+          status: res.status,
+          provider: new URL(base).hostname,
+          model,
+          response: providerError,
+        });
         return {
           gifts: [],
           catalogHits,
