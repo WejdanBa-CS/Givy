@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import type { MetaHTMLAttributes } from "react";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
 import { MotionProvider } from "@/components/providers/motion-provider";
@@ -17,6 +18,13 @@ const body = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
 });
+
+const impactVerificationMeta: MetaHTMLAttributes<HTMLMetaElement> & {
+  value: string;
+} = {
+  name: "impact-site-verification",
+  value: "42deb65b-c91f-4140-b44b-7c25a751a515",
+};
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -72,10 +80,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta
-          name="impact-site-verification"
-          value="42deb65b-c91f-4140-b44b-7c25a751a515"
-        />
+        <meta {...impactVerificationMeta} />
         <link
           rel="preload"
           as="image"
