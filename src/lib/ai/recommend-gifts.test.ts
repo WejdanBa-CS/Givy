@@ -1,9 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
+  isGroqGptOssModel,
   parseRecommendBody,
   sanitizeRecommendedGift,
   searchGiftCatalog,
 } from "@/lib/ai/recommend-gifts";
+
+describe("isGroqGptOssModel", () => {
+  it("identifies Groq GPT-OSS models only", () => {
+    expect(
+      isGroqGptOssModel(
+        "https://api.groq.com/openai/v1",
+        "openai/gpt-oss-20b",
+      ),
+    ).toBe(true);
+    expect(
+      isGroqGptOssModel(
+        "https://api.groq.com/openai/v1",
+        "llama-3.3-70b-versatile",
+      ),
+    ).toBe(false);
+    expect(
+      isGroqGptOssModel("https://api.openai.com/v1", "gpt-4o-mini"),
+    ).toBe(false);
+  });
+});
 
 describe("parseRecommendBody", () => {
   it("accepts category and budget range", () => {
