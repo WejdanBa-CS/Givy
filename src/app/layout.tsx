@@ -72,6 +72,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="impact-site-verification"
+          value="42deb65b-c91f-4140-b44b-7c25a751a515"
+        />
         <link
           rel="preload"
           as="image"
