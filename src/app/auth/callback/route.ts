@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/safe-next";
+import { publicRequestOrigin } from "@/lib/site";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const origin = publicRequestOrigin(request);
   const code = searchParams.get("code");
   const next = safeNextPath(searchParams.get("next"), "/app");
   const requireInvite = process.env.NEXT_PUBLIC_BETA_REQUIRE_INVITE === "true";
