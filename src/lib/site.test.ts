@@ -6,6 +6,7 @@ import {
   isLegacyPublicHost,
   mapFundingRpcError,
   minorToDollars,
+  publicRequestOrigin,
   siteOriginSet,
 } from "@/lib/site";
 
@@ -19,6 +20,40 @@ describe("site", () => {
   it("allows the custom domain in API origin checks", () => {
     expect(siteOriginSet().has(CANONICAL_SITE_URL)).toBe(true);
     expect(siteOriginSet().has("https://givy.gifts")).toBe(true);
+  });
+
+  it("maps Render's internal localhost:10000 to the public site", () => {
+    const req = new Request("https://localhost:10000/auth/callback", {
+      headers: { "x-forwarded-proto": "https" },
+    });
+    expect(publicRequestOrigin(req)).toBe(CANONICAL_SITE_URL);
+  });
+
+  it("uses the public Host header when request.url is the Render bind", () => {
+    const req = new Request("https://localhost:10000/auth/callback", {
+      headers: {
+        host: "www.givy.gifts",
+        "x-forwarded-proto": "https",
+      },
+    });
+    expect(publicRequestOrigin(req)).toBe(CANONICAL_SITE_URL);
+  });
+
+  it("prefers the forwarded public host over the internal bind", () => {
+    const req = new Request("http://localhost:10000/auth/callback", {
+      headers: {
+        "x-forwarded-host": "www.givy.gifts",
+        "x-forwarded-proto": "https",
+      },
+    });
+    expect(publicRequestOrigin(req)).toBe(CANONICAL_SITE_URL);
+  });
+
+  it("keeps local Next on port 3000", () => {
+    const req = new Request("http://127.0.0.1:3000/auth/callback", {
+      headers: { host: "127.0.0.1:3000" },
+    });
+    expect(publicRequestOrigin(req)).toBe("http://127.0.0.1:3000");
   });
 
   it("converts money in integer minor units", () => {

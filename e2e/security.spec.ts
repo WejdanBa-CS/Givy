@@ -45,6 +45,7 @@ test.describe("security smoke", () => {
     expect([302, 303, 307, 308]).toContain(res.status());
     const location = res.headers().location ?? "";
     expect(location).toMatch(/\/login/);
+    expect(location).not.toMatch(/localhost:10000/);
   });
 
   test("protocol-relative next= is not used as a link target", async ({
