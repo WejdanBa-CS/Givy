@@ -8,15 +8,12 @@ test.describe('Supabase RLS Policy Enforcement', () => {
     await page.fill('input[type="email"]', 'user-a@test.com');
     await page.fill('input[type="password"]', 'test-password');
     await page.click('button:has-text("Sign In")');
-    
-    // Get current user's list ID from the browser
-    const userAListId = await page.evaluate(() => localStorage.getItem('userListId'));
-    
+
     // Try to access another user's list via API (simulating unauthorized access)
     const response = await page.request.get(`/api/lists/other-user-list-id`, {
       headers: { 'Content-Type': 'application/json' },
     });
-    
+
     // Should be forbidden
     expect(response.status()).toBe(403);
   });

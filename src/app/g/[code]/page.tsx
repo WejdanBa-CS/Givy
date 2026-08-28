@@ -94,7 +94,7 @@ function SharedGivyInner() {
       window.removeEventListener("focus", onVisible);
       window.clearInterval(poll);
     };
-  }, [ready, list?.id, reloadList]);
+  }, [ready, list, reloadList]);
 
   useEffect(() => {
     if (!list || !claimTarget || reopenedClaim) return;
