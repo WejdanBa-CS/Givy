@@ -27,10 +27,7 @@ test.describe('Gift Claim Flow', () => {
     expect(shareCode).toMatch(/^[a-zA-Z0-9]{6,}$/);
   });
 
-  test('should allow anonymous claim without revealing address', async ({
-    page,
-    context,
-  }) => {
+  test('should allow anonymous claim without revealing address', async ({ page }) => {
     // Open list from share code
     await page.goto('/g/demo-code-123');
     
