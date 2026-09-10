@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <SiteHeader />
         <main className="mx-auto mt-10 max-w-2xl animate-rise">
           <h1 className="font-display text-4xl tracking-tight text-ink">Privacy</h1>
-          <p className="mt-2 text-sm text-ink-soft">Last updated: August 19, 2026</p>
+          <p className="mt-2 text-sm text-ink-soft">Last updated: September 11, 2026</p>
 
           <div className="prose-givy mt-8 space-y-6 text-[15px] leading-relaxed text-ink-soft">
             <p>
@@ -77,8 +77,8 @@ export default function PrivacyPage() {
                   Delete your account
                 </Link>{" "}
                 or email{" "}
-                <a className="font-semibold text-coral-deep underline-offset-2 hover:underline" href="mailto:hello@givy.app">
-                  hello@givy.app
+                <a className="font-semibold text-coral-deep underline-offset-2 hover:underline" href="mailto:hello@givy.gifts">
+                  hello@givy.gifts
                 </a>
                 .
               </p>
@@ -88,8 +88,8 @@ export default function PrivacyPage() {
               <h2 className="font-display text-2xl text-ink">Contact</h2>
               <p className="mt-2">
                 Questions about privacy:{" "}
-                <a className="font-semibold text-coral-deep underline-offset-2 hover:underline" href="mailto:hello@givy.app">
-                  hello@givy.app
+                <a className="font-semibold text-coral-deep underline-offset-2 hover:underline" href="mailto:hello@givy.gifts">
+                  hello@givy.gifts
                 </a>
               </p>
             </section>

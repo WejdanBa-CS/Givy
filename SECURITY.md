@@ -6,7 +6,7 @@ We take security seriously for Givy, especially around auth, share links, and sh
 
 **Please do not** open public GitHub issues for security bugs.
 
-Email **hello@givy.app** with:
+Email **hello@givy.gifts** with:
 
 - Description of the issue
 - Steps to reproduce
@@ -62,7 +62,7 @@ Good-faith research that avoids privacy violations and service disruption is app
 | Auth / session | Supabase SSR cookies; `/app` gate; invite write gate |
 | XSS | React escaping; `plainText()` on AI output; CSP headers |
 | CSRF | Same-site `Origin` checks on all POST API routes |
-| Access control | RLS + SECURITY DEFINER RPCs; no public item SELECT |
+| Access control | RLS + `internal` SECURITY DEFINER RPCs behind public INVOKER wrappers; no public item SELECT |
 | Open redirect | `safeNextPath()` on auth `next` |
 | SSRF | `OPENAI_BASE_URL` host allowlist (`api.openai.com`, `api.groq.com`) |
 | Rate limiting | Postgres + in-memory buckets (see above) |
@@ -70,5 +70,9 @@ Good-faith research that avoids privacy violations and service disruption is app
 | Secrets | Service role server-only; CI secret scan |
 
 Run migration `012_owasp_hardening.sql` in Supabase for pledge limits and https-only buy URLs.
+Run migration `013_linter_security_hardening.sql` to lock function `search_path` and revoke client EXECUTE on trigger-only DEFINER helpers.
+Run migration `014_internal_definer_rpcs.sql` so guest/claim RPCs stay callable while advisor lints 0028/0029 clear: DEFINER bodies move to schema `internal` (do **not** add that schema to API Exposed schemas). Public `get_public_list`, `get_item_buy_url`, `pledge_contribution`, `claim_item`, and `redeem_invite` become `SECURITY INVOKER` wrappers.
+
+**Supabase Auth (dashboard — not a SQL migration):** Authentication → settings → enable **Leaked password protection** (HaveIBeenPwned). Pro Plan and above. That is the remaining `auth_leaked_password_protection` advisor warning.
 
 CI runs a basic secret pattern scan on every push.

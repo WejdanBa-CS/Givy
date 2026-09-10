@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 const DELETE_MAIL =
-  "mailto:hello@givy.app?subject=" +
+  "mailto:hello@givy.gifts?subject=" +
   encodeURIComponent("Givy account deletion request") +
   "&body=" +
   encodeURIComponent(
@@ -39,7 +39,7 @@ export default function DeleteAccountPage() {
               <ol className="mt-2 list-decimal space-y-2 pl-5">
                 <li>
                   Tap the button below to email{" "}
-                  <span className="font-semibold text-ink">hello@givy.app</span>
+                  <span className="font-semibold text-ink">hello@givy.gifts</span>
                   .
                 </li>
                 <li>
