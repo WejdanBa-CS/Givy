@@ -66,7 +66,16 @@ export default function CreatePage() {
       toast.success("List created");
       router.push(`/app/${list.id}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not create list");
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" &&
+              err !== null &&
+              "message" in err &&
+              typeof (err as { message: unknown }).message === "string"
+            ? (err as { message: string }).message
+            : "Could not create list";
+      toast.error(message || "Could not create list");
     } finally {
       setBusy(false);
     }

@@ -47,6 +47,21 @@ export function sanitizeItemUrl(url?: string | null): string | null {
   return https;
 }
 
+/**
+ * `GiftItem.imageHint` is overloaded: real https image URLs **or** local glyph
+ * seeds like `"hat"` / `"socks"` used by GiftGlyph. Only https values belong in
+ * `items.image_url`; glyph seeds must not run through URL sanitization (that
+ * threw and broke “Start with sample gift ideas” → Create Givy).
+ */
+export function sanitizeImageHint(hint?: string | null): string | null {
+  if (!hint) return null;
+  const trimmed = hint.trim();
+  if (!trimmed) return null;
+  // Protocol-looking values are URLs; everything else is a glyph seed.
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  return sanitizeItemUrl(trimmed);
+}
+
 export function sanitizeSupportUrl(url?: string | null): string | null {
   if (url == null || url === "") return null;
   return safeSupportUrl(url);

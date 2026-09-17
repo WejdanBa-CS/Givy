@@ -1,7 +1,16 @@
 import { customAlphabet } from "nanoid";
 import { createClient } from "@/lib/supabase/client";
 import { DEMO_SEED_ITEMS, type GiftItem, type GivyList, type Occasion, type User } from "@/lib/types";
-import { mapItem, mapList, mapFundingMode, sanitizeItemUrl, sanitizeSupportUrl, type ItemRow, type ListRow } from "./mappers";
+import {
+  mapItem,
+  mapList,
+  mapFundingMode,
+  sanitizeImageHint,
+  sanitizeItemUrl,
+  sanitizeSupportUrl,
+  type ItemRow,
+  type ListRow,
+} from "./mappers";
 
 const shareCode = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 
@@ -89,7 +98,7 @@ export async function createListRemote(input: {
       notes: item.notes ?? null,
       url: sanitizeItemUrl(item.url),
       price: item.price ?? null,
-      image_url: sanitizeItemUrl(item.imageHint),
+      image_url: sanitizeImageHint(item.imageHint),
       emoji: null,
       is_claimed: false,
       funding_mode: item.fundingMode ?? "direct_purchase",
