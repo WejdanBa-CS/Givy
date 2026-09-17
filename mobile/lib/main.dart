@@ -18,6 +18,20 @@ const String kGivyUrl = String.fromEnvironment(
 /// Must match Supabase Redirect URL: com.givy.givy://auth/callback
 const String kOAuthScheme = 'com.givy.givy';
 
+/// How long to wait for the first successful main-document load before showing
+/// a retry pane (Play reviewers treat an infinite spinner as "does not load").
+const Duration kInitialLoadTimeout = Duration(seconds: 25);
+
+/// Whether a WebView resource error should replace the in-app experience.
+///
+/// `onWebResourceError` also fires for failed images/scripts/iframes. Treating
+/// those as fatal caused Play review to see "Could not load Givy" even when the
+/// main document had loaded (Broken Functionality / does not open or load).
+@visibleForTesting
+bool shouldSurfaceWebResourceError(WebResourceError error) {
+  return error.isForMainFrame == true;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -65,9 +79,11 @@ class _GivyWebShellState extends State<GivyWebShell> {
   late final WebViewController _controller;
   final _appLinks = AppLinks();
   StreamSubscription<Uri>? _linkSub;
+  Timer? _loadTimeout;
   var _loading = true;
   var _progress = 0;
   var _oauthBusy = false;
+  var _mainDocumentLoaded = false;
   String? _error;
 
   static bool _isOAuthHost(String host) {
@@ -113,7 +129,49 @@ class _GivyWebShellState extends State<GivyWebShell> {
 
   void _loadGivy(Uri uri) {
     if (!_isAllowedInApp(uri)) return;
+    _beginLoadWatch();
     _controller.loadRequest(uri);
+  }
+
+  void _beginLoadWatch() {
+    _loadTimeout?.cancel();
+    if (!mounted) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+      _progress = 0;
+      _mainDocumentLoaded = false;
+    });
+    _loadTimeout = Timer(kInitialLoadTimeout, () {
+      if (!mounted || _mainDocumentLoaded || _error != null) return;
+      setState(() {
+        _loading = false;
+        _error =
+            'Givy is taking too long to respond. Check your connection and try again.';
+      });
+    });
+  }
+
+  void _markMainDocumentLoaded() {
+    _loadTimeout?.cancel();
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _error = null;
+      _mainDocumentLoaded = true;
+    });
+  }
+
+  void _surfaceMainFrameFailure(String message) {
+    _loadTimeout?.cancel();
+    if (!mounted) return;
+    // Keep a working page visible if the main document already rendered;
+    // only block the shell when the first paint never succeeded.
+    if (_mainDocumentLoaded) return;
+    setState(() {
+      _loading = false;
+      _error = message;
+    });
   }
 
   /// Finish PKCE in the WebView (cookies live there, not in Chrome).
@@ -128,6 +186,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
         'next': next,
       },
     );
+    _beginLoadWatch();
     _controller.loadRequest(callback);
   }
 
@@ -237,11 +296,17 @@ class _GivyWebShellState extends State<GivyWebShell> {
     }
 
     final start = Uri.tryParse(widget.initialUrl);
+    _beginLoadWatch();
     if (start != null && _isAllowedInApp(start)) {
       await _controller.loadRequest(start);
     } else {
       await _controller.loadRequest(Uri.parse(kGivyUrl));
     }
+  }
+
+  void _retryLoad() {
+    setState(() => _error = null);
+    unawaited(_applyPlayUserAgentAndLoad());
   }
 
   @override
@@ -256,16 +321,44 @@ class _GivyWebShellState extends State<GivyWebShell> {
       )
       ..setNavigationDelegate(
         NavigationDelegate(
-          onProgress: (p) => setState(() => _progress = p),
-          onPageStarted: (_) => setState(() {
-            _loading = true;
-            _error = null;
-          }),
-          onPageFinished: (_) => setState(() => _loading = false),
-          onWebResourceError: (e) => setState(() {
-            _loading = false;
-            _error = e.description;
-          }),
+          onProgress: (p) {
+            if (!mounted) return;
+            setState(() => _progress = p);
+          },
+          onPageStarted: (_) {
+            if (!mounted) return;
+            setState(() {
+              _loading = true;
+              // Do not clear a prior fatal error until the main document finishes;
+              // avoids flashing the broken WebView during a doomed reload.
+              if (_mainDocumentLoaded) {
+                _error = null;
+              }
+            });
+          },
+          onPageFinished: (_) => _markMainDocumentLoaded(),
+          onHttpError: (error) {
+            // Fires for every resource (images, scripts, etc.). Only treat
+            // same-origin document-like 5xx responses as a shell failure.
+            final code = error.response?.statusCode;
+            if (code == null || code < 500) return;
+            final uri = error.request?.uri;
+            if (uri == null || !_isAllowedInApp(uri)) return;
+            final leaf =
+                uri.pathSegments.isEmpty ? '' : uri.pathSegments.last;
+            if (leaf.contains('.')) return;
+            _surfaceMainFrameFailure(
+              'Givy returned HTTP $code. Please try again in a moment.',
+            );
+          },
+          onWebResourceError: (e) {
+            if (!shouldSurfaceWebResourceError(e)) return;
+            _surfaceMainFrameFailure(
+              e.description.isNotEmpty
+                  ? e.description
+                  : 'Could not reach www.givy.gifts.',
+            );
+          },
           onNavigationRequest: (request) {
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
@@ -294,6 +387,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
 
   @override
   void dispose() {
+    _loadTimeout?.cancel();
     _linkSub?.cancel();
     super.dispose();
   }
@@ -333,15 +427,22 @@ class _GivyWebShellState extends State<GivyWebShell> {
                   backgroundColor: const Color(0xFFE8391E).withValues(alpha: 0.12),
                 ),
               Expanded(
-                child: _error != null
-                    ? _ErrorPane(
-                        message: _error!,
-                        onRetry: () {
-                          setState(() => _error = null);
-                          _controller.reload();
-                        },
-                      )
-                    : WebViewWidget(controller: _controller),
+                // Keep the WebView mounted under the error overlay so a
+                // recovered / already-loaded document is not torn down.
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    WebViewWidget(controller: _controller),
+                    if (_error != null)
+                      ColoredBox(
+                        color: const Color(0xFFFEF6EE),
+                        child: _ErrorPane(
+                          message: _error!,
+                          onRetry: _retryLoad,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

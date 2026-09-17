@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { mapFundingRpcError } from "@/lib/site";
 import type { GiftItem, ShipPreference } from "@/lib/types";
-import { mapItem, sanitizeItemUrl, type ItemRow } from "./mappers";
+import { mapItem, sanitizeImageHint, sanitizeItemUrl, type ItemRow } from "./mappers";
 
 export type ClaimResult = {
   ok: boolean;
@@ -31,7 +31,7 @@ export async function addItemRemote(
       notes: item.notes ?? null,
       url: sanitizeItemUrl(item.url),
       price: item.price ?? null,
-      image_url: sanitizeItemUrl(item.imageHint),
+      image_url: sanitizeImageHint(item.imageHint),
       is_claimed: false,
       quantity: item.quantity ?? 1,
       quantity_needed: item.quantityNeeded ?? item.quantity ?? 1,
@@ -78,7 +78,9 @@ export async function updateItemRemote(
   if (patch.notes !== undefined) payload.notes = patch.notes ?? null;
   if (patch.url !== undefined) payload.url = sanitizeItemUrl(patch.url);
   if (patch.price !== undefined) payload.price = patch.price ?? null;
-  if (patch.imageHint !== undefined) payload.image_url = sanitizeItemUrl(patch.imageHint);
+  if (patch.imageHint !== undefined) {
+    payload.image_url = sanitizeImageHint(patch.imageHint);
+  }
   if (patch.quantity !== undefined) payload.quantity = patch.quantity;
   if (patch.quantityNeeded !== undefined) payload.quantity_needed = patch.quantityNeeded;
   if (patch.priority !== undefined) payload.priority = patch.priority;

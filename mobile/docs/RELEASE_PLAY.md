@@ -10,10 +10,17 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.0+14`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.1+16`**.
 
-- `versionName` (1.1.0) — loads **www.givy.gifts** (matches web 1.1.0)  
-- `versionCode` (14) — must increase on every Play upload  
+- `versionName` (1.1.1) — loads **www.givy.gifts**  
+- `versionCode` (16) — must increase on every Play upload  
+
+### Play “Broken Functionality” notes
+
+1. **Create Givy / sample gifts:** `imageHint` values like `"hat"` are glyph seeds, not URLs. Sanitizing them as https links broke list creation when “Start with sample gift ideas” was checked (`sanitizeImageHint` now ignores non-URL hints).
+2. **WebView shell:** Do **not** treat failed third-party subresources (Analytics, Skimlinks, fonts, etc.) as a fatal app load failure. Only main-frame document errors show the retry pane.
+
+Always bump `versionCode` before resubmitting the AAB, and redeploy **www.givy.gifts** so Play’s WebView picks up the create-list fix.
 
 ## Google Sign-In (Play WebView)
 
