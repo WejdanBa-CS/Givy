@@ -10,10 +10,14 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.0+14`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.1+16`**.
 
-- `versionName` (1.1.0) — loads **www.givy.gifts** (matches web 1.1.0)  
-- `versionCode` (14) — must increase on every Play upload  
+- `versionName` (1.1.1) — loads **www.givy.gifts**  
+- `versionCode` (16) — must increase on every Play upload  
+
+### Play “Broken Functionality / does not load” note
+
+The shell must **not** treat failed third-party subresources (Analytics, Skimlinks, fonts, etc.) as a fatal app load failure. Only main-frame document errors show the retry pane. Always bump `versionCode` before resubmitting after a load fix.
 
 ## Google Sign-In (Play WebView)
 
