@@ -10,17 +10,30 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.1+16`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.2+17`**.
 
-- `versionName` (1.1.1) — loads **www.givy.gifts**  
-- `versionCode` (16) — must increase on every Play upload  
+- `versionName` (1.1.2) — loads **www.givy.gifts**  
+- `versionCode` (17) — must increase on every Play upload  
+
+### Resubmit after Broken Functionality rejection (do in order)
+
+1. **Supabase SQL Editor** — run `supabase/ops/apply_play_write_grants.sql` (fixes `permission denied for function …` on create).
+2. **Confirm www.givy.gifts** is on latest `master` (Render auto-deploys).
+3. **Smoke test** (browser or phone): sign in (beta unlocked) → Create → enable sample gifts → **Create Givy** succeeds.
+4. **Build AAB** on your machine (signing keys are local only):
+   ```powershell
+   cd mobile
+   .\tool\build_release.ps1
+   ```
+5. **Play Console** → Closed testing (or Production) → upload `1.1.2 (17)` → **Send for review**.
 
 ### Play “Broken Functionality” notes
 
-1. **Create Givy / sample gifts:** `imageHint` values like `"hat"` are glyph seeds, not URLs. Sanitizing them as https links broke list creation when “Start with sample gift ideas” was checked (`sanitizeImageHint` now ignores non-URL hints).
-2. **WebView shell:** Do **not** treat failed third-party subresources (Analytics, Skimlinks, fonts, etc.) as a fatal app load failure. Only main-frame document errors show the retry pane.
+1. **Create Givy / sample gifts:** `imageHint` values like `"hat"` are glyph seeds, not URLs. Sanitizing them as https links broke list creation when “Start with sample gift ideas” was checked (`sanitizeImageHint` now ignores non-URL hints). Sample-gift seed failures no longer abort list create.
+2. **DB grants:** Triggers need `EXECUTE` on helpers (`require_beta_unlocked`, `is_safe_support_url`, …). Apply `supabase/ops/apply_play_write_grants.sql` in production.
+3. **WebView shell:** Do **not** treat failed third-party subresources as a fatal app load failure. Only main-frame document errors show the retry pane.
 
-Always bump `versionCode` before resubmitting the AAB, and redeploy **www.givy.gifts** so Play’s WebView picks up the create-list fix.
+Always bump `versionCode` before resubmitting the AAB.
 
 ## Google Sign-In (Play WebView)
 

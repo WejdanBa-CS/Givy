@@ -88,34 +88,55 @@ export async function createListRemote(input: {
     })
     .select("*")
     .single();
-  if (error) throw error;
+  if (error) throw mapListWriteError(error);
 
   let gifts: GiftItem[] = [];
   if (input.withDemoItems) {
-    const rows = DEMO_SEED_ITEMS.map((item) => ({
-      list_id: list.id,
-      title: item.title,
-      notes: item.notes ?? null,
-      url: sanitizeItemUrl(item.url),
-      price: item.price ?? null,
-      image_url: sanitizeImageHint(item.imageHint),
-      emoji: null,
-      is_claimed: false,
-      funding_mode: item.fundingMode ?? "direct_purchase",
-      goal_minor: item.goalMinor ?? null,
-    }));
-    const { data: inserted, error: itemError } = await supabase
-      .from("items")
-      .insert(rows)
-      .select("*");
-    if (itemError) throw itemError;
-    gifts = (inserted as ItemRow[]).map((row) => mapItem(row));
+    try {
+      const rows = DEMO_SEED_ITEMS.map((item) => ({
+        list_id: list.id,
+        title: item.title,
+        notes: item.notes ?? null,
+        url: sanitizeItemUrl(item.url),
+        price: item.price ?? null,
+        image_url: sanitizeImageHint(item.imageHint),
+        emoji: null,
+        is_claimed: false,
+        funding_mode: item.fundingMode ?? "direct_purchase",
+        goal_minor: item.goalMinor ?? null,
+      }));
+      const { data: inserted, error: itemError } = await supabase
+        .from("items")
+        .insert(rows)
+        .select("*");
+      if (itemError) throw itemError;
+      gifts = (inserted as ItemRow[]).map((row) => mapItem(row));
+    } catch {
+      // List already exists — never fail Create Givy solely because sample
+      // gifts could not seed (Play rejection was create aborted entirely).
+      gifts = [];
+    }
   }
 
   return mapList(
     { ...(list as ListRow), profiles: { display_name: input.owner.name } },
     gifts,
   );
+}
+
+/** Turn Postgres/PostgREST write failures into actionable user messages. */
+export function mapListWriteError(error: { message?: string; code?: string }): Error {
+  const message = error.message ?? "Could not create list";
+  const lower = message.toLowerCase();
+  if (lower.includes("invite required") || lower.includes("beta_unlocked")) {
+    return new Error("Redeem your invite code before creating a list.");
+  }
+  if (lower.includes("permission denied")) {
+    return new Error(
+      "Could not create list (database permission). Ask the owner to apply write grants in Supabase.",
+    );
+  }
+  return new Error(message);
 }
 
 export async function updateListRemote(id: string, patch: Partial<GivyList>): Promise<void> {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_SEED_ITEMS } from "@/lib/types";
+import { mapListWriteError } from "./lists";
 import { sanitizeImageHint, sanitizeItemUrl } from "./mappers";
 
 describe("sanitizeImageHint", () => {
@@ -36,5 +37,23 @@ describe("DEMO_SEED_ITEMS remote mapping", () => {
     expect(rows.every((row) => row.url?.startsWith("https://"))).toBe(true);
     expect(rows.every((row) => row.image_url === null)).toBe(true);
     expect(rows.some((row) => row.funding_mode === "cash_fund")).toBe(true);
+  });
+});
+
+describe("mapListWriteError", () => {
+  it("maps invite / beta gate failures", () => {
+    expect(
+      mapListWriteError({
+        message: "Invite required before creating or editing lists",
+      }).message,
+    ).toMatch(/invite/i);
+  });
+
+  it("maps permission denied helper failures", () => {
+    expect(
+      mapListWriteError({
+        message: "permission denied for function is_safe_support_url",
+      }).message,
+    ).toMatch(/database permission/i);
   });
 });
