@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AddGiftForm, type GiftDraft } from "@/components/AddGiftForm";
-import { AiGiftRecommend } from "@/components/AiGiftRecommend";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Countdown } from "@/components/Countdown";
 import { EditGiftDialog } from "@/components/EditGiftDialog";
 import { ListSettingsPanel } from "@/components/ListSettingsPanel";
 import { ShareListCard } from "@/components/ShareListCard";
+import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
 import { safeHttpUrl } from "@/lib/security";
@@ -251,13 +251,12 @@ export default function ManageListPage() {
             </ul>
           )}
 
-          <AiGiftRecommend
+          <SuggestGiftsPanel
             occasion={managedList.occasion}
-            onUse={(gift) => setGiftPrefill({
-              title: gift.title,
-              notes: gift.short_description,
-              price: gift.estimated_price,
-              url: `https://www.google.com/search?q=${encodeURIComponent(gift.search_keyword)}`,
+            onUse={(suggestion) => setGiftPrefill({
+              title: suggestion.title,
+              notes: suggestion.notes ?? suggestion.why ?? "",
+              price: suggestion.priceHint,
             })}
           />
           <AddGiftForm busy={busy} prefill={giftPrefill} onAdd={addGift} />
