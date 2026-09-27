@@ -21,7 +21,6 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
   const [budgetMax, setBudgetMax] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
-  const [source, setSource] = useState<"ai" | "fallback" | null>(null);
 
   async function onSuggest(e: FormEvent) {
     e.preventDefault();
@@ -40,7 +39,6 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
       const data = (await res.json()) as {
         error?: string;
         suggestions?: GiftSuggestion[];
-        source?: "ai" | "fallback";
       };
       if (!res.ok) {
         toast.error(data.error || "Could not suggest gifts");
@@ -48,11 +46,8 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
       }
       const list = Array.isArray(data.suggestions) ? data.suggestions : [];
       setSuggestions(list);
-      setSource(data.source ?? "fallback");
       if (list.length === 0) {
         toast.message("No ideas this round — try different interests.");
-      } else if (data.source === "fallback") {
-        toast.message("Curated ideas (AI offline or unavailable)");
       } else {
         toast.success("Gift ideas ready");
       }
