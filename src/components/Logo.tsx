@@ -24,7 +24,7 @@ export function LogoMark({
   return (
     // eslint-disable-next-line @next/next/no-img-element -- exact brand raster
     <img
-      src="/givy-mark.svg"
+      src="/givy-mark.png"
       width={size}
       height={size}
       alt=""
