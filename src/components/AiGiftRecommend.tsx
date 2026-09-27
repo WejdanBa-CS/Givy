@@ -29,15 +29,11 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
   const [budgetMax, setBudgetMax] = useState("80");
   const [loading, setLoading] = useState(false);
   const [gifts, setGifts] = useState<RecommendedGift[]>([]);
-  const [source, setSource] = useState<"ai" | "catalog" | "fallback" | null>(
-    null,
-  );
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setGifts([]);
-    setSource(null);
     try {
       const res = await fetch("/api/ai/recommend-gifts", {
         method: "POST",
@@ -53,10 +49,6 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
       const data = (await res.json()) as {
         error?: string;
         gifts?: RecommendedGift[];
-        source?: "ai" | "catalog" | "fallback";
-        catalog_hits?: number;
-        openai_configured?: boolean;
-        openai_error?: string;
       };
       if (!res.ok) {
         toast.error(data.error || "Could not recommend gifts");
@@ -64,17 +56,10 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
       }
       const list = Array.isArray(data.gifts) ? data.gifts : [];
       setGifts(list);
-      setSource(data.source ?? "fallback");
       if (list.length === 0) {
         toast.message("No ideas in that budget — try widening the range.");
-      } else if (data.source === "ai") {
-        toast.success("AI recommendations ready");
-      } else if (data.openai_configured === false) {
-        toast.message("OPENAI_API_KEY is not set on the server");
-      } else if (data.openai_error) {
-        toast.message(`AI unavailable (${data.openai_error}) — showing catalog`);
       } else {
-        toast.message("Catalog picks (AI offline or unavailable)");
+        toast.success("Gift ideas ready");
       }
     } catch {
       toast.error("Could not reach the recommendation service");
@@ -85,8 +70,8 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
 
   return (
     <CollapsiblePanel
-      title="AI gift engine"
-      description={`Category + budget recommendations for a ${OCCASION_LABELS[occasion].toLowerCase()}.`}
+      title="Suggest gifts"
+      description={`Pick a category and budget for a ${OCCASION_LABELS[occasion].toLowerCase()}.`}
       className={className}
     >
       <form onSubmit={onSubmit} className="space-y-3">
@@ -200,12 +185,6 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
         </div>
       )}
 
-      {source && source !== "ai" && gifts.length > 0 && (
-        <p className="mt-3 text-xs text-ink-soft">
-          Showing catalog-backed ideas. Set OPENAI_API_KEY on the server for
-          full AI shopping.
-        </p>
-      )}
     </CollapsiblePanel>
   );
 }

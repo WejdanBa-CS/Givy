@@ -133,11 +133,6 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
         </MotionList>
       )}
 
-      {source === "fallback" && suggestions.length > 0 && (
-        <p className="mt-3 text-xs text-ink-soft">
-          Showing curated ideas. Add OPENAI_API_KEY for AI suggestions.
-        </p>
-      )}
     </CollapsiblePanel>
   );
 }
