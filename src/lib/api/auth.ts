@@ -44,6 +44,10 @@ export async function fetchSessionUser(): Promise<User | null> {
 
 /** Play WebView shell appends this token to its user-agent. */
 function isGivyPlayApp(): boolean {
+  if (typeof window === "undefined") return false;
+  if ((window as unknown as { __GIVY_PLAY_APP__?: boolean }).__GIVY_PLAY_APP__) {
+    return true;
+  }
   if (typeof navigator === "undefined") return false;
   return /GivyPlayApp/i.test(navigator.userAgent);
 }
@@ -64,7 +68,19 @@ export async function signInWithOAuth(
   const origin = window.location.origin;
   const safeNext = safeNextPath(next, "/app");
   const bridge = playOAuthBridge();
-  const playApp = isGivyPlayApp() && bridge != null;
+  const inPlayShell = isGivyPlayApp();
+
+  // Google blocks OAuth inside WebViews. The Play shell must open a Custom Tab
+  // via the native bridge, then return with com.givy.givy://auth/callback.
+  // Never fall through to a normal browser redirect while inside the shell —
+  // that leaves the user stuck on the website in Chrome.
+  if (inPlayShell && !bridge) {
+    throw new Error(
+      "Google sign-in is still starting. Wait a second and try again, or use email.",
+    );
+  }
+
+  const playApp = inPlayShell && bridge != null;
   const redirectTo = playApp
     ? `com.givy.givy://auth/callback?next=${encodeURIComponent(safeNext)}`
     : `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;

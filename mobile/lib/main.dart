@@ -336,7 +336,16 @@ class _GivyWebShellState extends State<GivyWebShell> {
               }
             });
           },
-          onPageFinished: (_) => _markMainDocumentLoaded(),
+          onPageFinished: (_) {
+            _markMainDocumentLoaded();
+            // Let the website reliably detect the Play shell (UA alone can lag
+            // behind the first paint / OAuth tap).
+            unawaited(
+              _controller.runJavaScript(
+                'window.__GIVY_PLAY_APP__=true;',
+              ),
+            );
+          },
           onHttpError: (error) {
             // Fires for every resource (images, scripts, etc.). Only treat
             // same-origin document-like 5xx responses as a shell failure.
