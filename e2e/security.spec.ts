@@ -58,6 +58,8 @@ test.describe("security smoke", () => {
     expect(res.status()).toBe(200);
     const html = await res.text();
     expect(html).toContain("com.givy.givy://auth/callback");
+    expect(html).toContain("intent://auth/callback");
+    expect(html).toContain("package=com.givy.givy");
     expect(html).toContain("code=test-oauth-code");
     expect(html).toContain("Returning to Givy");
   });
