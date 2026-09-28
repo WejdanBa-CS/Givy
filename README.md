@@ -89,12 +89,16 @@ Full checklist: [`BETA.md`](BETA.md)
 
 Or use `render.yaml` as a starting blueprint.
 
-### Affiliate commissions (Skimlinks)
+### Affiliate commissions (Skimlinks) — optional, off by default
 
-1. Approve the site `www.givy.gifts` in your [Skimlinks](https://skimlinks.com) publisher account
-2. Set `NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID` on Render (build + runtime)
-3. Redeploy — shop links via `/go/[itemId]` and on-page retailer links can earn commission
-4. Disclosure lives in Terms, Privacy, and the landing footer
+Do **not** enable until `www.givy.gifts` is approved in Skimlinks. An unapproved
+publisher ID rewrites shop links into broken redirects (browsers may download).
+
+1. Approve the site in your [Skimlinks](https://skimlinks.com) publisher account
+2. On Render set BOTH:
+   - `NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID`
+   - `NEXT_PUBLIC_SKIMLINKS_ENABLED=true`
+3. Redeploy and verify “View product” / “Shop link” open the retailer (no download)
 
 ## Scripts
 

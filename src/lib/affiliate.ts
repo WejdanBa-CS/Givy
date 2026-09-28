@@ -6,28 +6,21 @@ export function skimlinksPublisherId(): string | null {
   return id || null;
 }
 
+export function skimlinksEnabled(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_SKIMLINKS_ENABLED?.trim().toLowerCase() === "true" &&
+    Boolean(skimlinksPublisherId())
+  );
+}
+
 /**
- * Wrap a merchant URL in Skimlinks' custom redirect so server-side hops
- * (e.g. `/go/[itemId]`) still earn commission. Returns the original URL
- * when the publisher id is unset or the destination is not https.
+ * Reserved for a future server-side affiliate hop once Skimlinks is approved.
+ * Currently returns the merchant URL unchanged — wrapping through
+ * go.redirectingat.com caused browsers to download instead of opening shops.
  */
 export function affiliateOutboundUrl(
   destination: string,
-  pageUrl?: string | null,
+  _pageUrl?: string | null,
 ): string {
-  const dest = safeHttpsUrl(destination);
-  if (!dest) return destination;
-
-  const publisherId = skimlinksPublisherId();
-  if (!publisherId) return dest;
-
-  const params = new URLSearchParams({
-    id: publisherId,
-    url: dest,
-    xs: "1",
-  });
-  const sref = pageUrl ? safeHttpsUrl(pageUrl) : null;
-  if (sref) params.set("sref", sref);
-
-  return `https://go.redirectingat.com/?${params.toString()}`;
+  return safeHttpsUrl(destination) ?? destination;
 }
