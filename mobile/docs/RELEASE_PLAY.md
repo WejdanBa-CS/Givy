@@ -10,10 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.3+18`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.2+17`**.
 
-- `versionName` (1.1.3) — loads **www.givy.gifts**  
-- `versionCode` (18) — must increase on every Play upload  
+- `versionName` (1.1.2) — loads **www.givy.gifts**  
+- `versionCode` (17) — must increase on every Play upload  
 
 ### Resubmit after Broken Functionality rejection (do in order)
 
@@ -25,7 +25,7 @@ See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.3+18`**.
    cd mobile
    .\tool\build_release.ps1
    ```
-5. **Play Console** → Closed testing (or Production) → upload `1.1.3 (18)` → **Send for review**.
+5. **Play Console** → Closed testing (or Production) → upload `1.1.2 (17)` → **Send for review**.
 
 ### Play “Broken Functionality” notes
 

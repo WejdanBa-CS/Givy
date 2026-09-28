@@ -42,12 +42,8 @@ export async function fetchSessionUser(): Promise<User | null> {
   };
 }
 
-/** Play WebView shell appends this token to its user-agent. */
+/** Play WebView shell appends this token to its user-agent (already in live AAB). */
 function isGivyPlayApp(): boolean {
-  if (typeof window === "undefined") return false;
-  if ((window as unknown as { __GIVY_PLAY_APP__?: boolean }).__GIVY_PLAY_APP__) {
-    return true;
-  }
   if (typeof navigator === "undefined") return false;
   return /GivyPlayApp/i.test(navigator.userAgent);
 }
@@ -60,6 +56,19 @@ export function playOAuthBridge(): GivyOAuthBridge | null {
   return bridge?.postMessage ? bridge : null;
 }
 
+/** Brief wait — bridge exists in the live Play shell; first tap can race page load. */
+async function waitForPlayOAuthBridge(
+  timeoutMs = 1200,
+): Promise<GivyOAuthBridge | null> {
+  const start = Date.now();
+  let bridge = playOAuthBridge();
+  while (!bridge && Date.now() - start < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 50));
+    bridge = playOAuthBridge();
+  }
+  return bridge;
+}
+
 export async function signInWithOAuth(
   provider: "google" | "facebook" | "apple",
   next = "/app",
@@ -67,13 +76,12 @@ export async function signInWithOAuth(
   const supabase = createClient();
   const origin = window.location.origin;
   const safeNext = safeNextPath(next, "/app");
-  const bridge = playOAuthBridge();
   const inPlayShell = isGivyPlayApp();
+  const bridge = inPlayShell ? await waitForPlayOAuthBridge() : playOAuthBridge();
 
-  // Google blocks OAuth inside WebViews. The Play shell must open a Custom Tab
-  // via the native bridge, then return with com.givy.givy://auth/callback.
-  // Never fall through to a normal browser redirect while inside the shell —
-  // that leaves the user stuck on the website in Chrome.
+  // Google blocks OAuth inside WebViews. The already-shipped Play shell opens a
+  // Custom Tab via GivyOAuth, then returns with com.givy.givy://auth/callback.
+  // Website-only fix: never fall through to a normal Chrome redirect in-shell.
   if (inPlayShell && !bridge) {
     throw new Error(
       "Google sign-in is still starting. Wait a second and try again, or use email.",
