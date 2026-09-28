@@ -42,7 +42,7 @@ export async function fetchSessionUser(): Promise<User | null> {
   };
 }
 
-/** Play WebView shell appends this token to its user-agent. */
+/** Play WebView shell appends this token to its user-agent (already in live AAB). */
 function isGivyPlayApp(): boolean {
   if (typeof navigator === "undefined") return false;
   return /GivyPlayApp/i.test(navigator.userAgent);
@@ -56,6 +56,19 @@ export function playOAuthBridge(): GivyOAuthBridge | null {
   return bridge?.postMessage ? bridge : null;
 }
 
+/** Brief wait — bridge exists in the live Play shell; first tap can race page load. */
+async function waitForPlayOAuthBridge(
+  timeoutMs = 1200,
+): Promise<GivyOAuthBridge | null> {
+  const start = Date.now();
+  let bridge = playOAuthBridge();
+  while (!bridge && Date.now() - start < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 50));
+    bridge = playOAuthBridge();
+  }
+  return bridge;
+}
+
 export async function signInWithOAuth(
   provider: "google" | "facebook" | "apple",
   next = "/app",
@@ -63,10 +76,24 @@ export async function signInWithOAuth(
   const supabase = createClient();
   const origin = window.location.origin;
   const safeNext = safeNextPath(next, "/app");
-  const bridge = playOAuthBridge();
-  const playApp = isGivyPlayApp() && bridge != null;
+  const inPlayShell = isGivyPlayApp();
+  const bridge = inPlayShell ? await waitForPlayOAuthBridge() : playOAuthBridge();
+
+  // Google blocks OAuth inside WebViews. The already-shipped Play shell opens a
+  // Custom Tab via GivyOAuth, then returns with com.givy.givy://auth/callback.
+  // Website-only fix: never fall through to a normal Chrome redirect in-shell.
+  if (inPlayShell && !bridge) {
+    throw new Error(
+      "Google sign-in is still starting. Wait a second and try again, or use email.",
+    );
+  }
+
+  const playApp = inPlayShell && bridge != null;
+  // Always use https callback (allowed in Supabase). For Play, add play=1 so the
+  // callback route bounces into com.givy.givy:// and the live shell resumes —
+  // custom-scheme redirect_to alone often never returns from Chrome.
   const redirectTo = playApp
-    ? `com.givy.givy://auth/callback?next=${encodeURIComponent(safeNext)}`
+    ? `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}&play=1`
     : `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({

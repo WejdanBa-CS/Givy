@@ -42,6 +42,11 @@ export const metadata: Metadata = {
   description:
     "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
   applicationName: "Givy",
+  appleWebApp: {
+    capable: true,
+    title: "Givy",
+    statusBarStyle: "default",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -67,8 +72,8 @@ export const metadata: Metadata = {
     images: ["/givy-hero.jpg"],
   },
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
   },
 };
 
