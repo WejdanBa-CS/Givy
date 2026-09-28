@@ -89,6 +89,13 @@ Full checklist: [`BETA.md`](BETA.md)
 
 Or use `render.yaml` as a starting blueprint.
 
+### Affiliate commissions (Skimlinks)
+
+1. Approve the site `www.givy.gifts` in your [Skimlinks](https://skimlinks.com) publisher account
+2. Set `NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID` on Render (build + runtime)
+3. Redeploy — shop links via `/go/[itemId]` and on-page retailer links can earn commission
+4. Disclosure lives in Terms, Privacy, and the landing footer
+
 ## Scripts
 
 | Command | Description |

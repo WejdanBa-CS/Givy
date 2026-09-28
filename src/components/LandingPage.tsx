@@ -88,7 +88,18 @@ export function LandingPage() {
         <section className="bg-[radial-gradient(ellipse_80%_70%_at_50%_0%,rgba(255,205,60,.18),transparent_60%),var(--mist)] py-[clamp(3.5rem,8vw,5.5rem)] lg:py-[clamp(4.5rem,9vw,6.5rem)]"><FadeIn className="shell text-center"><h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">Ready when they are.</h2><p className="mx-auto mt-3 max-w-md text-ink-soft lg:max-w-lg lg:text-lg">Make a registry in under a minute.</p><LandingCta className="mx-auto mt-8 flex w-[min(20rem,100%)]" /></FadeIn></section>
       </main>
 
-      <footer className="shell grid gap-1.5 border-t border-line py-7 pb-8 text-center text-sm text-ink-soft"><p>© {new Date().getFullYear()} Wejdan Al Amri · Givy · All rights reserved</p><nav className="flex flex-wrap justify-center gap-x-1" aria-label="Legal"><Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/privacy">Privacy</Link><Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/terms">Terms</Link><Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/delete-account">Delete account</Link></nav></footer>
+      <footer className="shell grid gap-1.5 border-t border-line py-7 pb-8 text-center text-sm text-ink-soft">
+        <p>© {new Date().getFullYear()} Wejdan Al Amri · Givy · All rights reserved</p>
+        <p className="mx-auto max-w-xl text-xs leading-relaxed">
+          Some shop links may be affiliate links. We may earn a commission if you buy through them, at no extra cost to you. See{" "}
+          <Link className="underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/terms">Terms</Link>.
+        </p>
+        <nav className="flex flex-wrap justify-center gap-x-1" aria-label="Legal">
+          <Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/privacy">Privacy</Link>
+          <Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/terms">Terms</Link>
+          <Link className="inline-flex min-h-11 items-center px-3 underline underline-offset-3 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-coral" href="/delete-account">Delete account</Link>
+        </nav>
+      </footer>
     </div>
   );
 }

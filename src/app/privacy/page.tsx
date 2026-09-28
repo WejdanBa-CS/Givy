@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <SiteHeader />
         <main className="mx-auto mt-10 max-w-2xl animate-rise">
           <h1 className="font-display text-4xl tracking-tight text-ink">Privacy</h1>
-          <p className="mt-2 text-sm text-ink-soft">Last updated: September 11, 2026</p>
+          <p className="mt-2 text-sm text-ink-soft">Last updated: September 28, 2026</p>
 
           <div className="prose-givy mt-8 space-y-6 text-[15px] leading-relaxed text-ink-soft">
             <p>
@@ -32,6 +32,12 @@ export default function PrivacyPage() {
                   Usage analytics via Google Analytics (pages visited, device and
                   approximate location). This is aggregated traffic data, not your
                   gift lists or shipping address.
+                </li>
+                <li>
+                  When you open a shop link, our affiliate partner (Skimlinks) may
+                  receive the destination retailer URL and basic click context so
+                  commissions can be attributed. See their privacy policy for
+                  details.
                 </li>
               </ul>
             </section>
@@ -60,6 +66,14 @@ export default function PrivacyPage() {
                   rel="noopener noreferrer"
                 >
                   Google’s privacy policy
+                </a>
+                . Affiliate click handling is provided by Skimlinks; see{" "}
+                <a
+                  className="font-semibold text-coral-deep underline-offset-2 hover:underline"
+                  href="https://skimlinks.com/privacy-policy/"
+                  rel="noopener noreferrer"
+                >
+                  Skimlinks’ privacy policy
                 </a>
                 .
               </p>

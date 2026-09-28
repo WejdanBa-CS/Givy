@@ -13,7 +13,7 @@ import { ShareListCard } from "@/components/ShareListCard";
 import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
-import { safeHttpUrl } from "@/lib/security";
+import { shopHref } from "@/lib/security";
 import type { GiftItem, GivyList } from "@/lib/types";
 import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
@@ -232,12 +232,12 @@ export default function ManageListPage() {
           ) : (
             <ul className="wish-list stagger">
               {managedList.items.map((item) => {
-                const buyUrl = item.url ? safeHttpUrl(item.url) : null;
+                const buyUrl = shopHref(item);
                 return (
                   <li key={item.id}>
                     <WishItem
                       item={item}
-                      footer={buyUrl && !item.purchased ? <a href={buyUrl} target="_blank" rel="noopener noreferrer" className="wish-item-link">View product</a> : null}
+                      footer={buyUrl && !item.purchased ? <a href={buyUrl} {...(buyUrl.startsWith("http") ? { target: "_blank" } : {})} rel="sponsored noopener noreferrer" className="wish-item-link">View product</a> : null}
                       actions={!item.purchased ? (
                         <>
                           <button type="button" className="btn btn-ghost !px-2 !py-1 text-sm" onClick={() => setEditingItem(item)}>Edit</button>

@@ -373,7 +373,7 @@ function SharedGivyInner() {
                           <Button asChild variant="secondary" size="sm">
                             <a
                               href={buyHref}
-                              rel="noopener noreferrer"
+                              rel="sponsored noopener noreferrer"
                               {...(buyHref.startsWith("http")
                                 ? { target: "_blank" }
                                 : {})}
@@ -392,6 +392,10 @@ function SharedGivyInner() {
           </ul>
           <p className="mt-8 mb-4 text-center text-sm text-ink-soft">
             Ensure you received this link directly from the gift receiver.
+          </p>
+          <p className="mb-4 text-center text-xs text-ink-soft">
+            Shop links may be affiliate links — we may earn a commission at no
+            extra cost to you.
           </p>
         </main>
       </div>

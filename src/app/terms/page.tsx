@@ -13,7 +13,7 @@ export default function TermsPage() {
         <SiteHeader />
         <main className="mx-auto mt-10 max-w-2xl animate-rise">
           <h1 className="font-display text-4xl tracking-tight text-ink">Terms</h1>
-          <p className="mt-2 text-sm text-ink-soft">Last updated: September 11, 2026</p>
+          <p className="mt-2 text-sm text-ink-soft">Last updated: September 28, 2026</p>
 
           <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-ink-soft">
             <p>
@@ -68,6 +68,17 @@ export default function TermsPage() {
                   LICENSE
                 </a>
                 .
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-display text-2xl text-ink">Affiliate links</h2>
+              <p className="mt-2">
+                Some product links on Givy may be affiliate links. If you buy
+                through them, Givy may earn a commission at no extra cost to you.
+                We use partners such as Skimlinks to rewrite eligible retailer
+                links. Commissions help keep the service running; they do not
+                change the price you pay the merchant.
               </p>
             </section>
 
