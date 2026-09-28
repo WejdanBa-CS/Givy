@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { affiliateOutboundUrl } from "@/lib/affiliate";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { isCloudItemId, safeHttpsUrl } from "@/lib/security";
@@ -7,7 +6,7 @@ import { isCloudItemId, safeHttpsUrl } from "@/lib/security";
 export const runtime = "nodejs";
 
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ itemId: string }> },
 ) {
   const { itemId } = await params;
@@ -26,7 +25,9 @@ export async function GET(
   if (!buy) {
     notFound();
   }
-  // Monetize via Skimlinks when configured; otherwise open the merchant URL.
-  const outbound = affiliateOutboundUrl(buy, req.headers.get("referer"));
-  return Response.redirect(outbound, 302);
+  // Direct merchant redirect. Skimlinks sitewide JS (when configured) can
+  // rewrite on-page http(s) links; do not wrap server redirects through
+  // go.redirectingat.com — broken/unapproved Skimlinks often makes browsers
+  // download instead of opening the shop.
+  return Response.redirect(buy, 302);
 }

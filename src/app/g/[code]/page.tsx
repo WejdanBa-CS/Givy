@@ -373,7 +373,7 @@ function SharedGivyInner() {
                           <Button asChild variant="secondary" size="sm">
                             <a
                               href={buyHref}
-                              rel="sponsored noopener noreferrer"
+                              rel="noopener noreferrer"
                               {...(buyHref.startsWith("http")
                                 ? { target: "_blank" }
                                 : {})}

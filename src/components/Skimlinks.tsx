@@ -1,13 +1,20 @@
 import Script from "next/script";
 
 /**
- * Skimlinks site-wide link affiliate rewriter.
- * Set NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID on Render (e.g. 307683X1795970).
- * Leave unset to skip loading (local / no affiliate).
+ * Optional Skimlinks sitewide rewriter.
+ *
+ * Requires BOTH:
+ * - NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID (from Skimlinks install)
+ * - NEXT_PUBLIC_SKIMLINKS_ENABLED=true
+ *
+ * Leave disabled until the publisher domain is approved. A bad/unapproved
+ * install rewrites shop links into broken redirects that browsers download.
  */
 export function Skimlinks() {
+  const enabled =
+    process.env.NEXT_PUBLIC_SKIMLINKS_ENABLED?.trim().toLowerCase() === "true";
   const publisherId = process.env.NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID?.trim();
-  if (!publisherId) return null;
+  if (!enabled || !publisherId) return null;
 
   return (
     <Script

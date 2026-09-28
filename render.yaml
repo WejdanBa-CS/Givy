@@ -31,9 +31,11 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SENTRY_ENVIRONMENT
         value: production
-      # Skimlinks publisher ID — set in dashboard for affiliate commissions
+      # Skimlinks — leave unset/false until publisher domain is approved
       - key: NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID
         sync: false
+      - key: NEXT_PUBLIC_SKIMLINKS_ENABLED
+        value: "false"
 
   - type: web
     name: givy-staging
