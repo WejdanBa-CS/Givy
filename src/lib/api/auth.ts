@@ -89,8 +89,11 @@ export async function signInWithOAuth(
   }
 
   const playApp = inPlayShell && bridge != null;
+  // Always use https callback (allowed in Supabase). For Play, add play=1 so the
+  // callback route bounces into com.givy.givy:// and the live shell resumes —
+  // custom-scheme redirect_to alone often never returns from Chrome.
   const redirectTo = playApp
-    ? `com.givy.givy://auth/callback?next=${encodeURIComponent(safeNext)}`
+    ? `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}&play=1`
     : `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({

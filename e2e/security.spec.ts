@@ -48,6 +48,20 @@ test.describe("security smoke", () => {
     expect(location).not.toMatch(/localhost:10000/);
   });
 
+  test("auth callback play=1 handoff uses native scheme without consuming code", async ({
+    request,
+  }) => {
+    const res = await request.get(
+      "/auth/callback?code=test-oauth-code&next=%2Fapp&play=1",
+      { maxRedirects: 0 },
+    );
+    expect([302, 303, 307, 308]).toContain(res.status());
+    const location = res.headers().location ?? "";
+    expect(location.startsWith("com.givy.givy://auth/callback")).toBe(true);
+    expect(location).toContain("code=test-oauth-code");
+    expect(location).toContain("next=");
+  });
+
   test("protocol-relative next= is not used as a link target", async ({
     page,
   }) => {
