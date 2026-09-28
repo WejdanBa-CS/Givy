@@ -55,11 +55,11 @@ test.describe("security smoke", () => {
       "/auth/callback?code=test-oauth-code&next=%2Fapp&play=1",
       { maxRedirects: 0 },
     );
-    expect([302, 303, 307, 308]).toContain(res.status());
-    const location = res.headers().location ?? "";
-    expect(location.startsWith("com.givy.givy://auth/callback")).toBe(true);
-    expect(location).toContain("code=test-oauth-code");
-    expect(location).toContain("next=");
+    expect(res.status()).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("com.givy.givy://auth/callback");
+    expect(html).toContain("code=test-oauth-code");
+    expect(html).toContain("Returning to Givy");
   });
 
   test("protocol-relative next= is not used as a link target", async ({
