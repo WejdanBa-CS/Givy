@@ -23,8 +23,9 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
+      # Public launch — invite gate off (also run supabase/ops/open_public_signup.sql)
       - key: NEXT_PUBLIC_BETA_REQUIRE_INVITE
-        value: "true"
+        value: "false"
       - key: NEXT_PUBLIC_ALLOW_GUEST
         value: "false"
       - key: NEXT_PUBLIC_SENTRY_DSN
