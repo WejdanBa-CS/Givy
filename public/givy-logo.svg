@@ -1,15 +1,10 @@
 <svg width="512" height="512" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Givy trademark-style mark: red box, white ribbon, green leaves, gold knot -->
-  <rect width="64" height="64" rx="14" fill="#FFFFFF"/>
-  <!-- body -->
+  <!-- Clean Givy mark — solid ribbon (no texture/noise) -->
+  <rect width="64" height="64" rx="14" fill="#FEF6EE"/>
   <rect x="14" y="28" width="36" height="28" fill="#E8391E"/>
-  <!-- lid -->
-  <rect x="11" y="24" width="42" height="8" fill="#D32F1A"/>
-  <!-- vertical ribbon -->
+  <rect x="11" y="24" width="42" height="8" fill="#C62818"/>
   <rect x="29" y="24" width="6" height="32" fill="#FFFFFF"/>
-  <!-- leaf bow -->
   <ellipse cx="22" cy="16" rx="10" ry="7" fill="#2F6B3A" transform="rotate(-28 22 16)"/>
   <ellipse cx="42" cy="16" rx="10" ry="7" fill="#2F6B3A" transform="rotate(28 42 16)"/>
-  <!-- gold knot -->
   <circle cx="32" cy="20" r="4" fill="#F5C518"/>
 </svg>
