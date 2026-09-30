@@ -5,8 +5,11 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import 'force_update.dart';
 
 /// Live Givy website — this Play app is a native shell around production.
 /// Override for local testing, e.g. `--dart-define=GIVY_URL=http://10.0.2.2:3000`
@@ -43,11 +46,14 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  runApp(const GivyPlayApp());
+  final forceUpdate = await checkForceUpdate(kGivyUrl);
+  runApp(GivyPlayApp(forceUpdate: forceUpdate));
 }
 
 class GivyPlayApp extends StatelessWidget {
-  const GivyPlayApp({super.key});
+  const GivyPlayApp({super.key, this.forceUpdate = ForceUpdatePolicy.none});
+
+  final ForceUpdatePolicy forceUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,9 @@ class GivyPlayApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const GivyWebShell(),
+      home: forceUpdate.required
+          ? _ForceUpdateScreen(policy: forceUpdate)
+          : const GivyWebShell(),
     );
   }
 }
@@ -312,11 +320,13 @@ class _GivyWebShellState extends State<GivyWebShell> {
   }
 
   Future<void> _applyPlayUserAgentAndLoad() async {
+    final package = await PackageInfo.fromPlatform();
+    final playToken = 'GivyPlayApp/${package.version}';
     try {
       final defaultUa = await _controller.getUserAgent() ?? '';
-      await _controller.setUserAgent('$defaultUa GivyPlayApp/1.0.0');
+      await _controller.setUserAgent('$defaultUa $playToken');
     } catch (_) {
-      await _controller.setUserAgent('GivyPlayApp/1.0.0');
+      await _controller.setUserAgent(playToken);
     }
 
     final start = Uri.tryParse(widget.initialUrl);
@@ -469,6 +479,68 @@ class _GivyWebShellState extends State<GivyWebShell> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ForceUpdateScreen extends StatelessWidget {
+  const _ForceUpdateScreen({required this.policy});
+
+  final ForceUpdatePolicy policy;
+
+  Future<void> _openStore() async {
+    final uri = Uri.parse(policy.storeUrl);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFEF6EE),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.system_update_alt_rounded,
+                  size: 56,
+                  color: Color(0xFFE8391E),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Update required',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  policy.message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.45,
+                    color: Colors.black.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                FilledButton(
+                  onPressed: _openStore,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFE8391E),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                  ),
+                  child: const Text('Update on Google Play'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
