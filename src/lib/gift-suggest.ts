@@ -1,5 +1,5 @@
 import type { Occasion } from "@/lib/types";
-import { OCCASION_LABELS } from "@/lib/types";
+import { OCCASION_AI_CONTEXT, OCCASION_LABELS } from "@/lib/types";
 import { resolveAiBaseUrl } from "@/lib/api-security";
 import { CURATED_GIFT_SUGGESTIONS } from "@/lib/ai/catalog";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
@@ -236,8 +236,10 @@ function buildPrompt(input: SuggestInput): string {
 
   return [
     `Suggest ${input.count} unique, thoughtful gift ideas for a ${occasionLabel}.`,
+    `Cultural context (Western US/EU registries): ${OCCASION_AI_CONTEXT[input.occasion]}`,
     interests,
     budget,
+    "Prefer gifts easy to buy on Amazon US, Target, Etsy, or similar Western shops.",
     "Avoid generic gift cards unless truly fitting. Prefer specific, buyable ideas.",
     "Return ONLY valid JSON: {\"suggestions\":[{\"title\":\"...\",\"notes\":\"...\",\"priceHint\":0,\"why\":\"...\"}]}",
     "priceHint is approximate USD integer. notes and why are short plain text.",
@@ -273,7 +275,7 @@ async function callOpenAiCompatible(
           {
             role: "system",
             content:
-              "You are a gift stylist for Givy, a wishlist app. Reply with JSON only. Never include HTML or markdown.",
+              "You are a gift stylist for Givy, a Western wishlist/registry app (US & Europe). Reply with JSON only. Never include HTML or markdown. Match baby showers, weddings, holidays, and graduations to local gift culture.",
           },
           { role: "user", content: buildPrompt(input) },
         ],

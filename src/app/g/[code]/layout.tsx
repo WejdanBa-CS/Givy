@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
-import { siteUrl } from "@/lib/site";
+import {
+  buildShareMetadata,
+  fallbackShareMetadata,
+} from "@/lib/share-preview";
 
 type Props = { children: React.ReactNode; params: Promise<{ code: string }> };
 
@@ -11,10 +14,7 @@ export async function generateMetadata({
   params: Promise<{ code: string }>;
 }): Promise<Metadata> {
   const { code } = await params;
-  const fallback: Metadata = {
-    title: "Shared wishlist",
-    description: "A private Givy list. Claim gifts without awkward duplicates.",
-  };
+  const fallback = fallbackShareMetadata();
   if (!isSupabaseConfigured() || !code) return fallback;
   try {
     const supabase = await createClient();
@@ -27,17 +27,12 @@ export async function generateMetadata({
       occasion?: string;
     } | null;
     if (!payload?.title) return fallback;
-    const description = `${payload.owner_name ?? "Someone"} shared a ${payload.occasion ?? "gift"} list on Givy.`;
-    return {
+    return buildShareMetadata({
       title: payload.title,
-      description,
-      openGraph: {
-        title: payload.title,
-        description,
-        url: `${siteUrl()}/g/${code}`,
-        images: ["/givy-hero.jpg"],
-      },
-    };
+      ownerName: payload.owner_name,
+      occasion: payload.occasion,
+      shareCode: code,
+    });
   } catch {
     return fallback;
   }

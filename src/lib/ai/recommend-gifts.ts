@@ -1,5 +1,5 @@
 import type { Occasion } from "@/lib/types";
-import { OCCASION_LABELS } from "@/lib/types";
+import { OCCASION_AI_CONTEXT, OCCASION_LABELS } from "@/lib/types";
 import { resolveAiBaseUrl } from "@/lib/api-security";
 import { plainText } from "@/lib/gift-suggest";
 import { createRateLimiter } from "./rate-limit";
@@ -328,12 +328,14 @@ type ChatMessage = {
 
 function systemPrompt(input: RecommendInput): string {
   return [
-    "You are an expert personal shopper for Givy, a gift wishlist app.",
+    "You are an expert personal shopper for Givy, a gift wishlist / registry app used heavily in the US and Western Europe.",
     "Recommend thoughtful, buyable gifts that STRICTLY fit the category and budget.",
     `Category: ${GIFT_CATEGORY_LABELS[input.category]} (${input.category}).`,
     `Occasion: ${OCCASION_LABELS[input.occasion]}.`,
+    `Occasion guidance: ${OCCASION_AI_CONTEXT[input.occasion]}`,
     `Budget: $${input.budget_min}–$${input.budget_max} USD inclusive. Every estimated_price MUST be inside this range.`,
     `Return exactly ${input.count} gift ideas.`,
+    "Prefer products easy to find on Amazon US, Target, Etsy, or similar Western retailers via search_keyword.",
     "Use supplied catalog matches whenever they fit. If search_gift_catalog is available, call it before your final answer.",
     "After tool results, respond with ONLY valid JSON (no markdown):",
     '{"gifts":[{"title":"...","short_description":"...","estimated_price":0,"search_keyword":"...","catalog_id":"optional-id-from-catalog"}]}',

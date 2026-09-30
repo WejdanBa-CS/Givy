@@ -101,9 +101,9 @@ export interface ActivityEvent {
 
 export const OCCASION_LABELS: Record<Occasion, string> = {
   birthday: "Birthday",
-  wedding: "Wedding",
+  wedding: "Wedding registry",
   holiday: "Holiday",
-  baby: "Baby",
+  baby: "Baby shower",
   graduation: "Graduation",
   creator: "Creator / content",
   other: "Just because",
@@ -118,6 +118,28 @@ export const OCCASION_EMOJI: Record<Occasion, string> = {
   creator: "🎥",
   other: "✨",
 };
+
+/** Western cultural framing for AI gift recommendations (English-first markets). */
+export const OCCASION_AI_CONTEXT: Record<Occasion, string> = {
+  birthday:
+    "Classic birthday wishlist. Prefer personal, fun, useful gifts. Avoid generic gift cards unless interests scream for them.",
+  wedding:
+    "US/EU wedding or bridal registry tone. Prefer home, couple, honeymoon-adjacent, and lasting gifts. Think registry — not gag gifts.",
+  holiday:
+    "Western winter holidays: Christmas, Hanukkah, Thanksgiving host gifts, Secret Santa, and German Nikolaus/Weihnachten-style useful treats. Prefer wrap-ready ideas.",
+  baby:
+    "Baby shower / newborn registry. Prefer practical nursery, feeding, comfort, and parent-relief gifts. Skip alcohol and age-inappropriate items.",
+  graduation:
+    "Graduation / new chapter. Prefer career-start, dorm/apartment, travel, and celebratory keepsakes.",
+  creator:
+    "Creator / influencer wishlist. Prefer gear, desk setup, and audience-friendly support gifts.",
+  other:
+    "Open-ended wishlist. Stay thoughtful and buyable; match any stated interests closely.",
+};
+
+export function isOccasionKey(value: string): value is Occasion {
+  return Object.prototype.hasOwnProperty.call(OCCASION_LABELS, value);
+}
 
 export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
   high: "High priority",
