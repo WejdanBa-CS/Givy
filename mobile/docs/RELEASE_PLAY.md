@@ -10,18 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.5+20`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.4+19`**.
 
-- `versionName` (1.1.5) — loads **www.givy.gifts**; UA tag `GivyPlayApp/1.1.5`
-- `versionCode` (20) — must increase on every Play upload  
-
-### Force update (block old installs)
-
-1. Website file: `public/play-min-version.json` (`minVersionName` / `minVersionCode`)
-2. Outdated Play WebViews (including legacy `GivyPlayApp/1.0.0`) are redirected to `/update-required`
-3. Native shell also checks the JSON on launch (from **1.1.5+** builds)
-
-To raise the floor later: bump `minVersionCode` in that JSON (and `PLAY_MIN_VERSION` env if set) — no AAB required for the threshold change once users are on 1.1.5+.
+- `versionName` (1.1.4) — loads **www.givy.gifts**  
+- `versionCode` (19) — must increase on every Play upload  
 
 ### Resubmit after Broken Functionality rejection (do in order)
 
@@ -33,7 +25,7 @@ To raise the floor later: bump `minVersionCode` in that JSON (and `PLAY_MIN_VERS
    cd mobile
    .\tool\build_release.ps1
    ```
-5. **Play Console** → Closed testing (or Production) → upload `1.1.5 (20)` → **Send for review**.
+5. **Play Console** → Closed testing (or Production) → upload `1.1.4 (19)` → **Send for review**.
 
 ### Play “Broken Functionality” notes
 
