@@ -35,8 +35,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
+  // Keep the browser/bookmark title short — marketing copy lives in Open Graph only.
   title: {
-    default: "Givy · One list. Zero awkward duplicates.",
+    default: "Givy",
     template: "%s · Givy",
   },
   description:
@@ -72,8 +73,11 @@ export const metadata: Metadata = {
     images: ["/givy-hero.jpg"],
   },
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
-    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+    // Cache-bust so re-added bookmarks pick up the current trademark mark.
+    icon: [{ url: "/icon.png?v=20260930", type: "image/png", sizes: "512x512" }],
+    apple: [
+      { url: "/apple-icon.png?v=20260930", type: "image/png", sizes: "180x180" },
+    ],
   },
 };
 
