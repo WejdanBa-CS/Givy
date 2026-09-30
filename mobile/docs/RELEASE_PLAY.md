@@ -10,10 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.2+17`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.4+19`**.
 
-- `versionName` (1.1.2) — loads **www.givy.gifts**  
-- `versionCode` (17) — must increase on every Play upload  
+- `versionName` (1.1.4) — loads **www.givy.gifts**  
+- `versionCode` (19) — must increase on every Play upload  
 
 ### Resubmit after Broken Functionality rejection (do in order)
 
@@ -25,7 +25,7 @@ See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.2+17`**.
    cd mobile
    .\tool\build_release.ps1
    ```
-5. **Play Console** → Closed testing (or Production) → upload `1.1.2 (17)` → **Send for review**.
+5. **Play Console** → Closed testing (or Production) → upload `1.1.4 (19)` → **Send for review**.
 
 ### Play “Broken Functionality” notes
 
@@ -51,6 +51,12 @@ com.givy.givy://auth/callback
 ```
 
 (Keep `https://www.givy.gifts/auth/callback` and the legacy `https://givy.onrender.com/auth/callback`.)
+
+## Facebook Sign-In (Play)
+
+Same Custom Tab bridge as Google. Facebook often hands off to the Facebook app and never returns — **1.1.4+19** keeps the flow in Chrome Custom Tabs (`preferEphemeral` + Chrome-first) and the website forces `display=popup` for Play.
+
+**Meta checklist:** Facebook Login → Settings → **Embedded Browser OAuth Login = Yes**, Valid OAuth Redirect URI = Supabase callback, App Domains include `givy.gifts` and `YOUR_REF.supabase.co`.
 
 ## App Links (Digital Asset Links)
 

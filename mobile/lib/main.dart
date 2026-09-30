@@ -202,21 +202,43 @@ class _GivyWebShellState extends State<GivyWebShell> {
     _loadGivy(uri);
   }
 
-  Future<void> _runOAuthSession(String authorizeUrl, String next) async {
+  Future<void> _runOAuthSession(
+    String authorizeUrl,
+    String next, {
+    String provider = 'google',
+  }) async {
     if (_oauthBusy) return;
     _oauthBusy = true;
+    final label = provider == 'facebook'
+        ? 'Facebook'
+        : provider == 'apple'
+            ? 'Apple'
+            : 'Google';
     try {
+      // Ephemeral + Chrome-first keeps Facebook inside Custom Tabs instead of
+      // handing off to the Facebook app (which never returns to Givy).
       final result = await FlutterWebAuth2.authenticate(
         url: authorizeUrl,
         callbackUrlScheme: kOAuthScheme,
+        options: const FlutterWebAuth2Options(
+          preferEphemeral: true,
+          customTabsPackageOrder: [
+            'com.android.chrome',
+            'com.chrome.beta',
+            'com.chrome.dev',
+            'com.chrome.canary',
+          ],
+        ),
       );
       final returned = Uri.parse(result);
       final code = returned.queryParameters['code'];
       if (code == null || code.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Google sign-in did not return a code. Try email.'),
+            SnackBar(
+              content: Text(
+                '$label sign-in did not return a code. Try email.',
+              ),
             ),
           );
         }
@@ -229,8 +251,8 @@ class _GivyWebShellState extends State<GivyWebShell> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Sign-in failed. Add com.givy.givy://auth/callback in Supabase, '
-              'or use email. (${e.message ?? e.code})',
+              '$label sign-in failed. Try email/password instead. '
+              '(${e.message ?? e.code})',
             ),
           ),
         );
@@ -238,8 +260,8 @@ class _GivyWebShellState extends State<GivyWebShell> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign-in failed. Try email/password instead.'),
+          SnackBar(
+            content: Text('$label sign-in failed. Try email/password instead.'),
           ),
         );
       }
@@ -253,10 +275,12 @@ class _GivyWebShellState extends State<GivyWebShell> {
       final raw = message.message.trim();
       String authorizeUrl;
       var next = '/app';
+      var provider = 'google';
       if (raw.startsWith('{')) {
         final map = jsonDecode(raw) as Map<String, dynamic>;
         authorizeUrl = map['url'] as String? ?? '';
         next = map['next'] as String? ?? '/app';
+        provider = map['provider'] as String? ?? 'google';
       } else {
         authorizeUrl = raw;
       }
@@ -266,7 +290,7 @@ class _GivyWebShellState extends State<GivyWebShell> {
           authorizeUrl.isEmpty) {
         return;
       }
-      unawaited(_runOAuthSession(authorizeUrl, next));
+      unawaited(_runOAuthSession(authorizeUrl, next, provider: provider));
     } catch (_) {
       /* ignore malformed bridge payloads */
     }

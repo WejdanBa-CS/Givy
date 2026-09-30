@@ -75,6 +75,22 @@ async function waitForPlayOAuthBridge(
   return bridge;
 }
 
+/** Keep Facebook inside the browser dialog so Android does not hand off to the
+ * Facebook app (that breaks Custom Tab return into the Play shell). */
+function tunePlayOAuthAuthorizeUrl(
+  provider: "google" | "facebook" | "apple",
+  url: string,
+): string {
+  if (provider !== "facebook") return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("display", "popup");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 export async function signInWithOAuth(
   provider: "google" | "facebook" | "apple",
   next = "/app",
@@ -92,7 +108,7 @@ export async function signInWithOAuth(
 
   if (shouldWaitForBridge && !bridge) {
     throw new Error(
-      "Google sign-in is still starting. Wait a second and try again, or use email.",
+      "Sign-in is still starting. Wait a second and try again, or use email.",
     );
   }
 
@@ -111,7 +127,10 @@ export async function signInWithOAuth(
   });
   if (error) throw error;
   if (playApp && data.url && bridge) {
-    bridge.postMessage(JSON.stringify({ url: data.url, next: safeNext }));
+    const url = tunePlayOAuthAuthorizeUrl(provider, data.url);
+    bridge.postMessage(
+      JSON.stringify({ url, next: safeNext, provider }),
+    );
   }
 }
 
