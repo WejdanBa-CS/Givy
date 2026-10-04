@@ -79,8 +79,8 @@ services:
         sync: false
 
   # Optional: daily reminder ping (requires a paid cron-capable plan on Render).
-  # Prefer GitHub Actions workflow `.github/workflows/event-reminders-cron.yml`
-  # on free tiers — enable secrets only after SQL 015–017 are applied.
+  # Prefer GitHub Actions: copy `docs/event-reminders-cron.workflow.yml`
+  # into `.github/workflows/` on free tiers — enable secrets only after SQL 015–017.
   # - type: cron
   #   name: givy-event-reminders
   #   runtime: node
