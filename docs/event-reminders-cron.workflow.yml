@@ -1,3 +1,6 @@
+# Copy this file to .github/workflows/event-reminders-cron.yml after merge
+# (requires a GitHub token with workflow scope to commit under .github/workflows).
+
 # Daily friend-event reminders. Safe when secrets are unset (job no-ops).
 # Enable after production SQL + CRON_SECRET are ready:
 #   Repo → Settings → Secrets: CRON_SECRET, GIVY_APP_URL (https://www.givy.gifts)

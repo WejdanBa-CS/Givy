@@ -33,7 +33,7 @@ Reviewed locally. **No production apply / deploy performed.**
 
 | Item | Notes |
 |------|--------|
-| GitHub Actions cron | `.github/workflows/event-reminders-cron.yml` — no-ops until secrets `CRON_SECRET` + `GIVY_APP_URL` are set |
+| GitHub Actions cron | `docs/event-reminders-cron.workflow.yml (copy into .github/workflows/ after merge)` — no-ops until secrets `CRON_SECRET` + `GIVY_APP_URL` are set |
 | Render env slots | `render.yaml` lists `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `FCM_SERVER_KEY` (sync: false) |
 | Local cron ping | `npm run ping:reminders` |
 | Bottom nav | Friends / calendar / settings keep the app shell nav |
