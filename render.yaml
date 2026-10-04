@@ -37,6 +37,13 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SKIMLINKS_ENABLED
         value: "false"
+      # v2 friend-event reminders (set in dashboard when launching social calendar)
+      - key: CRON_SECRET
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FCM_SERVER_KEY
+        sync: false
 
   - type: web
     name: givy-staging
@@ -64,3 +71,24 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SENTRY_ENVIRONMENT
         value: staging
+      - key: CRON_SECRET
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FCM_SERVER_KEY
+        sync: false
+
+  # Optional: daily reminder ping (requires a paid cron-capable plan on Render).
+  # Prefer GitHub Actions workflow `.github/workflows/event-reminders-cron.yml`
+  # on free tiers — enable secrets only after SQL 015–017 are applied.
+  # - type: cron
+  #   name: givy-event-reminders
+  #   runtime: node
+  #   plan: starter
+  #   region: oregon
+  #   schedule: "0 8 * * *"
+  #   buildCommand: "true"
+  #   startCommand: 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://www.givy.gifts/api/cron/event-reminders'
+  #   envVars:
+  #     - key: CRON_SECRET
+  #       sync: false

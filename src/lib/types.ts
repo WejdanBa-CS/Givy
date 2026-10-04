@@ -19,6 +19,11 @@ export type FundingMode = "direct_purchase" | "cash_fund" | "locker_affiliate";
 
 export type CampaignState = "open" | "funded" | "closed" | "paid_out";
 
+/** Who can see calendar / wishlists (Givy v2 social). */
+export type PrivacyVisibility = "private" | "friends" | "public";
+
+export type FriendshipStatus = "pending" | "accepted";
+
 export interface User {
   id: string;
   name: string;
@@ -26,6 +31,40 @@ export interface User {
   provider: AuthProvider;
   avatarHue: number;
   betaUnlocked?: boolean;
+  username?: string | null;
+  calendarVisibility?: PrivacyVisibility;
+  wishlistVisibility?: PrivacyVisibility;
+  /** IANA timezone for friend-event reminders (e.g. Asia/Riyadh). */
+  timezone?: string;
+}
+
+export interface Friendship {
+  id: string;
+  requesterId: string;
+  addresseeId: string;
+  status: FriendshipStatus;
+  createdAt: string;
+  updatedAt: string;
+  /** Populated when listing: the other person. */
+  peer?: {
+    id: string;
+    name: string;
+    username?: string | null;
+    avatarHue: number;
+  };
+}
+
+export interface CalendarEvent {
+  id: string;
+  userId: string;
+  name: string;
+  eventDate: string;
+  listId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** True when this event belongs to a friend (not the current user). */
+  isFriendEvent?: boolean;
+  ownerName?: string;
 }
 
 export interface GiftItem {

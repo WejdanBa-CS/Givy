@@ -20,6 +20,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:reminders": "vitest run src/lib/reminders",
+    "dry-run:reminders": "node scripts/dry-run-reminders.mjs",
+    "ping:reminders": "node scripts/ping-reminders-cron.mjs",
     "test:e2e": "playwright test",
     "test:e2e:security": "playwright test e2e/security.spec.ts"
   },

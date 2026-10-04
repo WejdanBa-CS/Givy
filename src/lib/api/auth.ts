@@ -1,7 +1,7 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { normalizeInviteCode } from "@/lib/security";
 import { safeNextPath } from "@/lib/safe-next";
-import type { AuthProvider, User } from "@/lib/types";
+import type { AuthProvider, PrivacyVisibility, User } from "@/lib/types";
 
 export { isSupabaseConfigured };
 
@@ -13,11 +13,47 @@ export async function fetchSessionUser(): Promise<User | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  // Prefer v2 columns; fall back if migrations 015/016 not applied yet.
+  let profile: {
+    display_name: string;
+    email: string | null;
+    avatar_hue: number;
+    beta_unlocked: boolean;
+    username?: string | null;
+    calendar_visibility?: PrivacyVisibility;
+    wishlist_visibility?: PrivacyVisibility;
+    timezone?: string | null;
+  } | null = null;
+
+  const full = await supabase
     .from("profiles")
-    .select("display_name, email, avatar_hue, beta_unlocked")
+    .select(
+      "display_name, email, avatar_hue, beta_unlocked, username, calendar_visibility, wishlist_visibility, timezone",
+    )
     .eq("id", user.id)
     .maybeSingle();
+
+  if (!full.error) {
+    profile = full.data;
+  } else {
+    const mid = await supabase
+      .from("profiles")
+      .select(
+        "display_name, email, avatar_hue, beta_unlocked, username, calendar_visibility, wishlist_visibility",
+      )
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!mid.error) {
+      profile = mid.data;
+    } else {
+      const basic = await supabase
+        .from("profiles")
+        .select("display_name, email, avatar_hue, beta_unlocked")
+        .eq("id", user.id)
+        .maybeSingle();
+      profile = basic.data;
+    }
+  }
 
   const providerRaw =
     (user.app_metadata?.provider as string | undefined) ??
@@ -39,7 +75,41 @@ export async function fetchSessionUser(): Promise<User | null> {
     provider,
     avatarHue: profile?.avatar_hue ?? 180,
     betaUnlocked: Boolean(profile?.beta_unlocked),
+    username: profile?.username ?? null,
+    calendarVisibility: profile?.calendar_visibility ?? "friends",
+    wishlistVisibility: profile?.wishlist_visibility ?? "friends",
+    timezone: profile?.timezone ?? "UTC",
   };
+}
+
+export async function updatePrivacySettings(input: {
+  username?: string | null;
+  calendarVisibility?: PrivacyVisibility;
+  wishlistVisibility?: PrivacyVisibility;
+  timezone?: string;
+}): Promise<void> {
+  if (!isSupabaseConfigured()) throw new Error("Supabase is not configured.");
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  const payload: Record<string, unknown> = {};
+  if (input.username !== undefined) {
+    const u = input.username?.trim() ?? "";
+    payload.username = u.length ? u.toLowerCase() : null;
+  }
+  if (input.calendarVisibility) payload.calendar_visibility = input.calendarVisibility;
+  if (input.wishlistVisibility) payload.wishlist_visibility = input.wishlistVisibility;
+  if (input.timezone !== undefined) {
+    const tz = input.timezone.trim() || "UTC";
+    payload.timezone = tz.slice(0, 64);
+  }
+  if (Object.keys(payload).length === 0) return;
+
+  const { error } = await supabase.from("profiles").update(payload).eq("id", user.id);
+  if (error) throw new Error(error.message);
 }
 
 /** Play WebView shell appends this token to its user-agent (already in live AAB). */

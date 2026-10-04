@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const tabs = [
   { href: "/app", label: "Home", match: (path: string) => path === "/app", icon: HomeIcon },
-  { href: "/app/lists", label: "Lists", match: (path: string) => { if (path.startsWith("/app/lists")) return true; return !["/app", "/app/create", "/app/activity", "/app/profile", "/app/giveaways"].includes(path) && /^\/app\/[^/]+$/.test(path); }, icon: ListsIcon },
+  { href: "/app/lists", label: "Lists", match: (path: string) => { if (path.startsWith("/app/lists")) return true; return !["/app", "/app/create", "/app/activity", "/app/profile", "/app/giveaways", "/app/friends", "/app/calendar"].includes(path) && !path.startsWith("/app/settings") && /^\/app\/[^/]+$/.test(path); }, icon: ListsIcon },
   { href: "/app/create", label: "Create", match: (path: string) => path.startsWith("/app/create"), icon: CreateIcon, primary: true },
   { href: "/app/activity", label: "Activity", match: (path: string) => path.startsWith("/app/activity"), icon: ActivityIcon },
   { href: "/app/profile", label: "You", match: (path: string) => path.startsWith("/app/profile"), icon: ProfileIcon },

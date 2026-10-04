@@ -9,6 +9,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import 'push_notifications.dart';
+
 /// Live Givy website — this Play app is a native shell around production.
 /// Override for local testing, e.g. `--dart-define=GIVY_URL=http://10.0.2.2:3000`
 const String kGivyUrl = String.fromEnvironment(
@@ -161,6 +163,18 @@ class _GivyWebShellState extends State<GivyWebShell> {
       _error = null;
       _mainDocumentLoaded = true;
     });
+    unawaited(_injectPushToken());
+  }
+
+  /// Hand FCM (or mock) token to the web app for `/api/push/register`.
+  Future<void> _injectPushToken() async {
+    try {
+      final payload = await fetchDeviceToken();
+      if (payload == null) return;
+      await _controller.runJavaScript(injectFcmTokenScript(payload));
+    } catch (_) {
+      /* push is optional */
+    }
   }
 
   void _surfaceMainFrameFailure(String message) {

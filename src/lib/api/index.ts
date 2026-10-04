@@ -3,6 +3,10 @@ export * from "./items";
 export * from "./lists";
 export * from "./mappers";
 export * from "./notifications";
+export * from "./friends";
+export * from "./events";
+export * from "./event-notifications";
+export * from "./friend-lists";
 
 import { formatMoney as formatMoneyValue } from "../utils/format";
 

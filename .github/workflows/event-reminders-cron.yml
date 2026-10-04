@@ -1,0 +1,35 @@
+# Daily friend-event reminders. Safe when secrets are unset (job no-ops).
+# Enable after production SQL + CRON_SECRET are ready:
+#   Repo → Settings → Secrets: CRON_SECRET, GIVY_APP_URL (https://www.givy.gifts)
+name: Event reminders cron
+
+on:
+  schedule:
+    # 08:00 UTC daily (~11:00 Asia/Riyadh)
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reminder endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GIVY_APP_URL: ${{ secrets.GIVY_APP_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ] || [ -z "${GIVY_APP_URL:-}" ]; then
+            echo "CRON_SECRET or GIVY_APP_URL not set — skipping (local/pre-launch)."
+            exit 0
+          fi
+          url="${GIVY_APP_URL%/}/api/cron/event-reminders"
+          echo "POST $url"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            "$url"
+          echo

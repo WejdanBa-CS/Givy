@@ -54,6 +54,19 @@ export default function AppHomePage() {
         ))}
       </Stagger>
 
+      <FadeIn delay={0.08}>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <Link href="/app/friends" className="panel block px-4 py-3.5 sm:px-5">
+            <p className="font-semibold text-ink">Friends</p>
+            <p className="text-xs text-ink-soft">Find people & requests</p>
+          </Link>
+          <Link href="/app/calendar" className="panel block px-4 py-3.5 sm:px-5">
+            <p className="font-semibold text-ink">Calendar</p>
+            <p className="text-xs text-ink-soft">Occasions & reminders</p>
+          </Link>
+        </div>
+      </FadeIn>
+
       {upcoming && (
         <FadeIn delay={0.15}>
           <section className="panel overflow-hidden p-4 sm:p-5 lg:p-6">

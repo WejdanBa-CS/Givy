@@ -108,6 +108,9 @@ publisher ID rewrites shop links into broken redirects (browsers may download).
 | `npm run build` | Production build |
 | `npm run start` | Serve production build |
 | `npm test` | Vitest (security + gift-suggest helpers) |
+| `npm run test:reminders` | Reminder timezone / planner unit tests |
+| `npm run dry-run:reminders` | Offline reminder planning dry-run |
+| `npm run ping:reminders` | Local cron ping (`CRON_SECRET` + running server) |
 | `npm run test:e2e:security` | Playwright security smoke |
 
 ## Project layout

@@ -42,6 +42,20 @@ export default function ProfilePage() {
           <span className="text-ink-soft">{lists.length}</span>
         </Link>
         <Link
+          href="/app/friends"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Friends</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
+        <Link
+          href="/app/calendar"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Calendar</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
+        <Link
           href="/app/activity"
           className="flex items-center justify-between px-5 py-4"
         >
@@ -49,10 +63,17 @@ export default function ProfilePage() {
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
+          href="/app/settings/privacy"
+          className="flex items-center justify-between px-5 py-4"
+        >
+          <span className="font-semibold">Privacy settings</span>
+          <span className="text-ink-soft">→</span>
+        </Link>
+        <Link
           href="/privacy"
           className="flex items-center justify-between px-5 py-4"
         >
-          <span className="font-semibold">Privacy</span>
+          <span className="font-semibold">Privacy policy</span>
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
