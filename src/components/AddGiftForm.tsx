@@ -1,11 +1,12 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { GiftGlyph } from "@/components/GiftGlyph";
 import { FIELD_LIMITS, safeHttpsUrl } from "@/lib/security";
 import type { GiftItem } from "@/lib/types";
 
-export type GiftDraft = Pick<GiftItem, "title" | "notes" | "price" | "url">;
+export type GiftDraft = Pick<GiftItem, "title" | "notes" | "price" | "url" | "imageHint">;
 
 type AddGiftFormProps = {
   busy?: boolean;
@@ -28,10 +29,13 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
   const [price, setPrice] = useState("");
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [imageHint, setImageHint] = useState("");
   const [quantity, setQuantity] = useState("");
   const [quantityNeeded, setQuantityNeeded] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low" | "">("");
   const [groupFund, setGroupFund] = useState(false);
+  const [previewBusy, setPreviewBusy] = useState(false);
+  const previewForUrl = useRef<string | null>(null);
 
   useEffect(() => {
     if (!prefill) return;
@@ -39,13 +43,56 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
     setNotes(prefill.notes ?? "");
     setPrice(prefill.price != null ? String(prefill.price) : "");
     setUrl(prefill.url ?? "");
+    setImageHint(prefill.imageHint ?? "");
   }, [prefill]);
+
+  useEffect(() => {
+    const https = safeHttpsUrl(url);
+    if (!https) return;
+    if (imageHint.trim()) return;
+    if (previewForUrl.current === https) return;
+
+    const handle = window.setTimeout(() => {
+      previewForUrl.current = https;
+      setPreviewBusy(true);
+      void fetch(`/api/link-preview?url=${encodeURIComponent(https)}`, {
+        credentials: "same-origin",
+      })
+        .then(async (res) => {
+          if (!res.ok) return;
+          const data = (await res.json()) as {
+            imageUrl?: string | null;
+            title?: string | null;
+          };
+          if (data.imageUrl && !imageHint.trim()) {
+            setImageHint(data.imageUrl);
+          }
+          if (data.title && !title.trim()) {
+            setTitle(data.title.slice(0, FIELD_LIMITS.itemTitle));
+          }
+        })
+        .catch(() => {
+          /* ignore preview failures */
+        })
+        .finally(() => setPreviewBusy(false));
+    }, 600);
+
+    return () => window.clearTimeout(handle);
+  }, [url, imageHint, title]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!title.trim()) return;
     try {
       const giftUrl = parseGiftUrl(url);
+      const image =
+        safeHttpsUrl(imageHint) ??
+        (imageHint.trim() && !/^[a-z][a-z0-9+.-]*:/i.test(imageHint.trim())
+          ? imageHint.trim()
+          : undefined);
+      if (imageHint.trim() && !image && /^https?:/i.test(imageHint.trim())) {
+        throw new Error("Image links must start with https://");
+      }
       if (groupFund && !price) {
         toast.error("Group-fund gifts need a price so there is a goal.");
         return;
@@ -55,6 +102,7 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
         price: price ? Number(price) : undefined,
         url: giftUrl,
         notes: notes.trim().slice(0, FIELD_LIMITS.notes) || undefined,
+        imageHint: image,
         quantity: quantity ? Number(quantity) : undefined,
         quantityNeeded: quantityNeeded ? Number(quantityNeeded) : undefined,
         priority: priority || undefined,
@@ -65,10 +113,12 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
       setPrice("");
       setUrl("");
       setNotes("");
+      setImageHint("");
       setQuantity("");
       setQuantityNeeded("");
       setPriority("");
       setGroupFund(false);
+      previewForUrl.current = null;
       toast.success("Gift added");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not add gift");
@@ -77,7 +127,10 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
 
   return (
     <form onSubmit={submit} className="panel space-y-3 p-5">
-      <p className="font-display text-xl text-ink">Add a gift idea</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-display text-xl text-ink">Add a gift idea</p>
+        <GiftGlyph title={title || "Gift"} hint={imageHint || undefined} size="lg" />
+      </div>
       <input
         className="field"
         placeholder="Title"
@@ -103,6 +156,16 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
           onChange={(event) => setUrl(event.target.value)}
         />
       </div>
+      <input
+        className="field"
+        placeholder="https:// image link (optional — auto-fills from product)"
+        value={imageHint}
+        maxLength={FIELD_LIMITS.url}
+        onChange={(event) => setImageHint(event.target.value)}
+      />
+      {previewBusy && (
+        <p className="text-xs font-semibold text-ink-soft">Looking up product photo…</p>
+      )}
       <div className="grid gap-3 sm:grid-cols-3">
         <input
           className="field"

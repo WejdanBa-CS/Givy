@@ -59,7 +59,7 @@ export function ensureSeedData(user: User) {
         notes: "Neutral colors",
         price: 45,
         url: "https://www.example.com/blanket",
-        imageHint: "default",
+        imageHint: "home",
         purchased: false,
       },
       {
@@ -67,7 +67,7 @@ export function ensureSeedData(user: User) {
         title: "Board game night kit",
         price: 38,
         url: "https://www.example.com/game",
-        imageHint: "default",
+        imageHint: "snacks",
         purchased: false,
       },
     ],

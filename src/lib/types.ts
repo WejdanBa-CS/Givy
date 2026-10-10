@@ -25,6 +25,8 @@ export interface User {
   email: string;
   provider: AuthProvider;
   avatarHue: number;
+  /** OAuth / provider photo when available (Google, Facebook, Apple). */
+  avatarUrl?: string | null;
   betaUnlocked?: boolean;
 }
 
@@ -208,7 +210,7 @@ export const DEMO_SEED_ITEMS: Omit<GiftItem, "id" | "purchased">[] = [
     notes: "Friends can chip in together toward this.",
     url: "https://www.example.com/cabin",
     price: 180,
-    imageHint: "default",
+    imageHint: "cabin",
     fundingMode: "cash_fund",
     goalMinor: 18000,
     fundedMinor: 4500,

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useGivy } from "@/lib/givy-context";
 
 export function SiteHeader() {
@@ -38,16 +39,12 @@ export function SiteHeader() {
                   : user.email
               }
             >
-              <span
-                className="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white"
-                style={{ background: `hsl(${user.avatarHue} 55% 42%)` }}
-              >
-                {user.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .join("")
-                  .slice(0, 2)}
-              </span>
+              <UserAvatar
+                name={user.name}
+                hue={user.avatarHue}
+                src={user.avatarUrl}
+                size="sm"
+              />
               <span className="max-w-[10rem] truncate text-sm text-ink-soft">
                 {user.name}
               </span>

@@ -6,9 +6,9 @@ import { FadeIn } from "@/components/motion";
 import type { GiftItem } from "@/lib/types";
 
 const demoItems: GiftItem[] = [
-  { id: "demo-tote", title: "Soft leather tote", notes: "Everyday bag in warm tan.", price: 89, purchased: true },
-  { id: "demo-pour", title: "Ceramic pour-over", notes: "For slow weekend coffee.", price: 42, purchased: false },
-  { id: "demo-stay", title: "Weekend cabin stay", notes: "Two nights, anywhere quiet.", price: 180, purchased: false, fundingMode: "cash_fund", goalMinor: 18000, fundedMinor: 4500, contributorCount: 2 },
+  { id: "demo-tote", title: "Soft leather tote", notes: "Everyday bag in warm tan.", price: 89, purchased: true, imageHint: "bag" },
+  { id: "demo-pour", title: "Ceramic pour-over", notes: "For slow weekend coffee.", price: 42, purchased: false, imageHint: "mug" },
+  { id: "demo-stay", title: "Weekend cabin stay", notes: "Two nights, anywhere quiet.", price: 180, purchased: false, imageHint: "cabin", fundingMode: "cash_fund", goalMinor: 18000, fundedMinor: 4500, contributorCount: 2 },
 ];
 
 type View = "owner" | "guest";
@@ -61,7 +61,7 @@ export function LandingProductPreview() {
             {demoItems.map((item) => (
               <li key={item.id}>
                 <article className={`wish-item ${item.purchased ? "is-claimed" : ""}`}>
-                  <GiftGlyph title={item.title} claimed={item.purchased} />
+                  <GiftGlyph title={item.title} hint={item.imageHint} claimed={item.purchased} size="lg" />
                   <div className="wish-item-body"><div className="wish-item-top"><h4 className="wish-item-title">{item.title}</h4>{item.purchased ? <span className="wish-item-status">Taken</span> : <span className="wish-item-price">${item.price}</span>}</div>{item.notes && <p className="wish-item-notes">{item.notes}</p>}{view === "owner" && item.purchased && <p className="mt-1 text-[.82rem] font-semibold text-leaf">Taken — you won’t see who claimed it.</p>}</div>
                   {view === "guest" && !item.purchased && <div className="wish-item-actions" aria-hidden><span className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-[.875rem] bg-coral px-3 py-2 text-sm font-bold text-white">{item.fundingMode === "cash_fund" ? "Contribute now" : "I’ll get this"}</span></div>}
                 </article>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useGivy } from "@/lib/givy-context";
 
 export default function ProfilePage() {
@@ -13,16 +14,12 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-lg animate-rise space-y-5">
       <section className="panel flex items-center gap-4 p-5">
-        <span
-          className="grid h-16 w-16 place-items-center rounded-full text-lg font-bold text-white"
-          style={{ background: `hsl(${user.avatarHue} 55% 42%)` }}
-        >
-          {user.name
-            .split(" ")
-            .map((p) => p[0])
-            .join("")
-            .slice(0, 2)}
-        </span>
+        <UserAvatar
+          name={user.name}
+          hue={user.avatarHue}
+          src={user.avatarUrl}
+          size="lg"
+        />
         <div>
           <h1 className="font-display text-3xl text-ink">{user.name}</h1>
           <p className="text-sm text-ink-soft">

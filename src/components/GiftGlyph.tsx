@@ -1,34 +1,52 @@
 "use client";
 
-/** Soft letter tile instead of emoji stickers. */
+import { useState } from "react";
+import {
+  giftIllustrationSrc,
+  isGiftImageUrl,
+  resolveGiftVisualSeed,
+} from "@/lib/gift-visual";
+
+/** Product photo when available; otherwise a curated gift illustration. */
 export function GiftGlyph({
   title,
   hint,
   claimed = false,
+  size = "md",
 }: {
   title?: string;
   hint?: string;
   claimed?: boolean;
+  size?: "md" | "lg";
 }) {
-  const letter = (title?.trim()?.[0] || hint?.trim()?.[0] || "G").toUpperCase();
-  let hue = 12;
-  const seed = title || hint || "g";
-  for (let index = 0; index < seed.length; index += 1) {
-    hue = (hue + seed.charCodeAt(index) * 17) % 360;
-  }
+  const [broken, setBroken] = useState(false);
+  const remote = hint && isGiftImageUrl(hint) && !broken ? hint.trim() : null;
+  const seed = resolveGiftVisualSeed(title, hint);
+  const src = remote ?? giftIllustrationSrc(seed);
+  const box =
+    size === "lg"
+      ? "h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] rounded-2xl"
+      : "h-[2.85rem] w-[2.85rem] sm:h-[3.25rem] sm:w-[3.25rem] lg:h-14 lg:w-14 rounded-[.875rem] sm:rounded-2xl";
 
   return (
     <span
       aria-hidden
-      className={`grid h-[2.85rem] w-[2.85rem] shrink-0 place-items-center rounded-[.875rem] font-display text-[1.35rem] font-semibold sm:h-[3.25rem] sm:w-[3.25rem] sm:rounded-2xl lg:h-14 lg:w-14 ${claimed ? "opacity-70" : ""}`}
-      style={{
-        background: claimed
-          ? "var(--mist-deep)"
-          : `linear-gradient(145deg, hsl(${hue} 42% 92%), hsl(${(hue + 24) % 360} 38% 86%))`,
-        color: claimed ? "var(--ink-soft)" : `hsl(${hue} 40% 32%)`,
-      }}
+      className={`relative block shrink-0 overflow-hidden bg-mist-deep ${box} ${claimed ? "opacity-70 grayscale-[.35]" : ""}`}
     >
-      {letter}
+      {/* eslint-disable-next-line @next/next/no-img-element -- mixed remote + local SVG */}
+      <img
+        src={src}
+        alt=""
+        width={112}
+        height={112}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onError={() => {
+          if (remote) setBroken(true);
+        }}
+        className="h-full w-full object-cover"
+      />
     </span>
   );
 }

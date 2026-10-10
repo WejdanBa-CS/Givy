@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { GiftGlyph } from "@/components/GiftGlyph";
 import { FIELD_LIMITS, safeHttpsUrl } from "@/lib/security";
 import type { GiftItem } from "@/lib/types";
 import {
@@ -24,6 +25,7 @@ type EditGiftDialogProps = {
         | "notes"
         | "url"
         | "price"
+        | "imageHint"
         | "quantity"
         | "quantityNeeded"
         | "priority"
@@ -45,6 +47,7 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
   const [price, setPrice] = useState("");
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [imageHint, setImageHint] = useState("");
   const [quantity, setQuantity] = useState("");
   const [quantityNeeded, setQuantityNeeded] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low" | "">("");
@@ -55,6 +58,7 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
     setPrice(item.price != null ? String(item.price) : "");
     setUrl(item.url ?? "");
     setNotes(item.notes ?? "");
+    setImageHint(item.imageHint ?? "");
     setQuantity(item.quantity != null ? String(item.quantity) : "");
     setQuantityNeeded(item.quantityNeeded != null ? String(item.quantityNeeded) : "");
     setPriority(item.priority ?? "");
@@ -63,11 +67,20 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
   async function save() {
     if (!item || !title.trim()) return;
     try {
+      const image =
+        safeHttpsUrl(imageHint) ??
+        (imageHint.trim() && !/^[a-z][a-z0-9+.-]*:/i.test(imageHint.trim())
+          ? imageHint.trim()
+          : undefined);
+      if (imageHint.trim() && !image && /^https?:/i.test(imageHint.trim())) {
+        throw new Error("Image links must start with https://");
+      }
       await onSave({
         title: title.trim().slice(0, FIELD_LIMITS.itemTitle),
         price: price ? Number(price) : undefined,
         url: parseGiftUrl(url),
         notes: notes.trim().slice(0, FIELD_LIMITS.notes) || undefined,
+        imageHint: image,
         quantity: quantity ? Number(quantity) : undefined,
         quantityNeeded: quantityNeeded ? Number(quantityNeeded) : undefined,
         priority: priority || undefined,
@@ -87,11 +100,21 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
           <DialogDescription>Update the details shown on this wishlist.</DialogDescription>
         </DialogHeader>
         <div className="mt-4 space-y-3">
-          <input className="field" value={title} maxLength={FIELD_LIMITS.itemTitle} onChange={(event) => setTitle(event.target.value)} />
+          <div className="flex items-start gap-3">
+            <GiftGlyph title={title || "Gift"} hint={imageHint || undefined} size="lg" />
+            <input className="field flex-1" value={title} maxLength={FIELD_LIMITS.itemTitle} onChange={(event) => setTitle(event.target.value)} />
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <input className="field" type="number" min="0" placeholder="Price" value={price} onChange={(event) => setPrice(event.target.value)} />
             <input className="field" placeholder="https:// product link" value={url} maxLength={FIELD_LIMITS.url} onChange={(event) => setUrl(event.target.value)} />
           </div>
+          <input
+            className="field"
+            placeholder="https:// image link (optional)"
+            value={imageHint}
+            maxLength={FIELD_LIMITS.url}
+            onChange={(event) => setImageHint(event.target.value)}
+          />
           <div className="grid gap-3 sm:grid-cols-3">
             <input className="field" type="number" min="1" placeholder="Quantity" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
             <input className="field" type="number" min="1" placeholder="Needed" value={quantityNeeded} onChange={(event) => setQuantityNeeded(event.target.value)} />

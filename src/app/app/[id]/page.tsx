@@ -137,7 +137,17 @@ export default function ManageListPage() {
 
   async function saveItem(
     patch: Partial<
-      Pick<GiftItem, "title" | "notes" | "url" | "price" | "quantity" | "quantityNeeded" | "priority">
+      Pick<
+        GiftItem,
+        | "title"
+        | "notes"
+        | "url"
+        | "price"
+        | "imageHint"
+        | "quantity"
+        | "quantityNeeded"
+        | "priority"
+      >
     >,
   ) {
     if (!editingItem) return;

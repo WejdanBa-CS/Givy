@@ -9,6 +9,7 @@ import { Countdown } from "@/components/Countdown";
 import { FriendListConfirm } from "@/components/FriendListConfirm";
 import { GiftUnwrapCelebration } from "@/components/GiftUnwrapCelebration";
 import { SiteHeader } from "@/components/SiteHeader";
+import { UserAvatar } from "@/components/UserAvatar";
 import { WishItem } from "@/components/WishItem";
 import { SupportPayPanel } from "@/components/SupportPayPanel";
 import { Button } from "@/components/ui/button";
@@ -263,9 +264,12 @@ function SharedGivyInner() {
           <header className="wish-hero">
             <div className="flex flex-wrap items-start justify-between gap-4 lg:gap-8">
               <div className="min-w-0 flex-1">
-                <p className="wish-hero-kicker">
-                  {OCCASION_LABELS[list.occasion]} · {list.ownerName}
-                </p>
+                <div className="mb-3 flex items-center gap-3">
+                  <UserAvatar name={list.ownerName} hue={24} size="md" />
+                  <p className="wish-hero-kicker m-0">
+                    {OCCASION_LABELS[list.occasion]} · {list.ownerName}
+                  </p>
+                </div>
                 <h1 className="wish-hero-title">{list.title}</h1>
                 {list.description && (
                   <p className="wish-hero-meta">{list.description}</p>

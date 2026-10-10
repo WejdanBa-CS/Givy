@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { mapFundingRpcError } from "@/lib/site";
 import type { GiftItem, ShipPreference } from "@/lib/types";
-import { mapItem, sanitizeImageHint, sanitizeItemUrl, type ItemRow } from "./mappers";
+import { mapItem, splitImageHint, sanitizeItemUrl, type ItemRow } from "./mappers";
 
 export type ClaimResult = {
   ok: boolean;
@@ -23,6 +23,7 @@ export async function addItemRemote(
   listId: string,
   item: Omit<GiftItem, "id" | "purchased" | "purchasedAt" | "claimedByMe">,
 ): Promise<GiftItem> {
+  const { imageUrl, glyph } = splitImageHint(item.imageHint);
   const { data, error } = await createClient()
     .from("items")
     .insert({
@@ -31,7 +32,8 @@ export async function addItemRemote(
       notes: item.notes ?? null,
       url: sanitizeItemUrl(item.url),
       price: item.price ?? null,
-      image_url: sanitizeImageHint(item.imageHint),
+      image_url: imageUrl,
+      emoji: glyph,
       is_claimed: false,
       quantity: item.quantity ?? 1,
       quantity_needed: item.quantityNeeded ?? item.quantity ?? 1,
@@ -79,7 +81,9 @@ export async function updateItemRemote(
   if (patch.url !== undefined) payload.url = sanitizeItemUrl(patch.url);
   if (patch.price !== undefined) payload.price = patch.price ?? null;
   if (patch.imageHint !== undefined) {
-    payload.image_url = sanitizeImageHint(patch.imageHint);
+    const { imageUrl, glyph } = splitImageHint(patch.imageHint);
+    payload.image_url = imageUrl;
+    payload.emoji = glyph;
   }
   if (patch.quantity !== undefined) payload.quantity = patch.quantity;
   if (patch.quantityNeeded !== undefined) payload.quantity_needed = patch.quantityNeeded;
