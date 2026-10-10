@@ -193,8 +193,8 @@ export async function renderShareCard(input: {
 
 export async function renderDefaultShareCard(): Promise<ImageResponse> {
   return renderShareCard({
-    title: "One list. Zero awkward duplicates.",
-    ownerName: "Givy",
+    title: "Shared wishlist",
+    ownerName: "Someone",
     occasion: "other",
   });
 }
