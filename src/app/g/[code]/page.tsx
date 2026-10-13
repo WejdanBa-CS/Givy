@@ -8,6 +8,7 @@ import { ContributeSheet } from "@/components/ContributeSheet";
 import { Countdown } from "@/components/Countdown";
 import { FriendListConfirm } from "@/components/FriendListConfirm";
 import { GiftUnwrapCelebration } from "@/components/GiftUnwrapCelebration";
+import { OccasionBadge } from "@/components/OccasionBadge";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UserAvatar } from "@/components/UserAvatar";
 import { WishItem } from "@/components/WishItem";
@@ -23,7 +24,7 @@ import {
 import { useGivy } from "@/lib/givy-context";
 import { safeHttpUrl, shopHref } from "@/lib/security";
 import type { GiftItem, GivyList, ShipPreference } from "@/lib/types";
-import { isFunded, isGroupFund, OCCASION_LABELS } from "@/lib/types";
+import { isFunded, isGroupFund } from "@/lib/types";
 
 function SharedGivyInner() {
   const params = useParams<{ code: string }>();
@@ -255,7 +256,7 @@ function SharedGivyInner() {
         />
       )}
       <div className="friend-banner">
-        Ensure you received this link directly from the gift receiver.
+        You&apos;re viewing {list.ownerName.split(" ")[0]}&apos;s wishlist — claims stay anonymous
       </div>
       <div className="shell">
         <SiteHeader />
@@ -264,11 +265,9 @@ function SharedGivyInner() {
           <header className="wish-hero">
             <div className="flex flex-wrap items-start justify-between gap-4 lg:gap-8">
               <div className="min-w-0 flex-1">
-                <div className="mb-3 flex items-center gap-3">
+                <div className="mb-3 flex flex-wrap items-center gap-3">
                   <UserAvatar name={list.ownerName} hue={24} size="md" />
-                  <p className="wish-hero-kicker m-0">
-                    {OCCASION_LABELS[list.occasion]} · {list.ownerName}
-                  </p>
+                  <OccasionBadge occasion={list.occasion} suffix={list.ownerName} />
                 </div>
                 <h1 className="wish-hero-title">{list.title}</h1>
                 {list.description && (

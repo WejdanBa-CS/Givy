@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Countdown } from "@/components/Countdown";
+import { OccasionBadge } from "@/components/OccasionBadge";
 import { useGivy } from "@/lib/givy-context";
 import { formatMoney } from "@/lib/store";
 import { OCCASION_EMOJI, OCCASION_LABELS, type Occasion } from "@/lib/types";
@@ -144,10 +145,10 @@ export default function ListsPage() {
             >
               <Link href={`/app/${list.id}`} className="block">
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold text-coral">
-                    {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
-                    {list.published ? " · Shared" : " · Draft"}
-                  </span>
+                  <OccasionBadge
+                    occasion={list.occasion}
+                    suffix={list.published ? "Shared" : "Draft"}
+                  />
                   <Countdown eventDate={list.eventDate} />
                 </div>
                 <h2 className="break-words font-display text-xl font-black text-ink sm:text-2xl">
