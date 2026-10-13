@@ -13,7 +13,7 @@ export function LandingAccountLink() {
   const { user, ready } = useGivy();
   const signedIn = ready && Boolean(user);
   return (
-    <Button asChild variant="ghost" size="sm" className="min-h-11 min-w-11 px-3.5 text-inherit hover:text-white focus-visible:outline-[#fff7f0]">
+    <Button asChild variant="ghost" size="sm" className="min-h-11 min-w-11 px-3.5 text-ink-soft hover:text-ink">
       <Link href={signedIn ? "/app" : "/login"}>{signedIn ? "My lists" : "Sign in"}</Link>
     </Button>
   );

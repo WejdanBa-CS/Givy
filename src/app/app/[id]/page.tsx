@@ -9,13 +9,13 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Countdown } from "@/components/Countdown";
 import { EditGiftDialog } from "@/components/EditGiftDialog";
 import { ListSettingsPanel } from "@/components/ListSettingsPanel";
+import { OccasionBadge } from "@/components/OccasionBadge";
 import { ShareListCard } from "@/components/ShareListCard";
 import { SuggestGiftsPanel } from "@/components/SuggestGiftsPanel";
 import { WishItem } from "@/components/WishItem";
 import { useGivy } from "@/lib/givy-context";
 import { safeHttpUrl } from "@/lib/security";
 import type { GiftItem, GivyList } from "@/lib/types";
-import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
 
 export default function ManageListPage() {
   const params = useParams<{ id: string }>();
@@ -220,23 +220,52 @@ export default function ManageListPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="animate-rise space-y-4">
-          <div className="wish-hero">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold text-coral">
-                  {OCCASION_EMOJI[managedList.occasion]} {OCCASION_LABELS[managedList.occasion]}
-                  {managedList.published ? " · Shared" : " · Draft"}
-                </span>
-                <h1 className="wish-hero-title">{managedList.title}</h1>
-                {managedList.description && <p className="wish-hero-meta">{managedList.description}</p>}
-              </div>
-              <Countdown eventDate={managedList.eventDate} />
+          <div className="wish-hero space-y-4">
+            <div className="min-w-0">
+              <OccasionBadge
+                occasion={managedList.occasion}
+                suffix={managedList.published ? "Shared" : "Draft"}
+              />
+              <h1 className="wish-hero-title">{managedList.title}</h1>
+              {managedList.description && (
+                <p className="wish-hero-meta">{managedList.description}</p>
+              )}
+            </div>
+            <div className="panel p-5">
+              <p className="mb-4 text-xs font-black uppercase tracking-widest text-ink-soft">
+                Countdown
+              </p>
+              <Countdown eventDate={managedList.eventDate} compact={false} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                {
+                  label: "Total",
+                  value: managedList.items.length,
+                  color: "text-ink",
+                },
+                {
+                  label: "Available",
+                  value: managedList.items.filter((i) => !i.purchased).length,
+                  color: "text-coral",
+                },
+                {
+                  label: "Claimed",
+                  value: managedList.items.filter((i) => i.purchased).length,
+                  color: "text-leaf",
+                },
+              ].map((s) => (
+                <div key={s.label} className="panel p-3.5">
+                  <p className={`font-display text-xl font-black ${s.color}`}>{s.value}</p>
+                  <p className="text-xs font-semibold text-ink-soft">{s.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
           {managedList.items.length === 0 ? (
             <div className="py-10 text-center">
-              <p className="font-display text-2xl text-ink">No gifts yet</p>
+              <p className="font-display text-2xl font-black text-ink">No gifts yet</p>
               <p className="mt-1 text-sm text-ink-soft">Add your first idea below.</p>
             </div>
           ) : (

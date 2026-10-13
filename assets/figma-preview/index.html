@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Givy — Figma Make design preview (review only)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,600;9..144,900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FEF6EE;
+      --ink: #1C1108;
+      --soft: #8A6F5E;
+      --coral: #E8391E;
+      --gold: #FFCD3C;
+      --line: #E8D9CC;
+      --paper: #fff;
+      --leaf: #2A7A2A;
+      --leaf-soft: #9DC88D;
+      --muted: #F5EDE4;
+      --secondary: #FFF0E6;
+      --radius: 1.25rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: #e8dfd4;
+      color: var(--ink);
+    }
+    .banner {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--ink); color: #fff;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem; font-weight: 700;
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; justify-content: space-between;
+    }
+    .banner a { color: var(--gold); }
+    .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .tabs button {
+      border: 0; border-radius: 999px; padding: 0.4rem 0.9rem;
+      font-weight: 800; font-size: 0.75rem; cursor: pointer;
+      background: #3a2a20; color: #f5e6d8;
+    }
+    .tabs button.active { background: var(--coral); color: #fff; }
+    .stage {
+      max-width: 420px; margin: 1.5rem auto 3rem;
+      background: var(--bg); min-height: 780px;
+      border-radius: 1.5rem; border: 2px solid var(--line);
+      box-shadow: 0 24px 60px -28px rgba(28,17,8,.45);
+      overflow: hidden; position: relative;
+    }
+    .screen { display: none; padding-bottom: 5rem; }
+    .screen.active { display: block; }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--line);
+      background: rgba(254,246,238,.9); backdrop-filter: blur(8px);
+      position: sticky; top: 0;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.55rem;
+      font-family: Fraunces, Georgia, serif; font-weight: 900; font-size: 1.25rem;
+    }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 999px;
+      background: var(--coral); color: #fff; display: grid; place-items: center;
+      font-size: 0.7rem; font-weight: 900;
+    }
+    .pad { padding: 1.25rem; }
+    h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 900; margin: 0; }
+    .soft { color: var(--soft); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: var(--secondary); color: var(--coral);
+      border-radius: 999px; padding: 0.25rem 0.75rem;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.65rem; margin: 1.25rem 0; }
+    .stat {
+      background: var(--paper); border: 2px solid var(--line);
+      border-radius: var(--radius); padding: 0.85rem; text-align: left;
+    }
+    .stat strong { font-family: Fraunces, serif; font-size: 1.4rem; display: block; }
+    .stat span { font-size: 0.7rem; font-weight: 700; color: var(--soft); }
+    .list-card, .gift-card {
+      background: var(--paper); border: 2px solid var(--line);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .list-card { padding: 1.15rem; margin-bottom: 0.75rem; }
+    .list-card h3 { font-size: 1.2rem; margin: 0.55rem 0 0.25rem; }
+    .bar { height: 8px; background: var(--muted); border-radius: 999px; overflow: hidden; margin-top: 0.75rem; }
+    .bar > i { display: block; height: 100%; background: var(--coral); width: 43%; }
+    .meta { font-size: 0.8rem; color: var(--soft); font-weight: 600; }
+    .kicker { font-size: 0.65rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin: 1rem 0 .65rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .gift-card img { width: 100%; height: 110px; object-fit: cover; background: var(--muted); display: block; }
+    .gift-card .body { padding: 0.75rem; }
+    .gift-card h3 { font-size: 0.85rem; line-height: 1.2; }
+    .price {
+      position: absolute; right: 8px; bottom: 8px;
+      background: var(--gold); color: var(--ink);
+      font-size: 0.7rem; font-weight: 900;
+      border-radius: 0.65rem; padding: 0.2rem 0.45rem;
+    }
+    .media { position: relative; }
+    .claimed {
+      position: absolute; inset: 0; background: rgba(254,246,238,.75);
+      display: grid; place-items: center; backdrop-filter: blur(2px);
+    }
+    .claimed span {
+      background: #fff; border: 1px solid var(--line); border-radius: 1rem;
+      padding: 0.5rem 0.75rem; font-size: 0.7rem; font-weight: 900;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      border: 0; border-radius: 1rem; padding: 0.85rem 1.1rem;
+      font-weight: 900; font-size: 0.85rem; cursor: pointer;
+    }
+    .btn-primary { background: var(--coral); color: #fff; width: 100%; }
+    .btn-secondary { background: #fff; color: var(--ink); border: 2px solid var(--line); }
+    .bottom-nav {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,.95); border-top: 2px solid var(--line);
+      display: grid; grid-template-columns: repeat(5,1fr);
+      padding: 0.55rem 0.35rem calc(0.55rem + env(safe-area-inset-bottom));
+      text-align: center; font-size: 0.58rem; font-weight: 800; color: var(--soft);
+    }
+    .bottom-nav .on { color: var(--ink); }
+    .fab {
+      width: 42px; height: 42px; border-radius: 999px; background: var(--coral); color: #fff;
+      display: grid; place-items: center; margin: -1.1rem auto 0.15rem; font-size: 1.2rem;
+    }
+    .hero-title { font-size: 2.4rem; line-height: 1.05; margin: 0.75rem 0; }
+    .hero-title em { color: var(--coral); font-style: italic; }
+    .friend-banner {
+      background: var(--gold); text-align: center; font-size: 0.7rem; font-weight: 800;
+      padding: 0.55rem 0.75rem;
+    }
+    .countdown {
+      display: flex; gap: 0.75rem; justify-content: center; margin: 1rem 0;
+    }
+    .countdown div { text-align: center; }
+    .countdown strong {
+      font-family: Fraunces, serif; font-size: 1.75rem; color: var(--coral); display: block;
+    }
+    .countdown span { font-size: 0.55rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+    .note {
+      max-width: 420px; margin: 0 auto 1rem; padding: 0 1rem;
+      color: #5a4638; font-size: 0.85rem; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span>Design preview only — evaluate before approving code changes</span>
+    <div class="tabs" id="tabs">
+      <button type="button" data-screen="landing" class="active">Landing</button>
+      <button type="button" data-screen="home">Home</button>
+      <button type="button" data-screen="list">List + gifts</button>
+      <button type="button" data-screen="friend">Friend view</button>
+    </div>
+    <a href="https://www.figma.com/make/3ykUAtZjVpdX6cWMXoRoEb/Gift-Registry-App-Development" target="_blank" rel="noreferrer">Open Figma Make ↗</a>
+  </div>
+  <p class="note">This mirrors the Figma Make Warm Editorial screens (cream / coral / gold). Trademark mark + “Givy” stay as-is.</p>
+
+  <div class="stage">
+    <!-- LANDING -->
+    <section class="screen active" id="landing">
+      <div class="nav">
+        <div class="brand">
+          <img src="givy-mark.png" alt="" />
+          <span>Givy</span>
+        </div>
+      </div>
+      <div class="pad">
+        <span class="badge" style="background:var(--gold);color:var(--ink)">✦ New way to wishlist</span>
+        <h1 class="hero-title">Gifts they'll actually <em>love.</em></h1>
+        <p class="soft" style="line-height:1.5;margin:0 0 1.25rem">Create a wishlist. Share one link. Friends claim gifts privately — no duplicates.</p>
+        <button class="btn btn-primary" type="button">Get started free</button>
+        <div style="height:.65rem"></div>
+        <button class="btn btn-secondary" type="button" style="width:100%">See how it works</button>
+        <div class="stats" style="margin-top:1.5rem">
+          <div class="stat"><strong>10k+</strong><span>wishlists</span></div>
+          <div class="stat"><strong>98%</strong><span>claim rate</span></div>
+          <div class="stat"><strong>Free</strong><span>forever</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="screen" id="home">
+      <div class="nav">
+        <div class="brand"><img src="givy-mark.png" alt="" /><span>Givy</span></div>
+        <div class="avatar">JR</div>
+      </div>
+      <div class="pad">
+        <p class="soft" style="margin:0;font-weight:700;font-size:.85rem">Good to see you,</p>
+        <h1 style="font-size:1.75rem">Jordan Rivera</h1>
+        <div class="stats">
+          <div class="stat"><strong>2</strong><span>Active lists</span></div>
+          <div class="stat"><strong>3</strong><span>Items claimed</span></div>
+          <div class="stat"><strong>23</strong><span>Friends viewing</span></div>
+        </div>
+        <p class="kicker">Your Lists</p>
+        <div class="list-card">
+          <span class="badge">🎂 Birthday</span>
+          <h3>Jordan's Birthday Wishlist</h3>
+          <p class="meta">September 15, 2026 · 23 viewing</p>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;font-weight:700;color:var(--soft);margin-top:.75rem">
+            <span>3 of 7 claimed</span><span style="color:var(--leaf)">43%</span>
+          </div>
+          <div class="bar"><i></i></div>
+        </div>
+        <div class="list-card">
+          <span class="badge" style="background:#FFF6E0;color:#C9840A">💍 Wedding</span>
+          <h3>Alex & Sam's Wedding</h3>
+          <p class="meta">December 20, 2026 · 87 viewing</p>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="on">⌂<br>Home</div>
+        <div>☰<br>Lists</div>
+        <div><div class="fab">+</div>Create</div>
+        <div>⌁<br>Activity</div>
+        <div>☺<br>You</div>
+      </div>
+    </section>
+
+    <!-- LIST DETAIL / GIFT CARDS -->
+    <section class="screen" id="list">
+      <div class="nav">
+        <div class="brand"><img src="givy-mark.png" alt="" /><span>Givy</span></div>
+        <div class="avatar">JR</div>
+      </div>
+      <div class="pad">
+        <span class="badge">🎂 Birthday</span>
+        <h1 style="font-size:1.65rem;margin-top:.65rem">Jordan's Birthday Wishlist</h1>
+        <p class="meta">Monday, September 15, 2026</p>
+        <div class="list-card" style="margin-top:1rem">
+          <p class="kicker" style="margin-top:0">Countdown</p>
+          <div class="countdown">
+            <div><strong>34</strong><span>days</span></div>
+            <div><strong>12</strong><span>hrs</span></div>
+            <div><strong>08</strong><span>min</span></div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong>7</strong><span>Total</span></div>
+          <div class="stat"><strong style="color:var(--coral)">4</strong><span>Available</span></div>
+          <div class="stat"><strong style="color:var(--leaf)">3</strong><span>Claimed</span></div>
+        </div>
+        <p class="kicker">Gift Ideas</p>
+        <div class="grid">
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$42</span>
+              <div class="claimed"><span>✓ Claimed</span></div>
+            </div>
+            <div class="body"><h3 style="text-decoration:line-through;color:var(--soft)">New Era Cap</h3><p class="meta">Claimed</p></div>
+          </div>
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$199</span>
+            </div>
+            <div class="body"><h3>Galaxy Watch 7</h3><p class="meta">● Available</p></div>
+          </div>
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$150</span>
+            </div>
+            <div class="body"><h3>Air Max Sneakers</h3><p class="meta">● Available</p></div>
+          </div>
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$89</span>
+            </div>
+            <div class="body"><h3>Sony WH-1000XM5</h3><p class="meta">● Available</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div>⌂<br>Home</div>
+        <div class="on">☰<br>Lists</div>
+        <div><div class="fab">+</div>Create</div>
+        <div>⌁<br>Activity</div>
+        <div>☺<br>You</div>
+      </div>
+    </section>
+
+    <!-- FRIEND VIEW -->
+    <section class="screen" id="friend">
+      <div class="friend-banner">🔒 You're viewing Jordan's wishlist — claims stay anonymous</div>
+      <div class="pad">
+        <div style="text-align:center">
+          <span class="badge">🎂 Birthday</span>
+          <h1 style="font-size:1.65rem;margin-top:.65rem">Jordan's Birthday Wishlist</h1>
+          <div class="countdown">
+            <div><strong>34</strong><span>days</span></div>
+            <div><strong>12</strong><span>hrs</span></div>
+            <div><strong>08</strong><span>min</span></div>
+          </div>
+        </div>
+        <div class="list-card">
+          <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:800">
+            <span class="soft">3 of 7 gifts claimed</span><span style="color:var(--leaf)">43%</span>
+          </div>
+          <div class="bar"><i></i></div>
+        </div>
+        <div class="grid" style="margin-top:1rem">
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$199</span>
+            </div>
+            <div class="body">
+              <h3>Galaxy Watch 7</h3>
+              <button class="btn btn-primary" type="button" style="margin-top:.55rem;padding:.55rem;font-size:.7rem">Claim this gift</button>
+            </div>
+          </div>
+          <div class="gift-card">
+            <div class="media">
+              <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop&auto=format" alt="" />
+              <span class="price">$150</span>
+            </div>
+            <div class="body">
+              <h3>Air Max Sneakers</h3>
+              <button class="btn btn-primary" type="button" style="margin-top:.55rem;padding:.55rem;font-size:.7rem">Claim this gift</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tabs = document.getElementById("tabs");
+    tabs.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-screen]");
+      if (!btn) return;
+      tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === btn.dataset.screen));
+    });
+  </script>
+</body>
+</html>

@@ -26,14 +26,14 @@ export default function GlobalError({
           placeItems: "center",
           fontFamily: "system-ui, sans-serif",
           background: "#fef6ee",
-          color: "#1a120e",
+          color: "#1C1108",
           padding: "2rem",
           textAlign: "center",
         }}
       >
         <div>
           <h1 style={{ fontSize: "2rem", margin: 0 }}>Something went wrong</h1>
-          <p style={{ color: "#6b5748", marginTop: "0.75rem" }}>
+          <p style={{ color: "#8A6F5E", marginTop: "0.75rem" }}>
             Please try again. If it keeps happening, refresh the page.
           </p>
           <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem", justifyContent: "center" }}>
@@ -56,7 +56,7 @@ export default function GlobalError({
               href="/"
               style={{
                 background: "#fff",
-                color: "#1a120e",
+                color: "#1C1108",
                 border: "2px solid #e8d9cc",
                 borderRadius: "0.875rem",
                 padding: "0.85rem 1.35rem",
