@@ -1,8 +1,10 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GiftGlyph } from "@/components/GiftGlyph";
+import { useProductLinkPreview } from "@/hooks/useProductLinkPreview";
+import { isGiftImageUrl } from "@/lib/gift-visual";
 import { FIELD_LIMITS, safeHttpsUrl } from "@/lib/security";
 import type { GiftItem } from "@/lib/types";
 
@@ -34,8 +36,16 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
   const [quantityNeeded, setQuantityNeeded] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low" | "">("");
   const [groupFund, setGroupFund] = useState(false);
-  const [previewBusy, setPreviewBusy] = useState(false);
-  const previewForUrl = useRef<string | null>(null);
+  const [showImageOverride, setShowImageOverride] = useState(false);
+
+  const { previewBusy, previewMiss, ensurePreview, resetPreviewTracking } =
+    useProductLinkPreview({
+      url,
+      imageHint,
+      title,
+      setImageHint,
+      setTitle,
+    });
 
   useEffect(() => {
     if (!prefill) return;
@@ -46,46 +56,14 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
     setImageHint(prefill.imageHint ?? "");
   }, [prefill]);
 
-  useEffect(() => {
-    const https = safeHttpsUrl(url);
-    if (!https) return;
-    if (imageHint.trim()) return;
-    if (previewForUrl.current === https) return;
-
-    const handle = window.setTimeout(() => {
-      previewForUrl.current = https;
-      setPreviewBusy(true);
-      void fetch(`/api/link-preview?url=${encodeURIComponent(https)}`, {
-        credentials: "same-origin",
-      })
-        .then(async (res) => {
-          if (!res.ok) return;
-          const data = (await res.json()) as {
-            imageUrl?: string | null;
-            title?: string | null;
-          };
-          if (data.imageUrl && !imageHint.trim()) {
-            setImageHint(data.imageUrl);
-          }
-          if (data.title && !title.trim()) {
-            setTitle(data.title.slice(0, FIELD_LIMITS.itemTitle));
-          }
-        })
-        .catch(() => {
-          /* ignore preview failures */
-        })
-        .finally(() => setPreviewBusy(false));
-    }, 600);
-
-    return () => window.clearTimeout(handle);
-  }, [url, imageHint, title]);
-
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() && !safeHttpsUrl(url)) return;
     try {
       const giftUrl = parseGiftUrl(url);
+      const preview = await ensurePreview();
       const image =
+        preview.imageUrl ??
         safeHttpsUrl(imageHint) ??
         (imageHint.trim() && !/^[a-z][a-z0-9+.-]*:/i.test(imageHint.trim())
           ? imageHint.trim()
@@ -93,12 +71,16 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
       if (imageHint.trim() && !image && /^https?:/i.test(imageHint.trim())) {
         throw new Error("Image links must start with https://");
       }
+      const finalTitle = (title.trim() || preview.title || "Gift idea").slice(
+        0,
+        FIELD_LIMITS.itemTitle,
+      );
       if (groupFund && !price) {
         toast.error("Group-fund gifts need a price so there is a goal.");
         return;
       }
       await onAdd({
-        title: title.trim().slice(0, FIELD_LIMITS.itemTitle),
+        title: finalTitle,
         price: price ? Number(price) : undefined,
         url: giftUrl,
         notes: notes.trim().slice(0, FIELD_LIMITS.notes) || undefined,
@@ -118,26 +100,77 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
       setQuantityNeeded("");
       setPriority("");
       setGroupFund(false);
-      previewForUrl.current = null;
+      setShowImageOverride(false);
+      resetPreviewTracking();
       toast.success("Gift added");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not add gift");
     }
   }
 
+  const hasProductPhoto = isGiftImageUrl(imageHint);
+
   return (
     <form onSubmit={submit} className="panel space-y-3 p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-display text-xl text-ink">Add a gift idea</p>
-        <GiftGlyph title={title || "Gift"} hint={imageHint || undefined} size="lg" />
+        <div>
+          <p className="font-display text-xl font-black text-ink">Add a gift idea</p>
+          <p className="mt-0.5 text-xs font-semibold text-ink-soft">
+            Paste a product link — we’ll pull the photo for your list.
+          </p>
+        </div>
       </div>
+
+      <div>
+        <label className="label" htmlFor="gift-product-url">
+          Product link
+        </label>
+        <input
+          id="gift-product-url"
+          className="field"
+          placeholder="https://… paste Amazon, Apple, or any shop link"
+          value={url}
+          maxLength={FIELD_LIMITS.url}
+          onChange={(event) => setUrl(event.target.value)}
+          inputMode="url"
+          autoComplete="url"
+        />
+        {previewBusy && (
+          <p className="mt-1.5 text-xs font-semibold text-ink-soft">Finding product photo…</p>
+        )}
+        {!previewBusy && previewMiss && safeHttpsUrl(url) && !hasProductPhoto && (
+          <p className="mt-1.5 text-xs font-semibold text-ink-soft">
+            Couldn’t find a photo automatically — add a title below, or paste an image URL.
+          </p>
+        )}
+      </div>
+
+      {(hasProductPhoto || previewBusy) && (
+        <div className="overflow-hidden rounded-2xl border-2 border-line bg-mist-deep">
+          <div className="relative">
+            {hasProductPhoto ? (
+              <GiftGlyph title={title || "Gift"} hint={imageHint} size="card" />
+            ) : (
+              <div className="flex h-36 items-center justify-center text-xs font-bold text-ink-soft">
+                Loading photo…
+              </div>
+            )}
+            {hasProductPhoto && (
+              <span className="absolute bottom-2.5 left-2.5 rounded-xl bg-paper/95 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-leaf">
+                Product photo
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <input
         className="field"
         placeholder="Title"
         value={title}
         maxLength={FIELD_LIMITS.itemTitle}
         onChange={(event) => setTitle(event.target.value)}
-        required
+        required={!safeHttpsUrl(url)}
       />
       <div className="grid gap-3 sm:grid-cols-2">
         <input
@@ -150,22 +183,30 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
         />
         <input
           className="field"
-          placeholder="https:// product link"
-          value={url}
-          maxLength={FIELD_LIMITS.url}
-          onChange={(event) => setUrl(event.target.value)}
+          placeholder="Notes"
+          value={notes}
+          maxLength={FIELD_LIMITS.notes}
+          onChange={(event) => setNotes(event.target.value)}
         />
       </div>
-      <input
-        className="field"
-        placeholder="https:// image link (optional — auto-fills from product)"
-        value={imageHint}
-        maxLength={FIELD_LIMITS.url}
-        onChange={(event) => setImageHint(event.target.value)}
-      />
-      {previewBusy && (
-        <p className="text-xs font-semibold text-ink-soft">Looking up product photo…</p>
+
+      <button
+        type="button"
+        className="text-xs font-bold text-ink-soft underline-offset-2 hover:text-ink hover:underline"
+        onClick={() => setShowImageOverride((v) => !v)}
+      >
+        {showImageOverride ? "Hide image URL" : "Override photo URL"}
+      </button>
+      {showImageOverride && (
+        <input
+          className="field"
+          placeholder="https:// image link (optional)"
+          value={imageHint}
+          maxLength={FIELD_LIMITS.url}
+          onChange={(event) => setImageHint(event.target.value)}
+        />
       )}
+
       <div className="grid gap-3 sm:grid-cols-3">
         <input
           className="field"
@@ -194,13 +235,6 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
           <option value="low">Low</option>
         </select>
       </div>
-      <input
-        className="field"
-        placeholder="Notes"
-        value={notes}
-        maxLength={FIELD_LIMITS.notes}
-        onChange={(event) => setNotes(event.target.value)}
-      />
       <label className="flex items-start gap-2 text-sm text-ink">
         <input
           type="checkbox"
@@ -213,7 +247,7 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
           of buying it alone. Set a price so there is a goal.
         </span>
       </label>
-      <button type="submit" className="btn btn-secondary" disabled={busy}>
+      <button type="submit" className="btn btn-secondary w-full sm:w-auto" disabled={busy || previewBusy}>
         Add to list
       </button>
     </form>

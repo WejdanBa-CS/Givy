@@ -314,7 +314,7 @@ function SharedGivyInner() {
 
           <ul className="wish-list stagger mt-2">
             {list.items.length === 0 && (
-              <li className="py-12 text-center text-ink-soft">
+              <li className="col-span-full py-12 text-center text-ink-soft">
                 No gifts on this list yet. Check back soon.
               </li>
             )}

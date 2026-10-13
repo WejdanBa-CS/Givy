@@ -223,10 +223,10 @@ export default function ManageListPage() {
           <div className="wish-hero">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="wish-hero-kicker">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1 text-xs font-semibold text-coral">
                   {OCCASION_EMOJI[managedList.occasion]} {OCCASION_LABELS[managedList.occasion]}
                   {managedList.published ? " · Shared" : " · Draft"}
-                </p>
+                </span>
                 <h1 className="wish-hero-title">{managedList.title}</h1>
                 {managedList.description && <p className="wish-hero-meta">{managedList.description}</p>}
               </div>
@@ -240,25 +240,28 @@ export default function ManageListPage() {
               <p className="mt-1 text-sm text-ink-soft">Add your first idea below.</p>
             </div>
           ) : (
-            <ul className="wish-list stagger">
-              {managedList.items.map((item) => {
-                const buyUrl = item.url ? safeHttpUrl(item.url) : null;
-                return (
-                  <li key={item.id}>
-                    <WishItem
-                      item={item}
-                      footer={buyUrl && !item.purchased ? <a href={buyUrl} target="_blank" rel="noopener noreferrer" className="wish-item-link">View product</a> : null}
-                      actions={!item.purchased ? (
-                        <>
-                          <button type="button" className="btn btn-ghost !px-2 !py-1 text-sm" onClick={() => setEditingItem(item)}>Edit</button>
-                          <button type="button" className="btn btn-ghost !px-2 !py-1 text-sm text-coral-deep" onClick={() => setRemoveItemTarget(item)}>Remove</button>
-                        </>
-                      ) : undefined}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="space-y-4">
+              <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Gift Ideas</p>
+              <ul className="wish-list stagger">
+                {managedList.items.map((item) => {
+                  const buyUrl = item.url ? safeHttpUrl(item.url) : null;
+                  return (
+                    <li key={item.id}>
+                      <WishItem
+                        item={item}
+                        footer={buyUrl && !item.purchased ? <a href={buyUrl} target="_blank" rel="noopener noreferrer" className="wish-item-link">View product</a> : null}
+                        actions={!item.purchased ? (
+                          <>
+                            <button type="button" className="btn btn-ghost !px-2 !py-1 text-xs" onClick={() => setEditingItem(item)}>Edit</button>
+                            <button type="button" className="btn btn-ghost !px-2 !py-1 text-xs text-coral" onClick={() => setRemoveItemTarget(item)}>Remove</button>
+                          </>
+                        ) : undefined}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
 
           <SuggestGiftsPanel

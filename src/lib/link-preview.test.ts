@@ -35,4 +35,22 @@ describe("fetchLinkPreview", () => {
       title: "Nice Mug",
     });
   });
+
+  it("falls back to JSON-LD Product image", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          `<html><head><title>Fallback</title>
+            <script type="application/ld+json">{"@type":"Product","name":"Watch","image":"https://cdn.example/watch.png"}</script>
+          </head></html>`,
+          { status: 200, headers: { "content-type": "text/html" } },
+        ),
+      ),
+    );
+    await expect(fetchLinkPreview("https://shop.example/watch")).resolves.toEqual({
+      imageUrl: "https://cdn.example/watch.png",
+      title: "Fallback",
+    });
+  });
 });

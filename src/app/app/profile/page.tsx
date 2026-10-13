@@ -20,9 +20,10 @@ export default function ProfilePage() {
           src={user.avatarUrl}
           size="lg"
         />
-        <div>
-          <h1 className="font-display text-3xl text-ink">{user.name}</h1>
-          <p className="text-sm text-ink-soft">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-ink-soft">Signed in as</p>
+          <h1 className="font-display text-3xl font-black text-ink">{user.name}</h1>
+          <p className="truncate text-sm text-ink-soft">
             {user.provider === "guest"
               ? "Demo account · this browser only"
               : `${user.email} · ${user.provider}`}
@@ -30,40 +31,42 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Account</p>
+
       <section className="panel divide-y divide-[var(--line)] overflow-hidden">
         <Link
           href="/app/lists"
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-mist-deep/40"
         >
-          <span className="font-semibold">Your lists</span>
-          <span className="text-ink-soft">{lists.length}</span>
+          <span className="font-bold text-ink">Your lists</span>
+          <span className="text-sm font-semibold text-ink-soft">{lists.length}</span>
         </Link>
         <Link
           href="/app/activity"
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-mist-deep/40"
         >
-          <span className="font-semibold">Activity</span>
+          <span className="font-bold text-ink">Activity</span>
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
           href="/privacy"
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-mist-deep/40"
         >
-          <span className="font-semibold">Privacy</span>
+          <span className="font-bold text-ink">Privacy</span>
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
           href="/delete-account"
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-mist-deep/40"
         >
-          <span className="font-semibold">Delete account & data</span>
+          <span className="font-bold text-ink">Delete account & data</span>
           <span className="text-ink-soft">→</span>
         </Link>
         <Link
           href="/terms"
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-mist-deep/40"
         >
-          <span className="font-semibold">Terms</span>
+          <span className="font-bold text-ink">Terms</span>
           <span className="text-ink-soft">→</span>
         </Link>
       </section>
