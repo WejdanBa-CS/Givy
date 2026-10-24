@@ -32,12 +32,19 @@ export async function fetchSessionUser(): Promise<User | null> {
       ? providerRaw
       : "email";
 
+  const meta = user.user_metadata ?? {};
+  const avatarUrl =
+    (typeof meta.avatar_url === "string" && meta.avatar_url) ||
+    (typeof meta.picture === "string" && meta.picture) ||
+    null;
+
   return {
     id: user.id,
     name: profile?.display_name ?? user.user_metadata?.full_name ?? "Givy user",
     email: profile?.email ?? user.email ?? "",
     provider,
     avatarHue: profile?.avatar_hue ?? 180,
+    avatarUrl: avatarUrl && /^https:\/\//i.test(avatarUrl) ? avatarUrl : null,
     betaUnlocked: Boolean(profile?.beta_unlocked),
   };
 }

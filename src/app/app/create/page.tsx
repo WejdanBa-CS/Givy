@@ -83,11 +83,11 @@ export default function CreatePage() {
 
   return (
     <div className="mx-auto max-w-xl animate-rise lg:max-w-2xl">
-      <h1 className="font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl">
+      <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl lg:text-5xl">
         New Givy
       </h1>
-      <p className="mt-2 text-ink-soft lg:text-lg">
-        Pick an occasion, set the date, and start collecting ideas.
+      <p className="mt-2 text-sm font-semibold text-ink-soft lg:text-base">
+        Set it up, share it, watch the gifts roll in.
       </p>
 
       <form
@@ -114,10 +114,10 @@ export default function CreatePage() {
                 key={key}
                 type="button"
                 variant="secondary"
-                className={`h-auto justify-start rounded-2xl px-3 py-3 text-left text-sm ${
+                className={`!h-auto !flex-col items-center justify-center gap-1.5 rounded-2xl px-3 py-3 text-center text-xs font-bold ${
                   occasion === key
-                    ? "border-coral bg-coral/10 text-ink"
-                    : "bg-white/70 text-ink-soft"
+                    ? "border-coral bg-[var(--secondary)] text-coral"
+                    : "bg-[#fafaf7] text-ink-soft"
                 }`}
                 onClick={() => setOccasion(key)}
               >
@@ -215,7 +215,7 @@ export default function CreatePage() {
         </label>
 
         <Button type="submit" className="w-full" disabled={busy}>
-          {busy ? "Creating…" : "Create Givy"}
+          {busy ? "Creating…" : "Create my Givy"}
         </Button>
       </form>
     </div>

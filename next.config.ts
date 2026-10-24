@@ -1,6 +1,47 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
+const isDev = process.env.NODE_ENV !== "production";
+
+// Next.js / Framer Motion need eval in `next dev` (and Android WebView hits that CSP).
+// Keep production strict — no unsafe-eval.
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  ...(isDev ? ["'unsafe-eval'"] : []),
+  "https://accounts.google.com",
+  "https://s.skimresources.com",
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+].join(" ");
+
+const connectSrc = [
+  "'self'",
+  ...(isDev
+    ? [
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
+        "http://10.0.2.2:3000",
+        "ws://127.0.0.1:3000",
+        "ws://localhost:3000",
+        "ws://10.0.2.2:3000",
+      ]
+    : []),
+  "https://*.supabase.co",
+  "wss://*.supabase.co",
+  "https://api.openai.com",
+  "https://api.groq.com",
+  "https://*.ingest.us.sentry.io",
+  "https://accounts.google.com",
+  "https://*.skimresources.com",
+  "https://*.redirectingat.com",
+  "https://www.google-analytics.com",
+  "https://*.google-analytics.com",
+  "https://*.analytics.google.com",
+  "https://www.googletagmanager.com",
+  "https://*.googletagmanager.com",
+].join(" ");
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -19,12 +60,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js still needs inline for bootstrap; avoid unsafe-eval in production builds.
-      "script-src 'self' 'unsafe-inline' https://accounts.google.com https://s.skimresources.com https://www.googletagmanager.com https://www.google-analytics.com",
+      `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.groq.com https://*.ingest.us.sentry.io https://accounts.google.com https://*.skimresources.com https://*.redirectingat.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com",
+      `connect-src ${connectSrc}`,
       "frame-src 'self' https://accounts.google.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",

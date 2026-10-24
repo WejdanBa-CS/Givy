@@ -2,20 +2,22 @@
 @import "tw-animate-css";
 
 :root {
-  --ink: #1a120e;
-  --ink-soft: #6b5748;
+  /* Figma Make Gift-Registry-App-Development theme.css */
+  --ink: #1c1108;
+  --ink-soft: #8a6f5e;
   --mist: #fef6ee;
-  --mist-deep: #f3e6d8;
+  --mist-deep: #f5ede4;
   --paper: #ffffff;
   --coral: #e8391e;
   --coral-deep: #c92e16;
-  --leaf: #3d6b4f;
-  --leaf-soft: #6f9879;
+  --leaf: #2a7a2a;
+  --leaf-soft: #9dc88d;
   --amber: #ffcd3c;
   --gold: #ffcd3c;
+  --secondary: #fff0e6;
   --line: #e8d9cc;
-  --shadow: 0 18px 50px -28px rgba(26, 18, 14, 0.35);
-  --radius: 1.125rem;
+  --shadow: 0 18px 50px -28px rgba(28, 17, 8, 0.35);
+  --radius: 1.25rem;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, sans-serif;
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
@@ -35,10 +37,11 @@
   --color-line: var(--line);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
+  --color-secondary: var(--secondary);
   --shadow-givy: var(--shadow);
-  --shadow-lift: 0 18px 50px -28px rgba(26, 18, 14, 0.35);
+  --shadow-lift: 0 18px 50px -28px rgba(28, 17, 8, 0.35);
   --shadow-glow-coral: 0 10px 24px -12px rgba(232, 57, 30, 0.65);
-  --radius-xl: 1.125rem;
+  --radius-xl: 1.25rem;
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.5rem;
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
@@ -138,12 +141,12 @@ select {
   justify-content: center;
   gap: 0.5rem;
   border: 0;
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   padding: 0.85rem 1.35rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: transform 180ms ease, background 180ms ease;
+  transition: transform 180ms ease, background 180ms ease, opacity 180ms ease;
 }
 
 .btn:hover {
@@ -184,8 +187,8 @@ select {
 .field {
   width: 100%;
   border: 2px solid var(--line);
-  background: var(--paper);
-  border-radius: 0.875rem;
+  background: #fafaf7;
+  border-radius: 1rem;
   padding: 0.85rem 1rem;
   color: var(--ink);
   outline: none;
@@ -310,12 +313,13 @@ select {
   align-items: center;
   border: 2px solid var(--line);
   background: var(--paper);
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   padding: 0.65rem 1rem;
 }
 
 .countdown-card .num {
   font-family: var(--font-display);
+  color: var(--coral);
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--coral);
@@ -471,10 +475,10 @@ select {
   }
 }
 
-/* —— Wishlist —— */
+/* —— Wishlist (Figma Make GiftCard grid) —— */
 .wish-hero {
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
 }
 
 @media (min-width: 1024px) {
@@ -486,16 +490,6 @@ select {
     max-width: 42rem;
     font-size: 1rem;
   }
-
-  .wish-item {
-    gap: 1.35rem;
-    padding: 1.35rem 0;
-  }
-
-  .wish-glyph {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
 }
 
 .wish-hero-kicker {
@@ -503,14 +497,14 @@ select {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--leaf);
+  color: var(--ink-soft);
 }
 
 .wish-hero-title {
   margin: 0.35rem 0 0;
   font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 600;
+  font-weight: 900;
   letter-spacing: -0.03em;
   line-height: 1.05;
   color: var(--ink);
@@ -528,98 +522,23 @@ select {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.wish-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  align-items: start;
-  padding: 1.15rem 0;
-  border-bottom: 1px solid var(--line);
 }
 
-.wish-item:last-child {
-  border-bottom: 0;
-}
-
-.wish-glyph {
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 1rem;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.wish-glyph.is-claimed {
-  opacity: 0.7;
-}
-
-.wish-item-body {
-  min-width: 0;
-}
-
-.wish-item-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.wish-item-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-.wish-item.is-claimed .wish-item-title {
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
-  color: var(--ink-soft);
-}
-
-.wish-item-price {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: -0.02em;
-}
-
-.wish-item-status {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.wish-item-notes {
-  margin: 0.35rem 0 0;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  line-height: 1.45;
-}
-
-.wish-item-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
+@media (min-width: 640px) {
+  .wish-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .wish-item-link {
   display: inline-block;
   margin-top: 0.45rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--coral-deep);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--coral);
   text-underline-offset: 3px;
 }
 
@@ -628,36 +547,18 @@ select {
 }
 
 .friend-banner {
-  background: transparent;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink-soft);
-  font-weight: 600;
-  font-size: 0.85rem;
+  background: var(--gold);
+  border-bottom: 2px solid var(--line);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.75rem;
   text-align: center;
-  padding: 0.85rem max(1rem, env(safe-area-inset-left, 0px))
-    0.85rem max(1rem, env(safe-area-inset-right, 0px));
+  padding: 0.65rem max(1rem, env(safe-area-inset-left, 0px))
+    0.65rem max(1rem, env(safe-area-inset-right, 0px));
 }
 
 @media (max-width: 640px) {
-  .wish-item {
-    grid-template-columns: auto 1fr;
-  }
-
-  .wish-item-actions {
-    grid-column: 2;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
   .wish-hero-title {
     font-size: clamp(1.75rem, 8vw, 2.35rem);
-  }
-
-  .wish-glyph {
-    width: 2.85rem;
-    height: 2.85rem;
-    border-radius: 0.875rem;
   }
 }

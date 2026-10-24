@@ -58,10 +58,10 @@ export const metadata: Metadata = {
       "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
     images: [
       {
-        url: "/givy-hero.jpg",
-        width: 1536,
-        height: 1024,
-        alt: "A wrapped cream gift tied with a ribbon",
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Givy — private gift wishlists with the Givy gift mark",
       },
     ],
   },
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     title: "Givy · One list. Zero awkward duplicates.",
     description:
       "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
-    images: ["/givy-hero.jpg"],
+    images: ["/opengraph-image"],
   },
   icons: {
     // Cache-bust so re-added bookmarks pick up the current trademark mark.

@@ -6,11 +6,11 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-[0.875rem] font-bold tracking-tight transition-[transform,background-color,opacity,box-shadow] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2 focus-visible:ring-offset-mist disabled:pointer-events-none disabled:opacity-50 active:translate-y-0 hover:-translate-y-px",
+  "inline-flex items-center justify-center gap-2 rounded-2xl font-black tracking-tight transition-[transform,background-color,opacity] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2 focus-visible:ring-offset-mist disabled:pointer-events-none disabled:opacity-40 active:scale-[0.99] hover:opacity-90",
   {
     variants: {
       variant: {
-        primary: "bg-coral text-white hover:bg-coral-deep shadow-[0_10px_24px_-12px_rgba(232,57,30,0.65)]",
+        primary: "bg-coral text-white hover:bg-coral-deep",
         secondary:
           "border-2 border-line bg-paper text-ink hover:bg-mist-deep/50",
         ghost: "bg-transparent text-ink-soft hover:text-ink",
