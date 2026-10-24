@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -215,10 +216,15 @@ export default function ManageListPage() {
 
   return (
     <div className="space-y-4">
-      <Link href="/app/lists" className="text-sm font-semibold text-ink-soft">← Lists</Link>
-      <div className="lg:hidden">{shareCard}</div>
+      <Link
+        href="/app/lists"
+        className="-ml-1 inline-flex min-h-9 items-center gap-1 rounded-lg px-1 text-sm font-medium text-ink-soft transition hover:text-ink"
+      >
+        <ChevronLeft aria-hidden size={16} strokeWidth={2} />
+        Lists
+      </Link>
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <section className="animate-rise space-y-4">
           <div className="wish-hero space-y-4">
             <div className="min-w-0">
@@ -232,12 +238,11 @@ export default function ManageListPage() {
               )}
             </div>
             <div className="panel p-5">
-              <p className="mb-4 text-xs font-black uppercase tracking-widest text-ink-soft">
-                Countdown
+              <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">
+                Until the day
               </p>
               <Countdown eventDate={managedList.eventDate} compact={false} />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="mt-5 grid grid-cols-3 divide-x divide-[var(--line)] border-t border-line/80 pt-4">
               {[
                 { label: "Total", value: managedList.items.length, color: "text-ink" },
                 {
@@ -251,22 +256,25 @@ export default function ManageListPage() {
                   color: "text-leaf",
                 },
               ].map((s) => (
-                <div key={s.label} className="panel p-3.5">
-                  <p className={`font-display text-xl font-black ${s.color}`}>{s.value}</p>
-                  <p className="text-xs font-semibold text-ink-soft">{s.label}</p>
+                <div key={s.label} className="px-2 text-center first:pl-0 last:pr-0">
+                  <p className={`font-display text-2xl font-medium tabular-nums leading-none ${s.color}`}>{s.value}</p>
+                  <p className="mt-1.5 text-xs text-ink-soft">{s.label}</p>
                 </div>
               ))}
             </div>
+            </div>
           </div>
+
+          <div className="lg:hidden">{shareCard}</div>
 
           {managedList.items.length === 0 ? (
             <div className="py-10 text-center">
-              <p className="font-display text-2xl font-black text-ink">No gifts yet</p>
+              <p className="font-display text-2xl font-semibold text-ink">No gifts yet</p>
               <p className="mt-1 text-sm text-ink-soft">Add your first idea below.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Gift Ideas</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">Gift Ideas</p>
               <ul className="wish-list stagger">
                 {managedList.items.map((item) => {
                   const buyUrl = item.url ? safeHttpUrl(item.url) : null;

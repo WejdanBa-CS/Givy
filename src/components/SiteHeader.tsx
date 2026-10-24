@@ -52,7 +52,7 @@ export function SiteHeader() {
               </Link>
               <button
                 type="button"
-                className="btn btn-secondary !px-3 !py-2 text-sm sm:!px-[1.35rem] sm:!py-[0.85rem] sm:text-base"
+                className="btn btn-secondary !min-h-10 !px-4 text-sm"
                 onClick={() => {
                   void signOut().then(() => router.replace("/"));
                 }}
@@ -60,8 +60,8 @@ export function SiteHeader() {
                 Sign out
               </button>
             </>
-          ) : (
-            <Link href="/login" className="btn btn-primary">
+          ) : pathname === "/login" ? null : (
+            <Link href="/login" className="btn btn-secondary !min-h-10 !px-4 text-sm">
               Sign in
             </Link>
           )}

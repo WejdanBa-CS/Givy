@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  giftIllustrationSrc,
-  isGiftImageUrl,
-  resolveGiftVisualSeed,
-} from "@/lib/gift-visual";
+import { isGiftImageUrl } from "@/lib/gift-visual";
 
-/** Product photo when available; otherwise a curated gift illustration. */
+/** Product photo when available; otherwise the Givy mark. */
 export function GiftGlyph({
-  title,
   hint,
   claimed = false,
   size = "md",
@@ -21,11 +16,10 @@ export function GiftGlyph({
 }) {
   const [broken, setBroken] = useState(false);
   const remote = hint && isGiftImageUrl(hint) && !broken ? hint.trim() : null;
-  const seed = resolveGiftVisualSeed(title, hint);
-  const src = remote ?? giftIllustrationSrc(seed);
+  const src = remote ?? "/givy-mark.png";
   const box =
     size === "card"
-      ? "block h-36 w-full rounded-none"
+      ? "block aspect-square w-full rounded-none border-b border-line"
       : size === "lg"
         ? "h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] rounded-2xl"
         : "h-[2.85rem] w-[2.85rem] sm:h-[3.25rem] sm:w-[3.25rem] lg:h-14 lg:w-14 rounded-[.875rem] sm:rounded-2xl";
@@ -33,9 +27,9 @@ export function GiftGlyph({
   return (
     <span
       aria-hidden
-      className={`relative shrink-0 overflow-hidden bg-mist-deep ${size === "card" ? "" : "block"} ${box} ${claimed ? "opacity-70 grayscale-[.35]" : ""}`}
+      className={`relative shrink-0 overflow-hidden ${remote ? "bg-white" : "bg-mist-deep"} ${size === "card" ? "" : "block border border-line"} ${box}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- mixed remote + local SVG */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- remote product photos */}
       <img
         src={src}
         alt=""
@@ -47,7 +41,13 @@ export function GiftGlyph({
         onError={() => {
           if (remote) setBroken(true);
         }}
-        className="h-full w-full object-cover"
+        className={`h-full w-full object-contain ${
+          remote
+            ? size === "card"
+              ? "p-[9%]"
+              : "p-[8%]"
+            : "p-[22%] mix-blend-multiply"
+        } ${claimed ? "opacity-40 grayscale-[.6]" : ""}`}
       />
     </span>
   );

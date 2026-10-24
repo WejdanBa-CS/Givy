@@ -8,7 +8,8 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { useGivy } from "@/lib/givy-context";
 import { paypalMeUrl, FIELD_LIMITS, safeSupportUrl } from "@/lib/security";
 import type { Occasion } from "@/lib/types";
-import { OCCASION_EMOJI, OCCASION_LABELS } from "@/lib/types";
+import { OccasionIcon } from "@/components/OccasionIcon";
+import { OCCASION_LABELS } from "@/lib/types";
 
 export default function CreatePage() {
   const { createList } = useGivy();
@@ -83,10 +84,10 @@ export default function CreatePage() {
 
   return (
     <div className="mx-auto max-w-xl animate-rise lg:max-w-2xl">
-      <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl lg:text-5xl">
-        New Givy
+      <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.025em] text-ink sm:text-4xl lg:text-5xl">
+        New list
       </h1>
-      <p className="mt-2 text-sm font-semibold text-ink-soft lg:text-base">
+      <p className="mt-1 text-sm text-ink-soft lg:text-base">
         Set it up, share it, watch the gifts roll in.
       </p>
 
@@ -110,20 +111,20 @@ export default function CreatePage() {
           <Label>Occasion</Label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {(Object.keys(OCCASION_LABELS) as Occasion[]).map((key) => (
-              <Button
+              <button
                 key={key}
                 type="button"
-                variant="secondary"
-                className={`!h-auto !flex-col items-center justify-center gap-1.5 rounded-2xl px-3 py-3 text-center text-xs font-bold ${
+                aria-pressed={occasion === key}
+                className={`flex min-h-11 items-center gap-2.5 rounded-xl border px-3 text-left text-[13px] font-medium transition ${
                   occasion === key
-                    ? "border-coral bg-[var(--secondary)] text-coral"
-                    : "bg-[#fafaf7] text-ink-soft"
+                    ? "border-coral/60 bg-[var(--secondary)] text-coral-deep shadow-[0_0_0_3px_rgba(232,57,30,.08)]"
+                    : "border-line/80 bg-paper text-ink-soft hover:border-ink/20 hover:text-ink"
                 }`}
                 onClick={() => setOccasion(key)}
               >
-                <span className="block text-lg">{OCCASION_EMOJI[key]}</span>
-                {OCCASION_LABELS[key]}
-              </Button>
+                <OccasionIcon occasion={key} size={16} className="shrink-0" />
+                <span className="min-w-0 truncate">{OCCASION_LABELS[key]}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -161,7 +162,7 @@ export default function CreatePage() {
           />
         </div>
 
-        <div className="rounded-2xl border-2 border-line bg-paper/70 p-4">
+        <div className="rounded-2xl border border-line bg-paper/70 p-4">
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"

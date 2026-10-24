@@ -6,21 +6,22 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-2xl font-black tracking-tight transition-[transform,background-color,opacity] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 focus-visible:ring-offset-2 focus-visible:ring-offset-mist disabled:pointer-events-none disabled:opacity-40 active:scale-[0.99] hover:opacity-90",
+  "inline-flex select-none items-center justify-center gap-2 rounded-xl font-semibold tracking-[-0.01em] transition-[transform,background-color,box-shadow,color] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/35 focus-visible:ring-offset-2 focus-visible:ring-offset-mist disabled:pointer-events-none disabled:opacity-40 active:scale-[0.985]",
   {
     variants: {
       variant: {
-        primary: "bg-coral text-white hover:bg-coral-deep",
+        primary:
+          "bg-coral text-white shadow-[inset_0_1px_0_rgba(255,255,255,.18),0_1px_2px_rgba(120,30,10,.25),0_6px_14px_-8px_rgba(232,57,30,.7)] hover:bg-coral-deep",
         secondary:
-          "border-2 border-line bg-paper text-ink hover:bg-mist-deep/50",
+          "border border-line bg-paper text-ink shadow-[0_1px_2px_rgba(28,17,8,.05)] hover:border-ink/20 hover:bg-mist/60",
         ghost: "bg-transparent text-ink-soft hover:text-ink",
         soft: "bg-mist-deep/80 text-ink hover:bg-mist-deep",
-        amber: "bg-amber text-ink hover:opacity-90",
+        amber: "bg-amber text-ink hover:brightness-95",
       },
       size: {
-        sm: "px-3 py-2 text-sm",
-        md: "px-[1.35rem] py-[0.85rem] text-base",
-        lg: "px-6 py-4 text-base",
+        sm: "h-9 px-3.5 text-[13px]",
+        md: "h-11 px-5 text-[15px]",
+        lg: "h-12 px-6 text-[15px]",
         icon: "h-10 w-10 p-0",
       },
     },
