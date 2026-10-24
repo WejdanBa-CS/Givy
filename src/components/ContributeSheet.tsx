@@ -72,7 +72,7 @@ export function ContributeSheet({ item, ownerName, onClose, onPledge }: Props) {
               <DialogDescription>
                 Chip in for {ownerName}. This records a pledge on the list so
                 everyone can see progress. Card checkout is the next payment
-                step — nothing is charged here.
+                step. Nothing is charged here.
               </DialogDescription>
             </DialogHeader>
             <p className="text-sm text-ink-soft">

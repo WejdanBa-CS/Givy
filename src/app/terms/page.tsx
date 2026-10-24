@@ -34,7 +34,7 @@ export default function TermsPage() {
                 Group-fund pledges currently record progress on the list. Givy does
                 not yet process card payments or hold funds. When cash checkout
                 launches, Givy will remain the intermediary for payment handling,
-                refunds, and payouts — not the product seller.
+                refunds, and payouts, not the product seller.
               </p>
             </section>
 

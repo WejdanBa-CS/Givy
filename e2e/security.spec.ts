@@ -172,7 +172,7 @@ test.describe("security smoke", () => {
     await expect(page).toHaveURL(/\/app/, { timeout: 30_000 });
     await page.getByRole("link", { name: /shared view/i }).click();
     await expect(page).toHaveURL(/\/g\//);
-    const confirm = page.getByRole("button", { name: /yes — this is/i });
+    const confirm = page.getByRole("button", { name: /yes, this is/i });
     if (await confirm.isVisible()) {
       await confirm.click();
     }

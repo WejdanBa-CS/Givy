@@ -256,7 +256,7 @@ function SharedGivyInner() {
         />
       )}
       <div className="friend-banner">
-        You&apos;re viewing {list.ownerName.split(" ")[0]}&apos;s wishlist — claims stay anonymous
+        You&apos;re viewing {list.ownerName.split(" ")[0]}&apos;s wishlist. Claims stay anonymous
       </div>
       <div className="shell">
         <SiteHeader />
@@ -413,7 +413,7 @@ function SharedGivyInner() {
             Ensure you received this link directly from the gift receiver.
           </p>
           <p className="mb-4 text-center text-xs text-ink-soft">
-            Shop links may be affiliate links — we may earn a commission at no
+            Shop links may be affiliate links. We may earn a commission at no
             extra cost to you.
           </p>
         </main>

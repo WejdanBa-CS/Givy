@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     template: "%s · Givy",
   },
   description:
-    "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
+    "Create one list, share one link, and let friends claim gifts privately, so nobody buys the same gift twice.",
   applicationName: "Givy",
   appleWebApp: {
     capable: true,
@@ -55,13 +55,13 @@ export const metadata: Metadata = {
     siteName: "Givy",
     title: "Givy · One list. Zero awkward duplicates.",
     description:
-      "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
+      "Create one list, share one link, and let friends claim gifts privately, so nobody buys the same gift twice.",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Givy — private gift wishlists with the Givy gift mark",
+        alt: "Givy, private gift wishlists with the Givy gift mark",
       },
     ],
   },
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Givy · One list. Zero awkward duplicates.",
     description:
-      "Create one list, share one link, and let friends claim gifts privately — so nobody buys the same gift twice.",
+      "Create one list, share one link, and let friends claim gifts privately, so nobody buys the same gift twice.",
     images: ["/opengraph-image"],
   },
   icons: {

@@ -117,7 +117,7 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
         <div>
           <p className="font-display text-xl font-semibold text-ink">Add a gift idea</p>
           <p className="mt-0.5 text-sm text-ink-soft">
-            Paste a product link — we’ll pull the photo for your list.
+            Paste a product link and we’ll pull the photo for your list.
           </p>
         </div>
       </div>

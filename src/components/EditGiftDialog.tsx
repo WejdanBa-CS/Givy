@@ -170,7 +170,7 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
           )}
           {!previewBusy && previewMiss && safeHttpsUrl(url) && !hasProductPhoto && (
             <p className="text-xs font-semibold text-ink-soft">
-              No photo found from that link — you can paste an image URL below.
+              No photo found from that link. You can paste an image URL below.
             </p>
           )}
           <input

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { OG_SIZE } from "@/lib/og/share-card";
 
-export const alt = "Givy — private gift wishlists";
+export const alt = "Givy, private gift wishlists";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 export const runtime = "nodejs";
@@ -70,7 +70,7 @@ export default async function Image() {
               maxWidth: 900,
             }}
           >
-            Share one link. Friends claim gifts privately — nobody buys the same gift twice.
+            Share one link. Friends claim gifts privately, so nobody buys the same gift twice.
           </div>
         </div>
         <div

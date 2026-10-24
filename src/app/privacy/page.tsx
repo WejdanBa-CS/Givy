@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>Account details from your sign-in provider (name, email, avatar).</li>
                 <li>Lists, gift items, notes, and optional ship-to addresses you add.</li>
-                <li>Claim records (that a gift was marked purchased—not who claimed it, for list owners).</li>
+                <li>Claim records (that a gift was marked purchased, not who claimed it, for list owners).</li>
                 <li>Basic technical logs needed to run and secure the service.</li>
                 <li>
                   Usage analytics via Google Analytics (pages visited, device and

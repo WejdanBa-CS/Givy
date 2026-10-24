@@ -57,7 +57,7 @@ export function AiGiftRecommend({ occasion, onUse, className }: Props) {
       const list = Array.isArray(data.gifts) ? data.gifts : [];
       setGifts(list);
       if (list.length === 0) {
-        toast.message("No ideas in that budget — try widening the range.");
+        toast.message("No ideas in that budget. Try widening the range.");
       } else {
         toast.success("Gift ideas ready");
       }

@@ -134,12 +134,12 @@ export async function POST(req: Request) {
       text: [
         `Hi ${owner?.display_name || "there"},`,
         ``,
-        `Good news — someone marked “${item.title}” as taken on your Givy list “${list.title}”.`,
+        `Good news. Someone marked “${item.title}” as taken on your Givy list “${list.title}”.`,
         `Claims stay anonymous; we won’t tell you who it was.`,
         ``,
         `Open your list: ${site}/app/${claim.list_id}`,
         ``,
-        `— Givy`,
+        `Givy`,
       ].join("\n"),
     }),
   });
