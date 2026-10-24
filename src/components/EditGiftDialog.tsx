@@ -119,11 +119,11 @@ export function EditGiftDialog({ item, busy = false, onOpenChange, onSave }: Edi
         </DialogHeader>
         <div className="mt-4 space-y-3">
           {(hasProductPhoto || previewBusy) && (
-            <div className="overflow-hidden rounded-2xl border-2 border-line bg-mist-deep">
+            <div className="overflow-hidden rounded-2xl border border-line bg-mist-deep">
               {hasProductPhoto ? (
                 <GiftGlyph title={title || "Gift"} hint={imageHint} size="card" />
               ) : (
-                <div className="flex h-36 items-center justify-center text-xs font-bold text-ink-soft">
+                <div className="flex h-36 items-center justify-center text-xs font-semibold text-ink-soft">
                   Finding photo…
                 </div>
               )}

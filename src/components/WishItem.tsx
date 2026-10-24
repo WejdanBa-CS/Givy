@@ -2,12 +2,13 @@
 
 import type { ReactNode } from "react";
 import { m, useReducedMotion } from "framer-motion";
+import { Check } from "lucide-react";
 import { GiftGlyph } from "@/components/GiftGlyph";
 import { formatMoney } from "@/lib/api";
 import { springs } from "@/lib/motion-presets";
 import { formatMinor } from "@/lib/site";
 import type { GiftItem } from "@/lib/types";
-import { isFunded, isGroupFund, PRIORITY_EMOJI } from "@/lib/types";
+import { isFunded, isGroupFund } from "@/lib/types";
 
 type Props = { item: GiftItem; actions?: ReactNode; footer?: ReactNode };
 
@@ -38,36 +39,23 @@ export function WishItem({ item, actions, footer }: Props) {
       transition={reduce ? { duration: 0 } : springs.soft}
       whileHover={reduce || funded ? undefined : { y: -2 }}
       whileTap={reduce || funded ? undefined : { scale: 0.995 }}
-      className={`relative overflow-hidden rounded-2xl border-2 border-line bg-paper transition-shadow ${funded ? "opacity-60" : "hover:shadow-md"}`}
+      className={`relative overflow-hidden rounded-2xl border bg-paper shadow-[var(--shadow-card)] transition-shadow duration-300 ${funded ? "border-leaf/25" : "border-line/80 hover:shadow-[var(--shadow-raised)]"}`}
     >
-      {funded && (
-        <div
-          className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[2px]"
-          style={{ background: "rgba(254,246,238,0.75)" }}
-        >
-          <div className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-paper px-4 py-2.5 shadow-sm">
-            <span className="text-lg leading-none text-leaf-soft" aria-hidden>
-              ✓
-            </span>
-            <span className="text-xs font-black text-ink">
-              {group ? "Funded" : "Claimed"}
-            </span>
-          </div>
-        </div>
-      )}
-
       <div className="relative overflow-hidden">
         <GiftGlyph title={item.title} hint={item.imageHint} claimed={funded} size="card" />
-        {item.priority && (
-          <span
-            className="absolute left-2.5 top-2.5 rounded-xl bg-paper/90 px-1.5 py-0.5 text-lg shadow-sm"
-            title={item.priority}
-          >
-            {PRIORITY_EMOJI[item.priority]}
+        {funded && (
+          <span className="absolute right-2.5 top-2.5 inline-flex h-6 items-center gap-1 rounded-full bg-leaf pl-2 pr-2.5 text-[11px] font-semibold tracking-[0.02em] text-white shadow-sm">
+            <Check aria-hidden size={12} strokeWidth={2.5} />
+            {group ? "Funded" : "Claimed"}
           </span>
         )}
-        {priceLabel && (
-          <span className="absolute bottom-2.5 right-2.5 rounded-xl bg-amber px-2 py-1 text-xs font-black text-ink">
+        {item.priority === "high" && !funded && (
+          <span className="absolute left-2.5 top-2.5 inline-flex h-6 items-center rounded-full bg-ink px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-mist">
+            Most wanted
+          </span>
+        )}
+        {priceLabel && !funded && (
+          <span className="absolute right-2.5 top-2.5 inline-flex h-7 items-center rounded-lg border border-line/80 bg-paper/90 px-2 font-display text-[15px] font-semibold tabular-nums text-ink shadow-[0_1px_2px_rgba(28,17,8,.06)] backdrop-blur-sm">
             {priceLabel}
           </span>
         )}
@@ -75,7 +63,7 @@ export function WishItem({ item, actions, footer }: Props) {
 
       <div className="p-3.5">
         <h3
-          className={`mb-1 font-display text-sm font-black leading-tight ${funded ? "text-ink-soft line-through" : "text-ink"}`}
+          className={`mb-1 font-display text-[15px] font-semibold leading-snug tracking-[-0.01em] ${funded ? "text-ink-soft" : "text-ink"}`}
         >
           {item.title}
         </h3>

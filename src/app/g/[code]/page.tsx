@@ -263,10 +263,10 @@ function SharedGivyInner() {
 
         <main className="mt-6 animate-rise lg:mt-8">
           <header className="wish-hero">
-            <div className="flex flex-wrap items-start justify-between gap-4 lg:gap-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
               <div className="min-w-0 flex-1">
-                <div className="mb-3 flex flex-wrap items-center gap-3">
-                  <UserAvatar name={list.ownerName} hue={24} size="md" />
+                <div className="mb-4 flex flex-wrap items-center gap-2.5">
+                  <UserAvatar name={list.ownerName} hue={24} size="sm" />
                   <OccasionBadge occasion={list.occasion} suffix={list.ownerName} />
                 </div>
                 <h1 className="wish-hero-title">{list.title}</h1>
@@ -276,10 +276,12 @@ function SharedGivyInner() {
                 <p className="wish-hero-meta" style={{ marginTop: "0.5rem" }}>
                   {openCount === 0
                     ? "Every gift on this list has been claimed."
-                    : `${openCount} still open · claims stay anonymous`}
+                    : `${openCount} of ${list.items.length} gifts still open`}
                 </p>
               </div>
-              <Countdown eventDate={list.eventDate} compact={false} />
+              <div className="border-t border-line/80 pt-5 lg:border-t-0 lg:pt-0">
+                <Countdown eventDate={list.eventDate} compact={false} />
+              </div>
             </div>
             {list.supportUrl && (
               <SupportPayPanel
@@ -338,6 +340,7 @@ function SharedGivyInner() {
                         {group ? (
                           <Button
                             size="sm"
+                            className="w-full whitespace-nowrap"
                             onClick={() => {
                               if (user && !friendConfirmed) {
                                 toast.message("Confirm the list owner first", {
@@ -354,6 +357,7 @@ function SharedGivyInner() {
                         ) : (
                           <Button
                             size="sm"
+                            className="w-full whitespace-nowrap"
                             onClick={() => {
                               if (user && !friendConfirmed) {
                                 toast.message("Confirm the list owner first", {
@@ -372,8 +376,8 @@ function SharedGivyInner() {
                             I&apos;ll get this
                           </Button>
                         )}
-                        {buyHref && (
-                          <Button asChild variant="secondary" size="sm">
+                        {buyHref && group && (
+                          <Button asChild variant="secondary" size="sm" className="w-full whitespace-nowrap">
                             <a
                               href={buyHref}
                               rel="noopener noreferrer"
@@ -381,9 +385,21 @@ function SharedGivyInner() {
                                 ? { target: "_blank" }
                                 : {})}
                             >
-                              {group ? "Buy from retailer" : "Shop link"}
+                              Buy from retailer
                             </a>
                           </Button>
+                        )}
+                        {buyHref && !group && (
+                          <a
+                            href={buyHref}
+                            rel="noopener noreferrer"
+                            className="wish-item-link w-full text-center"
+                            {...(buyHref.startsWith("http")
+                              ? { target: "_blank" }
+                              : {})}
+                          >
+                            View in shop ↗
+                          </a>
                         )}
                       </>
                     ) : undefined
@@ -482,7 +498,7 @@ function SharedGivyInner() {
               )}
 
               <div className="mt-5 space-y-2">
-                <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
+                <label className="flex cursor-pointer gap-3 rounded-2xl border border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
                   <input
                     type="radio"
                     name="ship"
@@ -497,7 +513,7 @@ function SharedGivyInner() {
                   </span>
                 </label>
                 {list.hasRecipientAddress ? (
-                  <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
+                  <label className="flex cursor-pointer gap-3 rounded-2xl border border-line bg-mist/60 p-3 transition hover:bg-mist-deep/40">
                     <input
                       type="radio"
                       name="ship"

@@ -17,6 +17,8 @@
   --secondary: #fff0e6;
   --line: #e8d9cc;
   --shadow: 0 18px 50px -28px rgba(28, 17, 8, 0.35);
+  --shadow-card: 0 1px 2px rgba(28, 17, 8, 0.04), 0 6px 20px -10px rgba(28, 17, 8, 0.1);
+  --shadow-raised: 0 1px 2px rgba(28, 17, 8, 0.05), 0 18px 40px -18px rgba(28, 17, 8, 0.22);
   --radius: 1.25rem;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, sans-serif;
@@ -72,6 +74,28 @@ body {
   font-family: var(--font-body);
   background: var(--mist);
   overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.tabular-nums,
+.countdown-card .num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+::selection {
+  background: rgba(232, 57, 30, 0.16);
 }
 
 .skip-link {
@@ -98,16 +122,20 @@ body::before {
   display: none;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 }
 
 .font-display {
@@ -141,9 +169,11 @@ select {
   justify-content: center;
   gap: 0.5rem;
   border: 0;
-  border-radius: 1rem;
-  padding: 0.85rem 1.35rem;
-  font-weight: 800;
+  border-radius: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: transform 180ms ease, background 180ms ease, opacity 180ms ease;
@@ -165,7 +195,10 @@ select {
 .btn-primary {
   background: var(--coral);
   color: white;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(120, 30, 10, 0.25),
+    0 6px 14px -8px rgba(232, 57, 30, 0.7);
 }
 
 .btn-primary:hover {
@@ -175,7 +208,8 @@ select {
 .btn-secondary {
   background: var(--paper);
   color: var(--ink);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(28, 17, 8, 0.05);
 }
 
 .btn-ghost {
@@ -186,34 +220,40 @@ select {
 
 .field {
   width: 100%;
-  border: 2px solid var(--line);
-  background: #fafaf7;
-  border-radius: 1rem;
-  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.9375rem;
   color: var(--ink);
   outline: none;
-  transition: border-color 160ms ease;
+  box-shadow: inset 0 1px 2px rgba(28, 17, 8, 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field:hover {
+  border-color: rgba(28, 17, 8, 0.2);
 }
 
 .field:focus {
-  border-color: var(--coral);
-  box-shadow: none;
+  border-color: rgba(232, 57, 30, 0.7);
+  box-shadow: 0 0 0 4px rgba(232, 57, 30, 0.1);
 }
 
 .label {
   display: block;
   margin-bottom: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(28, 17, 8, 0.75);
 }
 
 .panel {
   background: var(--paper);
-  border: 2px solid var(--line);
+  border: 1px solid rgba(232, 217, 204, 0.8);
   border-radius: var(--radius);
   backdrop-filter: none;
-  box-shadow: none;
+  box-shadow: var(--shadow-card);
 }
 
 @keyframes hero-ken {
@@ -311,9 +351,9 @@ select {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   background: var(--paper);
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   padding: 0.65rem 1rem;
 }
 
@@ -383,7 +423,7 @@ select {
   padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom));
   background: rgba(254, 246, 238, 0.96);
   backdrop-filter: blur(14px);
-  border-top: 2px solid var(--line);
+  border-top: 1px solid var(--line);
 }
 
 .app-nav-inner {
@@ -404,7 +444,7 @@ select {
   border-radius: 1rem;
   color: var(--ink-soft);
   font-size: clamp(0.58rem, 2.6vw, 0.68rem);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.01em;
   transition: color 160ms ease, transform 160ms ease;
   min-width: 0;
@@ -455,7 +495,7 @@ select {
     width: min(640px, calc(100% - 3rem));
     transform: translateX(-50%);
     padding: 0.7rem 0.85rem;
-    border: 2px solid var(--line);
+    border: 1px solid var(--line);
     border-radius: 1.35rem;
     box-shadow: 0 18px 40px -24px rgba(26, 18, 14, 0.35);
   }
@@ -478,7 +518,7 @@ select {
 /* —— Wishlist (Figma Make GiftCard grid) —— */
 .wish-hero {
   padding-bottom: 1.25rem;
-  border-bottom: 2px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 @media (min-width: 1024px) {
@@ -493,9 +533,9 @@ select {
 }
 
 .wish-hero-kicker {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
@@ -504,8 +544,8 @@ select {
   margin: 0.35rem 0 0;
   font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  font-weight: 600;
+  letter-spacing: -0.025em;
   line-height: 1.05;
   color: var(--ink);
 }
@@ -536,8 +576,8 @@ select {
 .wish-item-link {
   display: inline-block;
   margin-top: 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--coral);
   text-underline-offset: 3px;
 }
@@ -547,11 +587,11 @@ select {
 }
 
 .friend-banner {
-  background: var(--gold);
-  border-bottom: 2px solid var(--line);
-  color: var(--ink);
-  font-weight: 700;
+  background: var(--ink);
+  color: rgba(254, 246, 238, 0.86);
+  font-weight: 500;
   font-size: 0.75rem;
+  letter-spacing: 0.01em;
   text-align: center;
   padding: 0.65rem max(1rem, env(safe-area-inset-left, 0px))
     0.65rem max(1rem, env(safe-area-inset-right, 0px));

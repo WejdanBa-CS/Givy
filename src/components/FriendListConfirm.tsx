@@ -60,8 +60,8 @@ export function FriendListConfirm({
     >
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-[60] bg-ink/45 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <AlertDialog.Content className="fixed inset-x-4 bottom-4 z-[61] mx-auto w-auto max-w-md rounded-[1.25rem] border-2 border-line bg-paper p-5 shadow-[0_30px_80px_-40px_rgba(26,18,14,0.45)] outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-coral-deep">Check before you claim</p>
+        <AlertDialog.Content className="fixed inset-x-4 bottom-4 z-[61] mx-auto w-auto max-w-md rounded-[1.25rem] border border-line bg-paper p-5 shadow-[0_30px_80px_-40px_rgba(26,18,14,0.45)] outline-none sm:inset-auto sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-coral-deep">Check before you claim</p>
           <AlertDialog.Title className="mt-2 font-display text-2xl text-ink">Is this your friend’s list?</AlertDialog.Title>
           <AlertDialog.Description className="mt-2 text-sm text-ink-soft">
             You’re signed in as <strong className="text-ink">{signedInAs}</strong>. Confirm this wishlist belongs to the friend you meant to shop for — not your own account, and not someone else.

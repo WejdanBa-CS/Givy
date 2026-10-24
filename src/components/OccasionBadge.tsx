@@ -1,8 +1,9 @@
-import { OCCASION_EMOJI, OCCASION_LABELS, type Occasion } from "@/lib/types";
+import { OccasionIcon } from "@/components/OccasionIcon";
+import { OCCASION_LABELS, type Occasion } from "@/lib/types";
 
 const STYLES: Partial<Record<Occasion, { bg: string; text: string }>> = {
-  birthday: { bg: "#FFF0E6", text: "#E8391E" },
-  wedding: { bg: "#FFF6E0", text: "#C9840A" },
+  birthday: { bg: "#FFF0E6", text: "#C92E16" },
+  wedding: { bg: "#FFF6E0", text: "#A86E08" },
   holiday: { bg: "#EEF5FF", text: "#2265C3" },
   baby: { bg: "#F5EEFF", text: "#6B4BA1" },
   graduation: { bg: "#EEF5FF", text: "#2265C3" },
@@ -20,11 +21,12 @@ export function OccasionBadge({
   const style = STYLES[occasion] ?? STYLES.other!;
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+      className="inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold tracking-[0.02em]"
       style={{ background: style.bg, color: style.text }}
     >
-      {OCCASION_EMOJI[occasion]} {OCCASION_LABELS[occasion]}
-      {suffix ? ` · ${suffix}` : ""}
+      <OccasionIcon occasion={occasion} size={12} />
+      {OCCASION_LABELS[occasion]}
+      {suffix ? <span className="opacity-60">· {suffix}</span> : null}
     </span>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FIELD_LIMITS, paypalMeUrl, safeSupportUrl } from "@/lib/security";
@@ -12,6 +13,12 @@ type ListSettingsPanelProps = {
   onUpdate: (patch: Partial<GivyList>) => Promise<void>;
   onDelete: () => Promise<void>;
 };
+
+const SUMMARY =
+  "flex cursor-pointer list-none items-center justify-between gap-3 font-display text-lg font-semibold tracking-[-0.015em] text-ink [&::-webkit-details-marker]:hidden";
+const CHEVRON = "shrink-0 text-ink-soft transition-transform duration-200 group-open:rotate-180";
+const SAVED =
+  "inline-flex h-5 items-center gap-1 rounded-full bg-leaf/10 px-2 font-body text-[11px] font-semibold tracking-normal text-leaf";
 
 export function ListSettingsPanel({
   list,
@@ -98,8 +105,11 @@ export function ListSettingsPanel({
 
   return (
     <div className="space-y-4">
-      <details className="panel p-5">
-        <summary className="cursor-pointer font-display text-xl text-ink">Edit list details</summary>
+      <details className="group panel p-5">
+        <summary className={SUMMARY}>
+          Edit list details
+          <ChevronDown aria-hidden size={18} strokeWidth={1.75} className={CHEVRON} />
+        </summary>
         <div className="mt-4 space-y-3">
           <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title" />
           <textarea className="field min-h-20" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Note for friends" />
@@ -125,24 +135,36 @@ export function ListSettingsPanel({
         </div>
       </details>
 
-      <div className="panel p-5">
-        <p className="font-display text-xl text-ink">Shipping address</p>
-        <p className="mt-1 text-sm text-ink-soft">Used when a friend ships the gift straight to you.</p>
+      <details className="group panel p-5">
+        <summary className={SUMMARY}>
+          <span className="flex items-center gap-2">
+            Shipping address
+            {list.recipientAddress ? <span className={SAVED}><Check aria-hidden size={12} strokeWidth={2.5} />Saved</span> : null}
+          </span>
+          <ChevronDown aria-hidden size={18} strokeWidth={1.75} className={CHEVRON} />
+        </summary>
+        <p className="mt-3 text-sm text-ink-soft">Used when a friend ships the gift straight to you.</p>
         <textarea className="field mt-3 min-h-24" value={address} maxLength={FIELD_LIMITS.recipientAddress} onChange={(event) => setAddress(event.target.value)} placeholder="123 Gift Lane…" />
         <button type="button" className="btn btn-secondary mt-3" disabled={busy} onClick={() => void saveAddress()}>Save address</button>
-      </div>
+      </details>
 
-      <div className="panel p-5">
-        <p className="font-display text-xl text-ink">Support me</p>
-        <p className="mt-1 text-sm text-ink-soft">PayPal.me recommended. Tips process on PayPal, not Givy.</p>
+      <details className="group panel p-5">
+        <summary className={SUMMARY}>
+          <span className="flex items-center gap-2">
+            Support me
+            {list.supportUrl ? <span className={SAVED}><Check aria-hidden size={12} strokeWidth={2.5} />Added</span> : null}
+          </span>
+          <ChevronDown aria-hidden size={18} strokeWidth={1.75} className={CHEVRON} />
+        </summary>
+        <p className="mt-3 text-sm text-ink-soft">PayPal.me recommended. Tips process on PayPal, not Givy.</p>
         <label className="label mt-3" htmlFor={`support-url-${list.id}`}>PayPal.me or tip link</label>
         <input id={`support-url-${list.id}`} className="field" type="url" value={supportUrl} onChange={(event) => setSupportUrl(event.target.value)} placeholder="https://www.paypal.com/paypalme/yourname" />
         <label className="label mt-3" htmlFor={`support-label-${list.id}`}>Button text</label>
         <input id={`support-label-${list.id}`} className="field" value={supportLabel} onChange={(event) => setSupportLabel(event.target.value)} placeholder="Support with PayPal" />
         <button type="button" className="btn btn-secondary mt-3" disabled={busy} onClick={() => void saveSupportLink()}>Save support link</button>
-      </div>
+      </details>
 
-      <button type="button" className="btn btn-ghost text-sm text-coral-deep" onClick={() => setConfirmDelete(true)}>Delete list</button>
+      <button type="button" className="btn btn-ghost !min-h-10 text-sm !text-coral-deep" onClick={() => setConfirmDelete(true)}>Delete list</button>
       <ConfirmDialog
         open={confirmDelete}
         title="Delete this Givy?"

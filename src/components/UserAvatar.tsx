@@ -43,7 +43,7 @@ export function UserAvatar({
   return (
     <span
       className={cn(
-        "relative grid shrink-0 place-items-center overflow-hidden rounded-full font-bold text-white",
+        "relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold text-white",
         SIZES[size],
         className,
       )}

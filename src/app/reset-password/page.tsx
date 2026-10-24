@@ -44,7 +44,7 @@ export default function ResetPasswordPage() {
     <div className="shell pb-16 lg:pb-24">
       <main className="mx-auto mt-16 max-w-md">
         <section className="panel p-6 sm:p-8">
-          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-leaf">Password recovery</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-leaf">Password recovery</p>
           <h1 className="mt-2 font-display text-3xl tracking-tight text-ink">Choose a new password</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">Use at least eight characters. After saving, you will return to your Givy profile.</p>
           {message && <p className="mt-4 rounded-2xl border border-coral/40 bg-coral/10 p-3 text-sm text-ink">{message}</p>}
@@ -52,7 +52,7 @@ export default function ResetPasswordPage() {
             <div className="relative">
               <label className="label" htmlFor="new-password">New password</label>
               <input id="new-password" type={showPassword ? "text" : "password"} className="field pr-20" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" required disabled={busy} />
-              <button type="button" className="absolute bottom-2 right-2 rounded-lg px-2 py-1 text-xs font-bold text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40" onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "Hide" : "Show"}</button>
+              <button type="button" className="absolute bottom-2 right-2 rounded-lg px-2 py-1 text-xs font-semibold text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40" onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "Hide" : "Show"}</button>
             </div>
             <div>
               <label className="label" htmlFor="confirm-password">Confirm password</label>

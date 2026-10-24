@@ -3,13 +3,12 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const cardVariants = cva(
-  "rounded-[var(--radius)] border-2 border-line bg-paper text-ink",
+  "rounded-[var(--radius)] border border-line/80 bg-paper text-ink shadow-[var(--shadow-card)]",
   {
     variants: {
       variant: {
         default: "",
-        elevated:
-          "shadow-[0_18px_50px_-28px_rgba(26,18,14,0.35)]",
+        elevated: "shadow-[var(--shadow-raised)]",
         inset: "bg-mist-deep/30 border-line/80",
         highlight: "border-coral/25 bg-mist-deep/25",
       },

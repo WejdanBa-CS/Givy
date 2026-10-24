@@ -73,7 +73,7 @@ export function ClaimNotificationWatcher() {
     <div className="rounded-2xl border border-leaf/30 bg-leaf/10 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-leaf">
             New claims
           </p>
           <p className="mt-1 text-sm font-semibold text-ink">

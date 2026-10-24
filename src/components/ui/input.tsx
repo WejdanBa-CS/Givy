@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 const inputVariants = cva(
-  "w-full rounded-[0.875rem] border-2 border-line bg-paper px-4 py-[0.85rem] text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-soft/60 focus:border-coral focus:ring-2 focus:ring-coral/15 disabled:cursor-not-allowed disabled:opacity-50",
+  "w-full rounded-xl border border-line bg-paper px-3.5 py-3 text-[15px] text-ink shadow-[inset_0_1px_2px_rgba(28,17,8,.04)] outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-soft/55 hover:border-ink/20 focus:border-coral/70 focus:ring-4 focus:ring-coral/10 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {
@@ -56,7 +56,7 @@ export function Label({
   return (
     <label
       className={cn(
-        "mb-1.5 block text-sm font-bold text-ink-soft",
+        "mb-1.5 block text-[13px] font-medium text-ink/75",
         className,
       )}
       {...props}

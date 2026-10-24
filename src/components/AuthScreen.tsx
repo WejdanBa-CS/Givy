@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, KeyboardEvent, Suspense, useEffect, useState } from "react";
-import { Logo } from "@/components/Logo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useGivy } from "@/lib/givy-context";
 import { isGuestAllowed } from "@/lib/guest";
@@ -178,12 +177,13 @@ function AuthInner() {
       <SiteHeader />
       <main className="mx-auto mt-10 max-w-md animate-rise lg:mt-16">
         <div className="panel p-5 sm:p-7 md:p-8 lg:p-9">
-          <Logo size="lg" />
-          <h1 className="mt-4 font-display text-2xl font-black tracking-tight sm:text-3xl">
-            {mode === "signup" ? "Create your Givy" : "Sign in to Givy"}
+          <h1 className="font-display text-[1.75rem] font-semibold leading-tight tracking-[-0.02em] sm:text-3xl">
+            {mode === "signup" ? "Create your account" : "Welcome back"}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            Create lists, share one link, and keep gift claims private.
+            {mode === "signup"
+              ? "Make a list, share one link, and let friends claim gifts privately."
+              : "Sign in to manage your lists and see what's been claimed."}
           </p>
 
           {errorText && (
@@ -198,7 +198,7 @@ function AuthInner() {
           )}
 
           <form onSubmit={onEmailSubmit} className="mt-7 space-y-3">
-            <div className="flex gap-2 rounded-2xl border border-line bg-mist/40 p-1" role="tablist" aria-label="Account access">
+            <div className="flex gap-1 rounded-xl bg-mist-deep/70 p-1" role="tablist" aria-label="Account access">
               <button
                 id="auth-tab-signin"
                 type="button"
@@ -206,8 +206,8 @@ function AuthInner() {
                 aria-selected={mode === "signin"}
                 aria-controls="auth-panel"
                 tabIndex={mode === "signin" ? 0 : -1}
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
-                  mode === "signin" ? "bg-paper text-ink shadow-sm" : "text-ink-soft"
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
+                  mode === "signin" ? "bg-paper text-ink shadow-[0_1px_2px_rgba(28,17,8,.08)]" : "text-ink-soft hover:text-ink"
                 }`}
                 disabled={busy !== null}
                 onClick={() => setMode("signin")}
@@ -222,8 +222,8 @@ function AuthInner() {
                 aria-selected={mode === "signup"}
                 aria-controls="auth-panel"
                 tabIndex={mode === "signup" ? 0 : -1}
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
-                  mode === "signup" ? "bg-paper text-ink shadow-sm" : "text-ink-soft"
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 ${
+                  mode === "signup" ? "bg-paper text-ink shadow-[0_1px_2px_rgba(28,17,8,.08)]" : "text-ink-soft hover:text-ink"
                 }`}
                 disabled={busy !== null}
                 onClick={() => setMode("signup")}
@@ -287,7 +287,7 @@ function AuthInner() {
               />
               <button
                 type="button"
-                className="absolute bottom-2 right-2 rounded-lg px-2 py-1 text-xs font-bold text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40"
+                className="absolute bottom-2 right-2 rounded-lg px-2 py-1 text-xs font-semibold text-ink-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/40"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((visible) => !visible)}
               >
@@ -321,24 +321,14 @@ function AuthInner() {
               <button
                 key={p.id}
                 type="button"
-                className="flex w-full items-center gap-3 rounded-2xl border-2 border-line bg-paper px-4 py-3.5 text-left transition hover:bg-mist-deep/40 disabled:opacity-60"
+                className="btn btn-secondary relative w-full hover:border-ink/20 disabled:opacity-60"
                 disabled={busy !== null}
                 onClick={() => void onProvider(p.id)}
               >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white">
+                <span className="absolute left-3.5 grid place-items-center" aria-hidden>
                   <ProviderIcon id={p.id} />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-ink">
-                    {busy === p.id ? "Signing in…" : p.label}
-                  </span>
-                  <span className="block text-xs font-medium text-ink-soft">
-                    {p.blurb}
-                  </span>
-                </span>
-                <span aria-hidden className="shrink-0 text-ink-soft">
-                  →
-                </span>
+                {busy === p.id ? "Signing in…" : p.label}
               </button>
             ))}
           </div>
@@ -358,26 +348,13 @@ function AuthInner() {
 
               <button
                 type="button"
-                className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-line bg-mist/60 px-4 py-3.5 text-left transition hover:border-coral/40 hover:bg-mist-deep/40 disabled:opacity-60"
+                className="mx-auto flex min-h-11 flex-col items-center justify-center rounded-xl px-4 text-center text-sm font-semibold text-ink transition hover:text-coral-deep disabled:opacity-60"
                 disabled={busy !== null}
                 onClick={() => void onProvider("guest")}
               >
-                <span
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white text-lg"
-                  aria-hidden
-                >
-                  ✦
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-ink">
-                    {busy === "guest" ? "Opening…" : "Continue as guest"}
-                  </span>
-                  <span className="block text-xs font-medium text-ink-soft">
-                    No email. Safe for testers — stays in this browser.
-                  </span>
-                </span>
-                <span aria-hidden className="shrink-0 text-ink-soft">
-                  →
+                {busy === "guest" ? "Opening…" : "Continue as guest"}
+                <span className="block text-xs font-normal text-ink-soft">
+                  No email needed · stays in this browser
                 </span>
               </button>
             </>

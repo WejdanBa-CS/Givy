@@ -39,19 +39,19 @@ export function Countdown({
       { v: parts.mins, l: "min" },
     ];
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-start">
         {units.map((u, i) => (
-          <div key={u.l} className="flex items-center gap-3">
-            <div className="flex flex-col items-center">
-              <span className="font-display text-3xl font-black tabular-nums leading-none text-coral">
+          <div key={u.l} className="flex items-start">
+            <div className="flex min-w-[3.25rem] flex-col items-start">
+              <span className="font-display text-[2.5rem] font-medium tabular-nums leading-none tracking-[-0.03em] text-coral">
                 {String(u.v).padStart(2, "0")}
               </span>
-              <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-ink-soft">
+              <span className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">
                 {u.l}
               </span>
             </div>
             {i < units.length - 1 && (
-              <span className="mb-3 text-2xl font-black text-line">:</span>
+              <span className="mx-3 mt-2 h-7 w-px bg-line" aria-hidden />
             )}
           </div>
         ))}
@@ -60,10 +60,12 @@ export function Countdown({
   }
 
   return (
-    <div className="countdown-card !flex-row !items-baseline !gap-1 !px-3 !py-2">
-      <span className="num !text-xl">{days}</span>
-      <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft">
-        {days === 1 ? "day" : "days"}
+    <div className="flex shrink-0 flex-col items-end text-right">
+      <span className="font-display text-[1.75rem] font-medium tabular-nums leading-none tracking-[-0.03em] text-coral">
+        {days}
+      </span>
+      <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">
+        {days === 1 ? "day to go" : "days to go"}
       </span>
     </div>
   );

@@ -5,7 +5,9 @@ import { Countdown } from "@/components/Countdown";
 import { OccasionBadge } from "@/components/OccasionBadge";
 import { useGivy } from "@/lib/givy-context";
 import { formatMoney } from "@/lib/store";
-import { OCCASION_EMOJI, OCCASION_LABELS, type Occasion } from "@/lib/types";
+import { OccasionIcon } from "@/components/OccasionIcon";
+import { CopyPlus, Plus, Search } from "lucide-react";
+import { OCCASION_LABELS, type Occasion } from "@/lib/types";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -58,28 +60,36 @@ export default function ListsPage() {
 
   return (
     <div className="animate-rise space-y-5 lg:space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl lg:text-5xl">
+          <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.025em] text-ink sm:text-4xl lg:text-5xl">
             Lists
           </h1>
-          <p className="mt-1 text-sm font-semibold text-ink-soft lg:text-base">
-            Birthdays, holidays, weddings: all your Givies.
+          <p className="mt-1 text-sm text-ink-soft lg:text-base">
+            Every occasion, in one place.
           </p>
         </div>
-        <Link href="/app/create" className="btn btn-primary shrink-0">
-          New Givy
+        <Link href="/app/create" className="btn btn-primary !min-h-10 shrink-0 !px-4 text-sm">
+          <Plus aria-hidden size={16} strokeWidth={2.25} />
+          New list
         </Link>
       </div>
 
       <div className="space-y-3">
         <div className="relative">
+          <Search
+            aria-hidden
+            size={16}
+            strokeWidth={1.75}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-soft"
+          />
           <input
-            type="text"
-            placeholder="Search lists..."
+            type="search"
+            placeholder="Search lists"
+            aria-label="Search lists"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="field !rounded-2xl !py-2.5"
+            className="field !pl-10"
           />
         </div>
 
@@ -88,10 +98,10 @@ export default function ListsPage() {
             <button
               type="button"
               onClick={() => setSelectedTag("")}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
                 !selectedTag
                   ? "bg-coral text-white"
-                  : "border-2 border-line bg-paper text-ink-soft"
+                  : "border border-line bg-paper text-ink-soft"
               }`}
             >
               All tags
@@ -101,10 +111,10 @@ export default function ListsPage() {
                 key={tag}
                 type="button"
                 onClick={() => setSelectedTag(tag)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
                   selectedTag === tag
                     ? "bg-coral text-white"
-                    : "border-2 border-line bg-paper text-ink-soft"
+                    : "border border-line bg-paper text-ink-soft"
                 }`}
               >
                 {tag}
@@ -119,19 +129,28 @@ export default function ListsPage() {
           <button
             key={f}
             type="button"
-            className={`shrink-0 snap-start rounded-full px-3 py-1.5 text-xs font-bold ${
+            className={`h-8 shrink-0 snap-start rounded-full px-3.5 text-[13px] font-medium transition ${
               filter === f
-                ? "bg-ink text-white"
-                : "border-2 border-line bg-paper text-ink-soft"
+                ? "bg-ink text-mist"
+                : "border border-line/80 bg-paper text-ink-soft hover:text-ink"
             }`}
             onClick={() => setFilter(f)}
           >
-            {f === "all" ? "All" : `${OCCASION_EMOJI[f]} ${OCCASION_LABELS[f]}`}
+            {f === "all" ? (
+              "All"
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <OccasionIcon occasion={f} size={12} />
+                {OCCASION_LABELS[f]}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Your Lists</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
+        {filtered.length} {filtered.length === 1 ? "list" : "lists"}
+      </p>
 
       <div className="stagger flex flex-col gap-3">
         {filtered.map((list) => {
@@ -141,20 +160,22 @@ export default function ListsPage() {
           return (
             <div
               key={list.id}
-              className="panel relative p-5 transition-all hover:border-coral/50 hover:shadow-md"
+              className="panel relative p-5 transition-shadow duration-300 hover:shadow-[var(--shadow-raised)]"
             >
               <Link href={`/app/${list.id}`} className="block">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <OccasionBadge
-                    occasion={list.occasion}
-                    suffix={list.published ? "Shared" : "Draft"}
-                  />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <OccasionBadge
+                      occasion={list.occasion}
+                      suffix={list.published ? "Shared" : "Draft"}
+                    />
+                    <h2 className="mt-2.5 break-words font-display text-xl font-semibold tracking-[-0.015em] text-ink sm:text-2xl">
+                      {list.title}
+                    </h2>
+                  </div>
                   <Countdown eventDate={list.eventDate} />
                 </div>
-                <h2 className="break-words font-display text-xl font-black text-ink sm:text-2xl">
-                  {list.title}
-                </h2>
-                <p className="mt-1 text-sm text-ink-soft">
+                <p className="mt-0.5 text-sm text-ink-soft">
                   {total} items · {claimed} claimed
                   {list.items[0]?.price != null
                     ? ` · from ${formatMoney(
@@ -176,33 +197,34 @@ export default function ListsPage() {
                 )}
                 {total > 0 && (
                   <div className="mt-4">
-                    <div className="mb-1.5 flex justify-between text-xs font-semibold text-ink-soft">
+                    <div className="mb-1.5 flex justify-between text-xs text-ink-soft">
                       <span>
                         {claimed} of {total} claimed
                       </span>
-                      <span className="text-leaf">{pct}%</span>
+                      <span className="tabular-nums">{pct}%</span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-mist-deep">
+                    <div className="h-1 overflow-hidden rounded-full bg-mist-deep">
                       <div
-                        className="h-full rounded-full bg-coral transition-all"
+                        className="h-full rounded-full bg-leaf transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
                   </div>
                 )}
               </Link>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-4 flex justify-end border-t border-line/70 pt-3">
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="ghost"
                   onClick={(e) => {
                     e.preventDefault();
                     handleDuplicate(list.id, list.title);
                   }}
                   disabled={duplicatingId === list.id}
-                  className="flex-1"
+                  className="!h-8 !px-2"
                 >
-                  {duplicatingId === list.id ? "Duplicating..." : "Duplicate"}
+                  <CopyPlus aria-hidden size={15} strokeWidth={1.75} />
+                  {duplicatingId === list.id ? "Duplicating…" : "Duplicate"}
                 </Button>
               </div>
             </div>
@@ -210,7 +232,7 @@ export default function ListsPage() {
         })}
         {filtered.length === 0 && (
           <div className="panel p-8 text-center">
-            <p className="font-display text-2xl font-black">
+            <p className="font-display text-2xl font-semibold">
               {lists.length === 0 ? "Nothing here yet" : "No lists in this filter"}
             </p>
             <p className="mt-2 text-sm text-ink-soft">
@@ -226,9 +248,10 @@ export default function ListsPage() {
         {filtered.length > 0 && (
           <Link
             href="/app/create"
-            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line py-7 text-sm font-bold text-ink-soft transition-all hover:bg-mist-deep"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-dashed border-line text-sm font-medium text-ink-soft transition hover:border-ink/25 hover:text-ink"
           >
-            + Create a new Givy
+            <Plus aria-hidden size={15} strokeWidth={2} />
+            New list
           </Link>
         )}
       </div>
