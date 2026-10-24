@@ -1,0 +1,46 @@
+GOOGLE ADS APP CAMPAIGN (Google Play installs)
+
+Headlines (30 max, add all 5):
+1. Gift wishlists, done right
+2. No more duplicate gifts
+3. One list. One link.
+4. Claims stay secret
+5. Gifts they'll actually love
+
+Descriptions (90 max, add all 5):
+1. Make one wishlist, share one link, and let friends claim gifts privately.
+2. Claimed gifts lock for everyone else, so nobody buys the same gift twice.
+3. Add gifts from any shop. Paste a link and the photo fills in.
+4. Birthdays, weddings, baby showers, holidays. One list for every occasion.
+5. Friends can chip in together toward the big gift. Free for personal lists.
+
+Images: out/statics/post_feature_4x5.png, post_problem_4x5.png, post_steps_1x1.png
+Video: out/Givy_Ad3_NewDesign_9x16.mp4 (upload to YouTube, then add the link)
+(paths are inside assets/ads/ad3-new-design/)
+
+
+INSTAGRAM / FACEBOOK POSTS
+
+Post 1 (post_feature_4x5.png)
+Gifts they'll actually love. Make one wishlist, share one link, and friends claim gifts privately, so nobody doubles up.
+Free on Google Play. Link in bio.
+#wishlist #giftideas #birthdaygifts #giftregistry
+
+Post 2 (post_problem_4x5.png)
+Two friends. Same watch. Sound familiar?
+With Givy, claimed gifts lock for everyone else. One list, one link, zero duplicates.
+Free on Google Play. Link in bio.
+#giftideas #wishlist #birthday #babyshower
+
+Post 3 (post_steps_1x1.png)
+How Givy works:
+1. Make a list
+2. Share the link
+3. Friends claim gifts privately
+You see what's taken. Never who took it.
+Free on Google Play · givy.gifts
+#wishlist #giftregistry #weddingregistry #holidaygifts
+
+Reel / Story (Givy_Ad3_NewDesign_9x16.mp4)
+Same gift twice? Not anymore. One list, one link, zero duplicates.
+Free on Google Play.

@@ -36,7 +36,7 @@ const steps = [
     n: "01",
     Icon: PenLine,
     title: "Build your list",
-    body: "Add any gift idea — link a product, set a price, add details.",
+    body: "Add any gift idea. Link a product, set a price, and add details.",
   },
   {
     n: "02",
@@ -94,8 +94,8 @@ export function LandingPage() {
             </FadeIn>
             <FadeIn delay={0.14}>
               <p className="mt-5 max-w-md text-lg leading-relaxed text-ink-soft">
-                Create a wishlist for any occasion. Share it. Friends claim gifts privately —
-                no duplicates, no guesswork, no awkward moments.
+                Create a wishlist for any occasion. Share it. Friends claim gifts privately,
+                with no duplicates, no guesswork, and no awkward moments.
               </p>
             </FadeIn>
             <FadeIn delay={0.2} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">

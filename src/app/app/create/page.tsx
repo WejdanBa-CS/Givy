@@ -176,7 +176,7 @@ export default function CreatePage() {
               </span>
               <span className="block text-sm text-ink-soft">
                 PayPal.me or Ko-fi tip link on your public list. Payments stay on
-                PayPal — Givy never sees card numbers.
+                PayPal. Givy never sees card numbers.
               </span>
             </span>
           </label>

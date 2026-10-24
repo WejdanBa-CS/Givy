@@ -2,7 +2,7 @@ import type { AuthProvider, User } from "../types";
 import { getGiveaways, saveGiveaways } from "./local-giveaways";
 import { getLists, saveLists } from "./local-lists";
 import { ensureSeedData } from "./seed";
-import { readJson, STORAGE_KEYS, uid, writeJson } from "./storage";
+import { readJson, removeJson, STORAGE_KEYS, uid, writeJson } from "./storage";
 
 type LocalEmailAccount = {
   password: string;
@@ -107,8 +107,7 @@ export function signIn(provider: AuthProvider): User {
 }
 
 export function signOut() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEYS.user);
+  removeJson(STORAGE_KEYS.user);
 }
 
 /** Local demo mode only — not used when Supabase is configured. */

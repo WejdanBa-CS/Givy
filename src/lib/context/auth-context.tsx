@@ -23,6 +23,7 @@ import {
 import { clearGuestCookie, isGuestAllowed, isGuestUser, setGuestCookie } from "@/lib/guest";
 import {
   getCurrentUser,
+  hydrateStorage,
   signIn as signInLocal,
   signInWithEmailLocal,
   signOut as signOutLocal,
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const localSession = !cloud || isGuestUser(user);
 
   const refresh = useCallback(async () => {
+    await hydrateStorage();
     const localUser = getCurrentUser();
     if (isGuestUser(localUser)) {
       setGuestCookie();

@@ -64,13 +64,13 @@ export function FriendListConfirm({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-coral-deep">Check before you claim</p>
           <AlertDialog.Title className="mt-2 font-display text-2xl text-ink">Is this your friend’s list?</AlertDialog.Title>
           <AlertDialog.Description className="mt-2 text-sm text-ink-soft">
-            You’re signed in as <strong className="text-ink">{signedInAs}</strong>. Confirm this wishlist belongs to the friend you meant to shop for — not your own account, and not someone else.
+            You’re signed in as <strong className="text-ink">{signedInAs}</strong>. Confirm this wishlist belongs to the friend you meant to shop for, not your own account and not someone else.
           </AlertDialog.Description>
           <div className="mt-4 rounded-2xl border border-line bg-mist/70 p-4 text-sm"><p className="font-semibold text-ink">{listTitle}</p><p className="mt-1 text-ink-soft">Owner: {ownerName}</p></div>
           <p className="mt-3 text-sm text-ink-soft">If this isn’t right, leave and open the link they sent you.</p>
           <div className="mt-5 flex flex-wrap justify-end gap-2">
             <AlertDialog.Cancel asChild><Button variant="secondary">Leave list</Button></AlertDialog.Cancel>
-            <AlertDialog.Action asChild><Button onClick={confirm}>Yes — this is {ownerName}&apos;s list</Button></AlertDialog.Action>
+            <AlertDialog.Action asChild><Button onClick={confirm}>Yes, this is {ownerName}&apos;s list</Button></AlertDialog.Action>
           </div>
         </AlertDialog.Content>
       </AlertDialog.Portal>

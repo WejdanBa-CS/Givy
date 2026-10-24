@@ -16,7 +16,7 @@ const SHARE_BLURBS: Record<
   (owner: string) => string
 > = {
   birthday: (owner) =>
-    `${owner}'s birthday wishlist on Givy. Claim a gift privately — no awkward duplicates.`,
+    `${owner}'s birthday wishlist on Givy. Claim a gift privately, with no awkward duplicates.`,
   wedding: (owner) =>
     `${owner}'s wedding registry on Givy. Pick a gift before someone else does.`,
   holiday: (owner) =>
@@ -28,7 +28,7 @@ const SHARE_BLURBS: Record<
   creator: (owner) =>
     `Support ${owner}'s wishlist on Givy. Claim gifts privately.`,
   other: (owner) =>
-    `${owner} shared a gift list on Givy. Claim privately — no awkward duplicates.`,
+    `${owner} shared a gift list on Givy. Claim privately, with no awkward duplicates.`,
 };
 
 export function resolveShareOccasion(raw: string | null | undefined): Occasion {
@@ -79,7 +79,7 @@ export function buildShareMetadata(input: SharePreviewInput): Metadata {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${title} — Givy`,
+          alt: `${title} on Givy`,
         },
       ],
     },

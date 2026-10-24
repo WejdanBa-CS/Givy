@@ -10,10 +10,10 @@ Same product as the website (lists, invites, email/password, Google, Facebook, g
 
 ## Version
 
-See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.4+19`**.
+See `pubspec.yaml` (`versionName+versionCode`), currently **`1.1.5+20`**.
 
-- `versionName` (1.1.4) — loads **www.givy.gifts**  
-- `versionCode` (19) — must increase on every Play upload  
+- `versionName` (1.1.5) — loads **www.givy.gifts**  
+- `versionCode` (20) — must increase on every Play upload  
 
 ### Resubmit after Broken Functionality rejection (do in order)
 

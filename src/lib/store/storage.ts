@@ -93,22 +93,36 @@ async function decryptString(payload: string): Promise<string> {
   return textDecoder.decode(plainBuffer);
 }
 
+// Decryption is async but reads are sync, so decrypted values live here.
+const plainCache = new Map<string, string>();
+let hydration: Promise<void> | null = null;
+
+/** Must resolve before the first readJson of encrypted data. */
+export function hydrateStorage(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  hydration ??= (async () => {
+    for (const key of Object.values(STORAGE_KEYS)) {
+      if (plainCache.has(key)) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      try {
+        plainCache.set(key, await decryptString(raw));
+      } catch {
+        // Unreadable payload (e.g. key was cleared); treat as missing.
+      }
+    }
+  })();
+  return hydration;
+}
+
 export function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
+    const cached = plainCache.get(key);
+    if (cached !== undefined) return JSON.parse(cached) as T;
     const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    if (!raw.startsWith(ENC_PREFIX)) return JSON.parse(raw) as T;
-
-    let result: T = fallback;
-    void decryptString(raw)
-      .then((plain) => {
-        result = JSON.parse(plain) as T;
-      })
-      .catch(() => {
-        result = fallback;
-      });
-    return result;
+    if (!raw || raw.startsWith(ENC_PREFIX)) return fallback;
+    return JSON.parse(raw) as T;
   } catch {
     return fallback;
   }
@@ -117,6 +131,7 @@ export function readJson<T>(key: string, fallback: T): T {
 export function writeJson<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
   const serialized = JSON.stringify(value);
+  plainCache.set(key, serialized);
   void encryptString(serialized)
     .then((encrypted) => {
       localStorage.setItem(key, encrypted);
@@ -124,6 +139,12 @@ export function writeJson<T>(key: string, value: T) {
     .catch(() => {
       // Avoid writing cleartext if encryption fails.
     });
+}
+
+export function removeJson(key: string) {
+  if (typeof window === "undefined") return;
+  plainCache.delete(key);
+  localStorage.removeItem(key);
 }
 
 export function getActivity(): ActivityEvent[] {

@@ -47,7 +47,7 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
       const list = Array.isArray(data.suggestions) ? data.suggestions : [];
       setSuggestions(list);
       if (list.length === 0) {
-        toast.message("No ideas this round — try different interests.");
+        toast.message("No ideas this round. Try different interests.");
       } else {
         toast.success("Gift ideas ready");
       }
@@ -61,7 +61,7 @@ export function SuggestGiftsPanel({ occasion, onUse }: Props) {
   return (
     <CollapsiblePanel
       title="Suggest gifts"
-      description={`Ideas for a ${OCCASION_LABELS[occasion].toLowerCase()} — pick one to fill the form below.`}
+      description={`Ideas for a ${OCCASION_LABELS[occasion].toLowerCase()}. Pick one to fill the form below.`}
     >
       <form onSubmit={onSuggest} className="space-y-3">
         <div>

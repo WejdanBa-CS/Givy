@@ -93,7 +93,7 @@ export const CURATED_GIFT_SUGGESTIONS: Record<Occasion, CuratedGift[]> = {
     },
     {
       title: "Wool throw in a deep color",
-      notes: "Not white — forest or rust",
+      notes: "Not white. Forest or rust",
       priceHint: 68,
       why: "Useful through winter",
     },
@@ -263,7 +263,7 @@ export const CURATED_GIFT_SUGGESTIONS: Record<Occasion, CuratedGift[]> = {
     },
     {
       title: "Quality socks + candle pairing",
-      notes: "Not boring — bold pattern + scent",
+      notes: "Not boring. Bold pattern and scent",
       priceHint: 32,
       why: "Small but considered",
     },

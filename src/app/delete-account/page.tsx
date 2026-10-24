@@ -71,7 +71,7 @@ export default function DeleteAccountPage() {
             </section>
 
             <p>
-              Guest sessions only live in this browser — use Sign out / clear
+              Guest sessions only live in this browser. Use Sign out or clear
               site data to remove them locally. See also our{" "}
               <Link
                 href="/privacy"

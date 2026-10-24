@@ -41,7 +41,7 @@ export function LandingProductPreview() {
       <FadeIn>
         <p className={kickerClass}>The list</p>
         <h2 id="preview-heading" className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">See Givy before you start.</h2>
-        <p className="mt-3 max-w-lg text-ink-soft lg:max-w-xl lg:text-lg">One shared list. Guests claim in private. You only see what is taken — never who bought it.</p>
+        <p className="mt-3 max-w-lg text-ink-soft lg:max-w-xl lg:text-lg">One shared list. Guests claim in private. You only see what is taken, never who bought it.</p>
       </FadeIn>
 
       <FadeIn delay={0.12} className="mt-8 overflow-hidden rounded-2xl border border-line bg-paper lg:mx-auto lg:mt-10 lg:max-w-[42rem]">
@@ -62,7 +62,7 @@ export function LandingProductPreview() {
               <li key={item.id}>
                 <article className={`wish-item ${item.purchased ? "is-claimed" : ""}`}>
                   <GiftGlyph title={item.title} hint={item.imageHint} claimed={item.purchased} size="lg" />
-                  <div className="wish-item-body"><div className="wish-item-top"><h4 className="wish-item-title">{item.title}</h4>{item.purchased ? <span className="wish-item-status">Taken</span> : <span className="wish-item-price">${item.price}</span>}</div>{item.notes && <p className="wish-item-notes">{item.notes}</p>}{view === "owner" && item.purchased && <p className="mt-1 text-[.82rem] font-semibold text-leaf">Taken — you won’t see who claimed it.</p>}</div>
+                  <div className="wish-item-body"><div className="wish-item-top"><h4 className="wish-item-title">{item.title}</h4>{item.purchased ? <span className="wish-item-status">Taken</span> : <span className="wish-item-price">${item.price}</span>}</div>{item.notes && <p className="wish-item-notes">{item.notes}</p>}{view === "owner" && item.purchased && <p className="mt-1 text-[.82rem] font-semibold text-leaf">Taken. You won’t see who claimed it.</p>}</div>
                   {view === "guest" && !item.purchased && <div className="wish-item-actions" aria-hidden><span className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-[.875rem] bg-coral px-3 py-2 text-sm font-semibold text-white">{item.fundingMode === "cash_fund" ? "Contribute now" : "I’ll get this"}</span></div>}
                 </article>
               </li>
