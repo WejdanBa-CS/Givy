@@ -1,6 +1,6 @@
 import { safeHttpsUrl } from "@/lib/security";
 
-const FETCH_TIMEOUT_MS = 5_500;
+const FETCH_TIMEOUT_MS = 9_000;
 const MAX_BYTES = 900_000;
 
 function isPrivateHostname(hostname: string): boolean {
@@ -54,6 +54,21 @@ function itemPropImage(html: string): string | null {
   const patterns = [
     /<meta[^>]+itemprop=["']image["'][^>]+content=["']([^"']+)["']/i,
     /<img[^>]+itemprop=["']image["'][^>]+src=["']([^"']+)["']/i,
+  ];
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+  return null;
+}
+
+/** Amazon product pages ship no og:image; the main photo lives on #landingImage. */
+function amazonImage(html: string): string | null {
+  const patterns = [
+    /data-old-hires=["'](https:\/\/[^"']+)["']/i,
+    /"hiRes":"(https:\/\/[^"]+)"/i,
+    /data-a-dynamic-image=["']\{&quot;(https:\/\/[^&]+)&quot;/i,
+    /data-a-dynamic-image=["']\{"(https:\/\/[^"]+)"/i,
   ];
   for (const pattern of patterns) {
     const match = html.match(pattern);
@@ -185,7 +200,8 @@ export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreview> {
       metaContent(html, "twitter:image:src") ||
       jsonLdImage(html) ||
       linkRelImage(html) ||
-      itemPropImage(html);
+      itemPropImage(html) ||
+      amazonImage(html);
     const titleRaw =
       metaContent(html, "og:title") ||
       metaContent(html, "twitter:title") ||

@@ -53,4 +53,23 @@ describe("fetchLinkPreview", () => {
       title: "Fallback",
     });
   });
+
+  it("reads the Amazon landing image when there is no og:image", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          `<html><head><title>Amazon.com: MacBook Pro</title></head><body>
+            <img id="landingImage" data-old-hires="https://m.media-amazon.com/images/I/61-oTP1X4rL._AC_SL1500_.jpg"
+              data-a-dynamic-image="{&quot;https://m.media-amazon.com/images/I/61-oTP1X4rL._AC_SY355_.jpg&quot;:[355,355]}" />
+          </body></html>`,
+          { status: 200, headers: { "content-type": "text/html" } },
+        ),
+      ),
+    );
+    await expect(fetchLinkPreview("https://www.amazon.com/dp/B0DRSWVTMN")).resolves.toEqual({
+      imageUrl: "https://m.media-amazon.com/images/I/61-oTP1X4rL._AC_SL1500_.jpg",
+      title: "Amazon.com: MacBook Pro",
+    });
+  });
 });

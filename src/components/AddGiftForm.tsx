@@ -38,7 +38,7 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
   const [groupFund, setGroupFund] = useState(false);
   const [showImageOverride, setShowImageOverride] = useState(false);
 
-  const { previewBusy, previewMiss, ensurePreview, resetPreviewTracking } =
+  const { previewBusy, ensurePreview, resetPreviewTracking } =
     useProductLinkPreview({
       url,
       imageHint,
@@ -137,11 +137,6 @@ export function AddGiftForm({ busy = false, prefill, onAdd }: AddGiftFormProps) 
         />
         {previewBusy && (
           <p className="mt-1.5 text-xs font-semibold text-ink-soft">Finding product photo…</p>
-        )}
-        {!previewBusy && previewMiss && safeHttpsUrl(url) && !hasProductPhoto && (
-          <p className="mt-1.5 text-xs font-semibold text-ink-soft">
-            Couldn’t find a photo automatically — add a title below, or paste an image URL.
-          </p>
         )}
       </div>
 
