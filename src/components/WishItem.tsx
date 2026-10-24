@@ -18,32 +18,107 @@ export function WishItem({ item, actions, footer }: Props) {
   const goal = item.goalMinor ?? 0;
   const raised = item.fundedMinor ?? 0;
   const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-  const quantityDisplay = item.quantity && item.quantityNeeded ? `${item.quantity}/${item.quantityNeeded}` : item.quantity ? `${item.quantity}` : null;
+  const quantityDisplay =
+    item.quantity && item.quantityNeeded
+      ? `${item.quantity}/${item.quantityNeeded}`
+      : item.quantity
+        ? `${item.quantity}`
+        : null;
+  const priceLabel =
+    group && goal > 0
+      ? formatMinor(goal)
+      : item.price != null
+        ? formatMoney(item.price)
+        : null;
 
   return (
     <m.article
       initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={reduce ? { duration: 0 } : springs.soft}
-      whileHover={reduce || funded ? undefined : { x: 2 }}
+      whileHover={reduce || funded ? undefined : { y: -2 }}
       whileTap={reduce || funded ? undefined : { scale: 0.995 }}
-      className="grid grid-cols-[auto_1fr] items-start gap-4 border-b border-line py-[1.15rem] last:border-b-0 sm:grid-cols-[auto_1fr_auto] lg:gap-[1.35rem] lg:py-[1.35rem]"
+      className={`relative overflow-hidden rounded-2xl border-2 border-line bg-paper transition-shadow ${funded ? "opacity-60" : "hover:shadow-md"}`}
     >
-      <GiftGlyph title={item.title} hint={item.imageHint} claimed={funded} />
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-          <h3 className={`m-0 text-[1.1rem] font-semibold tracking-[-.02em] ${funded ? "text-ink-soft line-through decoration-[1.5px]" : "text-ink"}`}>{item.title}</h3>
-          <div className="flex items-center gap-2">
-            {item.priority && <span className="text-xs" title={item.priority}>{PRIORITY_EMOJI[item.priority]}</span>}
-            {funded ? <span className="text-xs font-bold uppercase tracking-[.06em] text-ink-soft">{group ? "Funded" : "Taken"}</span> : group && goal > 0 ? <span className="text-[.95rem] font-bold tracking-[-.02em] text-ink">{formatMinor(goal)}</span> : item.price != null ? <span className="text-[.95rem] font-bold tracking-[-.02em] text-ink">{formatMoney(item.price)}</span> : null}
-            {quantityDisplay && <span className="text-xs text-ink-soft">×{quantityDisplay}</span>}
+      {funded && (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[2px]"
+          style={{ background: "rgba(254,246,238,0.75)" }}
+        >
+          <div className="flex flex-col items-center gap-1 rounded-2xl border border-line bg-paper px-4 py-2.5 shadow-sm">
+            <span className="text-lg leading-none text-leaf-soft" aria-hidden>
+              ✓
+            </span>
+            <span className="text-xs font-black text-ink">
+              {group ? "Funded" : "Claimed"}
+            </span>
           </div>
         </div>
-        {item.notes && <p className="mt-1.5 text-[.9rem] leading-[1.45] text-ink-soft">{item.notes}</p>}
-        {group && goal > 0 && <div className="mt-2"><div className="h-1.5 overflow-hidden rounded-full bg-mist-deep" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-coral" style={{ width: `${pct}%` }} /></div><p className="mt-1 text-xs font-semibold text-ink-soft">{formatMinor(raised)} of {formatMinor(goal)} pledged{item.contributorCount ? ` · ${item.contributorCount}` : ""}</p></div>}
-        {footer}
+      )}
+
+      <div className="relative overflow-hidden">
+        <GiftGlyph title={item.title} hint={item.imageHint} claimed={funded} size="card" />
+        {item.priority && (
+          <span
+            className="absolute left-2.5 top-2.5 rounded-xl bg-paper/90 px-1.5 py-0.5 text-lg shadow-sm"
+            title={item.priority}
+          >
+            {PRIORITY_EMOJI[item.priority]}
+          </span>
+        )}
+        {priceLabel && (
+          <span className="absolute bottom-2.5 right-2.5 rounded-xl bg-amber px-2 py-1 text-xs font-black text-ink">
+            {priceLabel}
+          </span>
+        )}
       </div>
-      {actions && <div className="col-start-2 flex flex-wrap items-center gap-1.5 sm:col-auto sm:flex-col sm:items-end">{actions}</div>}
+
+      <div className="p-3.5">
+        <h3
+          className={`mb-1 font-display text-sm font-black leading-tight ${funded ? "text-ink-soft line-through" : "text-ink"}`}
+        >
+          {item.title}
+        </h3>
+        {item.notes && (
+          <p className="mb-3 text-xs text-ink-soft line-clamp-2">{item.notes}</p>
+        )}
+        {quantityDisplay && (
+          <p className="mb-2 text-xs font-semibold text-ink-soft">×{quantityDisplay}</p>
+        )}
+        {group && goal > 0 && (
+          <div className="mb-3">
+            <div
+              className="h-1.5 overflow-hidden rounded-full bg-mist-deep"
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div className="h-full rounded-full bg-coral" style={{ width: `${pct}%` }} />
+            </div>
+            <p className="mt-1 text-xs font-semibold text-ink-soft">
+              {formatMinor(raised)} of {formatMinor(goal)} pledged
+              {item.contributorCount ? ` · ${item.contributorCount}` : ""}
+            </p>
+          </div>
+        )}
+        {footer}
+        {actions ? (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">{actions}</div>
+        ) : !funded ? (
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-line" />
+            <span className="text-xs font-semibold text-ink-soft">Available</span>
+          </div>
+        ) : (
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-leaf-soft" />
+            <span className="text-xs font-semibold text-leaf">
+              {group ? "Funded" : "Claimed"}
+            </span>
+          </div>
+        )}
+      </div>
     </m.article>
   );
 }

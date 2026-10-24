@@ -85,12 +85,18 @@ export function signIn(provider: AuthProvider): User {
     guest: "",
     email: "you@example.com",
   };
+  const demoAvatars: Partial<Record<AuthProvider, string>> = {
+    google: "https://api.dicebear.com/7.x/avataaars/svg?seed=AlexRivera",
+    apple: "https://api.dicebear.com/7.x/avataaars/svg?seed=JordanLee",
+    facebook: "https://api.dicebear.com/7.x/avataaars/svg?seed=SamOkoye",
+  };
   const user: User = {
     id: uid("user"),
     name: names[provider],
     email: emails[provider],
     provider,
     avatarHue: getSecureRandomInt(360),
+    avatarUrl: demoAvatars[provider] ?? null,
     betaUnlocked: provider === "guest" ? true : undefined,
   };
   saved[provider] = user;

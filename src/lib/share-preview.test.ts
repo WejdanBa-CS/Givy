@@ -42,7 +42,7 @@ describe("sharePreviewCopy", () => {
 });
 
 describe("buildShareMetadata", () => {
-  it("includes absolute Open Graph and Twitter images", () => {
+  it("includes absolute Open Graph and Twitter images with the Givy card", () => {
     const meta = buildShareMetadata({
       title: "Holiday haul",
       ownerName: "Sam",
@@ -54,6 +54,9 @@ describe("buildShareMetadata", () => {
     expect(Array.isArray(images) && images[0]).toBeTruthy();
     if (Array.isArray(images) && images[0] && typeof images[0] === "object") {
       expect(String(images[0].url)).toMatch(/^https?:\/\//);
+      expect(String(images[0].url)).toContain("/g/abc123/opengraph-image");
+      expect(images[0].width).toBe(1200);
+      expect(images[0].height).toBe(630);
     }
     expect(meta.twitter?.card).toBe("summary_large_image");
   });

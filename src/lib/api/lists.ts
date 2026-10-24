@@ -5,7 +5,7 @@ import {
   mapItem,
   mapList,
   mapFundingMode,
-  sanitizeImageHint,
+  splitImageHint,
   sanitizeItemUrl,
   sanitizeSupportUrl,
   type ItemRow,
@@ -93,18 +93,21 @@ export async function createListRemote(input: {
   let gifts: GiftItem[] = [];
   if (input.withDemoItems) {
     try {
-      const rows = DEMO_SEED_ITEMS.map((item) => ({
-        list_id: list.id,
-        title: item.title,
-        notes: item.notes ?? null,
-        url: sanitizeItemUrl(item.url),
-        price: item.price ?? null,
-        image_url: sanitizeImageHint(item.imageHint),
-        emoji: null,
-        is_claimed: false,
-        funding_mode: item.fundingMode ?? "direct_purchase",
-        goal_minor: item.goalMinor ?? null,
-      }));
+      const rows = DEMO_SEED_ITEMS.map((item) => {
+        const { imageUrl, glyph } = splitImageHint(item.imageHint);
+        return {
+          list_id: list.id,
+          title: item.title,
+          notes: item.notes ?? null,
+          url: sanitizeItemUrl(item.url),
+          price: item.price ?? null,
+          image_url: imageUrl,
+          emoji: glyph,
+          is_claimed: false,
+          funding_mode: item.fundingMode ?? "direct_purchase",
+          goal_minor: item.goalMinor ?? null,
+        };
+      });
       const { data: inserted, error: itemError } = await supabase
         .from("items")
         .insert(rows)

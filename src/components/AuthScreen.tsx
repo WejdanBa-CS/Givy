@@ -179,7 +179,7 @@ function AuthInner() {
       <main className="mx-auto mt-10 max-w-md animate-rise lg:mt-16">
         <div className="panel p-5 sm:p-7 md:p-8 lg:p-9">
           <Logo size="lg" />
-          <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1 className="mt-4 font-display text-2xl font-black tracking-tight sm:text-3xl">
             {mode === "signup" ? "Create your Givy" : "Sign in to Givy"}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">

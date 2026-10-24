@@ -62,6 +62,27 @@ export function sanitizeImageHint(hint?: string | null): string | null {
   return sanitizeItemUrl(trimmed);
 }
 
+/** Short glyph seed for `items.emoji` when the hint is not a URL. */
+export function sanitizeGlyphSeed(hint?: string | null): string | null {
+  if (!hint) return null;
+  const trimmed = hint.trim();
+  if (!trimmed) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  const seed = trimmed.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32);
+  return seed || null;
+}
+
+/** Split a client imageHint into DB columns. */
+export function splitImageHint(hint?: string | null): {
+  imageUrl: string | null;
+  glyph: string | null;
+} {
+  return {
+    imageUrl: sanitizeImageHint(hint),
+    glyph: sanitizeGlyphSeed(hint),
+  };
+}
+
 export function sanitizeSupportUrl(url?: string | null): string | null {
   if (url == null || url === "") return null;
   return safeSupportUrl(url);

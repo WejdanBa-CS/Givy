@@ -14,7 +14,10 @@ const tabs = [
 export function AppNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line bg-mist/96 px-3.5 pb-[calc(.65rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-[14px] lg:left-1/2 lg:right-auto lg:bottom-[1.35rem] lg:w-[min(640px,calc(100%-3rem))] lg:-translate-x-1/2 lg:rounded-[1.35rem] lg:border-2 lg:px-3.5 lg:py-3 lg:shadow-givy" aria-label="Main">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line bg-paper/95 px-3.5 pb-[calc(.65rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-md lg:left-1/2 lg:right-auto lg:bottom-[1.35rem] lg:w-[min(640px,calc(100%-3rem))] lg:-translate-x-1/2 lg:rounded-[1.25rem] lg:border-2 lg:px-3.5 lg:py-3 lg:shadow-givy"
+      aria-label="Main"
+    >
       <div className="mx-auto grid w-full max-w-[560px] grid-cols-5 items-end gap-0.5 lg:max-w-none lg:gap-1.5">
         {tabs.map((tab) => {
           const active = tab.match(pathname);

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Countdown } from "@/components/Countdown";
+import { OccasionBadge } from "@/components/OccasionBadge";
 import { useGivy } from "@/lib/givy-context";
 import { formatMoney } from "@/lib/store";
 import { OCCASION_EMOJI, OCCASION_LABELS, type Occasion } from "@/lib/types";
@@ -59,10 +60,10 @@ export default function ListsPage() {
     <div className="animate-rise space-y-5 lg:space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-3xl tracking-tight text-ink sm:text-4xl lg:text-5xl">
+          <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl lg:text-5xl">
             Lists
           </h1>
-          <p className="mt-1 text-ink-soft lg:text-lg">
+          <p className="mt-1 text-sm font-semibold text-ink-soft lg:text-base">
             Birthdays, holidays, weddings: all your Givies.
           </p>
         </div>
@@ -71,7 +72,6 @@ export default function ListsPage() {
         </Link>
       </div>
 
-      {/* Search and Tag Filters */}
       <div className="space-y-3">
         <div className="relative">
           <input
@@ -79,19 +79,19 @@ export default function ListsPage() {
             placeholder="Search lists..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-line bg-white/70 px-4 py-2 text-ink placeholder:text-ink-soft focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/20"
+            className="field !rounded-2xl !py-2.5"
           />
         </div>
-        
+
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setSelectedTag("")}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold ${
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
                 !selectedTag
-                  ? "bg-leaf text-white"
-                  : "border border-line bg-white/70 text-ink-soft"
+                  ? "bg-coral text-white"
+                  : "border-2 border-line bg-paper text-ink-soft"
               }`}
             >
               All tags
@@ -101,10 +101,10 @@ export default function ListsPage() {
                 key={tag}
                 type="button"
                 onClick={() => setSelectedTag(tag)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold ${
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
                   selectedTag === tag
-                    ? "bg-leaf text-white"
-                    : "border border-line bg-white/70 text-ink-soft"
+                    ? "bg-coral text-white"
+                    : "border-2 border-line bg-paper text-ink-soft"
                 }`}
               >
                 {tag}
@@ -119,10 +119,10 @@ export default function ListsPage() {
           <button
             key={f}
             type="button"
-            className={`shrink-0 snap-start rounded-full px-3 py-1.5 text-sm font-semibold ${
+            className={`shrink-0 snap-start rounded-full px-3 py-1.5 text-xs font-bold ${
               filter === f
                 ? "bg-ink text-white"
-                : "border border-line bg-white/70 text-ink-soft"
+                : "border-2 border-line bg-paper text-ink-soft"
             }`}
             onClick={() => setFilter(f)}
           >
@@ -131,50 +131,65 @@ export default function ListsPage() {
         ))}
       </div>
 
-      <div className="stagger space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+      <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Your Lists</p>
+
+      <div className="stagger flex flex-col gap-3">
         {filtered.map((list) => {
           const claimed = list.items.filter((i) => i.purchased).length;
+          const total = list.items.length;
+          const pct = total > 0 ? Math.round((claimed / total) * 100) : 0;
           return (
             <div
               key={list.id}
-              className="panel relative p-4 sm:p-5 lg:p-6"
+              className="panel relative p-5 transition-all hover:border-coral/50 hover:shadow-md"
             >
-              <Link
-                href={`/app/${list.id}`}
-                className="block"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf">
-                      {OCCASION_EMOJI[list.occasion]} {OCCASION_LABELS[list.occasion]}
-                      {list.published ? " · Shared" : " · Draft"}
-                    </p>
-                    <h2 className="mt-1 break-words font-display text-xl text-ink sm:text-2xl">
-                      {list.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-ink-soft">
-                      {list.items.length} items · {claimed} claimed
-                      {list.items[0]?.price != null
-                        ? ` · from ${formatMoney(
-                            Math.min(...list.items.map((i) => i.price ?? Infinity)),
-                          )}`
-                        : ""}
-                    </p>
-                    {list.tags && list.tags.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {list.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-block rounded-full bg-leaf/10 px-2 py-0.5 text-xs font-semibold text-leaf"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+              <Link href={`/app/${list.id}`} className="block">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <OccasionBadge
+                    occasion={list.occasion}
+                    suffix={list.published ? "Shared" : "Draft"}
+                  />
                   <Countdown eventDate={list.eventDate} />
                 </div>
+                <h2 className="break-words font-display text-xl font-black text-ink sm:text-2xl">
+                  {list.title}
+                </h2>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {total} items · {claimed} claimed
+                  {list.items[0]?.price != null
+                    ? ` · from ${formatMoney(
+                        Math.min(...list.items.map((i) => i.price ?? Infinity)),
+                      )}`
+                    : ""}
+                </p>
+                {list.tags && list.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {list.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-block rounded-full bg-mist-deep px-2 py-0.5 text-xs font-semibold text-ink-soft"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {total > 0 && (
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex justify-between text-xs font-semibold text-ink-soft">
+                      <span>
+                        {claimed} of {total} claimed
+                      </span>
+                      <span className="text-leaf">{pct}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-mist-deep">
+                      <div
+                        className="h-full rounded-full bg-coral transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </Link>
               <div className="mt-3 flex gap-2">
                 <Button
@@ -194,8 +209,8 @@ export default function ListsPage() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="panel p-8 text-center lg:col-span-2">
-            <p className="font-display text-2xl">
+          <div className="panel p-8 text-center">
+            <p className="font-display text-2xl font-black">
               {lists.length === 0 ? "Nothing here yet" : "No lists in this filter"}
             </p>
             <p className="mt-2 text-sm text-ink-soft">
@@ -207,6 +222,14 @@ export default function ListsPage() {
               {lists.length === 0 ? "Create a Givy" : "New Givy"}
             </Link>
           </div>
+        )}
+        {filtered.length > 0 && (
+          <Link
+            href="/app/create"
+            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line py-7 text-sm font-bold text-ink-soft transition-all hover:bg-mist-deep"
+          >
+            + Create a new Givy
+          </Link>
         )}
       </div>
     </div>
