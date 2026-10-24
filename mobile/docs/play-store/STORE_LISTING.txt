@@ -1,28 +1,30 @@
-﻿App name:
-Givy
+﻿App name (30 max):
+Givy: Gift Wishlists
 
 Short description (80 max):
-Gift wishlists without duplicates. Share one link; friends claim privately.
+One wishlist, one link. Friends claim gifts privately, so nobody doubles up.
 
-Full description (paste into Play Console → Main store listing):
-Givy helps you share gift wishlists for birthdays, holidays, weddings, and more — without the awkward duplicate presents.
+Full description (4000 max, paste into Play Console > Main store listing):
+Givy is the easy way to share a gift wishlist for birthdays, weddings, baby showers, holidays, and graduations.
 
-Create a list, add gift ideas with links and prices, then share one private link with friends and family. When someone claims a gift, you see that it’s taken — but not who claimed it — so surprises stay intact.
+Make one list, add the gifts you actually want, and share a single link. Friends open it in any browser, claim a gift, and everyone else sees it's taken. You never see who claimed what, so the surprise stays a surprise.
 
-WHY GIVY
-• One shared list for every occasion
-• Anonymous claims — no more “who bought what” spoilers
-• Optional ship-to address revealed only to the person who claims a gift
-• Optional tip link for supporters (PayPal / similar — handled by them, not Givy)
-• Sign in with email, Google, or Facebook
+WHY PEOPLE USE GIVY
+• No more duplicate gifts. Claimed gifts lock for everyone else.
+• Claims stay secret. You see what's taken, never who took it.
+• Works with any shop. Paste a product link and the photo fills in.
+• Group gifts. Friends can chip in together toward the big one.
+• Countdown to the day, so friends know how much time is left.
+• Your ship-to address is shown only to the person who claims a gift.
+• Sign in with email, Google, or Facebook.
 
 HOW IT WORKS
-1. Create your Givy list
-2. Add gifts you actually want
-3. Share one link
-4. Friends claim gifts privately
+1. Create a list for your occasion
+2. Add gifts from any shop
+3. Share one link with family and friends
+4. They claim gifts privately
 
-Purchases happen on retailer websites — Givy coordinates the list, not the checkout.
+Givy is free for personal lists. Purchases happen on the retailer's own website. Givy keeps the list in sync, not the checkout.
 
 Privacy: https://www.givy.gifts/privacy
 Terms: https://www.givy.gifts/terms
@@ -35,10 +37,19 @@ Made by Wejdan Al Amri.
 Also set these in Play Console (App content / Store settings), not only in the description:
 - Privacy policy URL: https://www.givy.gifts/privacy
 - App website (if asked): https://www.givy.gifts
+- Category: Lifestyle (alternative: Shopping)
+- Tags: Gift ideas, Shopping lists, Events
 
 Graphics (upload from this folder):
-- App icon 512×512: mobile/docs/play-store/app-icon-512.png
-- Feature graphic 1024×500: mobile/docs/play-store/feature-graphic-1024x500.png
+- App icon 512×512: app-icon-512.png
+- Feature graphic 1024×500: feature-graphic-1024x500.png
+- Phone screenshots 1080×1920, upload in this order:
+  1. screenshot-phone-1.png  Make one wishlist.
+  2. screenshot-phone-2.png  Add gifts from anywhere.
+  3. screenshot-phone-3.png  Share one link.
+  4. screenshot-phone-4.png  Claimed gifts lock.
+  5. screenshot-phone-5.png  Claims stay secret.
+  6. screenshot-phone-6.png  Chip in together.
 
-Phone screenshots:
-2–8 from a real device or emulator (9:16). Suggested: home, your lists, list detail, shared claim view.
+Promo video (optional, YouTube URL field):
+Upload assets/ads/ad3-new-design/out/Givy_Ad3_NewDesign_9x16.mp4 to YouTube as unlisted and paste the link.
