@@ -31,6 +31,7 @@ import {
   getListById,
   getListsForUser,
   getPublicListByShareCode,
+  hydrateStorage,
   joinGiveaway as joinGiveawayStore,
   publishList as publishListLocal,
   searchLists as searchListsLocal,
@@ -78,6 +79,7 @@ export function ListProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (localSession) {
+      await hydrateStorage();
       if (user) ensureSeedData(user);
       setLists(user ? getListsForUser(user.id) : []);
       setGiveaways(getGiveaways());
