@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
-  <rect width="128" height="128" rx="28" fill="#FEF6EE"/>
-  <rect x="34" y="54" width="60" height="42" rx="6" fill="#E8391E"/>
-  <rect x="30" y="46" width="68" height="14" rx="4" fill="#C92E16"/>
-  <rect x="60" y="46" width="8" height="50" fill="#FEF6EE"/>
-  <ellipse cx="48" cy="36" rx="14" ry="10" fill="#3D6B4F" transform="rotate(-28 48 36)"/>
-  <ellipse cx="80" cy="36" rx="14" ry="10" fill="#3D6B4F" transform="rotate(28 80 36)"/>
-  <circle cx="64" cy="40" r="6" fill="#FFCD3C"/>
-</svg>
