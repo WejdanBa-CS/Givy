@@ -1,55 +1,63 @@
-# Givy
+<p align="center">
+  <a href="https://www.givy.gifts"><img src="docs/readme/banner.png" alt="Givy. Gifts they'll actually love." width="100%" /></a>
+</p>
 
-**Gift lists without awkward duplicates.** Create a wishlist, share one link, and let friends claim gifts anonymously.
+<p align="center">
+  <a href="https://www.givy.gifts"><b>www.givy.gifts</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://play.google.com/store/apps/details?id=com.givy.givy">Google Play</a>
+  &nbsp;·&nbsp;
+  <a href="mailto:hello@givy.gifts">hello@givy.gifts</a>
+</p>
 
-**Live site:** [www.givy.gifts](https://www.givy.gifts)  
-**Latest release:** [v1.1.0](https://github.com/WejdanBa-CS/Givy/releases/tag/v1.1.0)
+Givy is a gift wishlist you share with one link. Friends open it in any browser, claim a gift, and everyone else sees it's taken. You never see who claimed what, so the surprise stays a surprise.
 
-![Givy hero](public/givy-hero.jpg)
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/readme/make-a-list.jpg" alt="Make one wishlist" /></td>
+    <td align="center" width="25%"><img src="docs/readme/share-one-link.jpg" alt="Share one link" /></td>
+    <td align="center" width="25%"><img src="docs/readme/claimed-gifts-lock.jpg" alt="Claimed gifts lock" /></td>
+    <td align="center" width="25%"><img src="docs/readme/chip-in-together.jpg" alt="Chip in together" /></td>
+  </tr>
+</table>
 
-## Features
+## What it does
 
-- Create & manage gift lists (occasion, date, items, links, prices)
-- Share a unique `/g/[code]` link — shipping address hidden until claim
-- Anonymous “mark purchased” with optional unwrap celebration
-- **Group fund** — mark a high-value gift as cash-fund so friends can chip in
-- **Support me** — PayPal.me / allowlisted tip links (cards never touch Givy)
-- **Suggest gifts** — AI ideas (OpenAI) with curated offline fallback
-- Google sign-in via Supabase (optional closed-beta invite gate)
-- Security helpers, Vitest unit tests, Playwright smoke suite
-- Responsive landing + app shell (mobile → desktop)
-
-## Design
-
-Warm Editorial — cream `#FEF6EE`, coral `#E8391E`, leaf green, gold · Fraunces + DM Sans · custom gift-box mark.
+- **One list per occasion.** Birthdays, weddings, baby showers, holidays, graduations.
+- **Works with any shop.** Paste a product link and Givy pulls the photo and title.
+- **No duplicates.** A claimed gift locks for everyone else on the list.
+- **Claims stay secret.** Owners see what's taken, never who took it.
+- **Group gifts.** Friends can pledge toward a bigger item together.
+- **Private address.** A ship-to address is shown only to the person who claims a gift.
+- **Gift ideas.** AI suggestions by occasion and budget, with a curated offline fallback.
+- **Sign in your way.** Email, Google, or Facebook, with an optional closed-beta invite gate.
 
 ## Stack
 
 | Layer | Tech |
 |-------|------|
 | Web | Next.js 15 (App Router), React 19, Tailwind CSS 4 |
-| Motion / UI | Framer Motion, Radix Dialog, CVA, Lucide |
-| Cloud (optional) | Supabase Auth, Postgres, RLS |
-| Local demo | Browser storage + demo sign-in (no backend) |
-| Deploy | [Render](render.yaml) (Vercel-compatible Next.js) |
+| UI | Fraunces and DM Sans, Lucide icons, Radix dialogs, Framer Motion |
+| Cloud | Supabase Auth, Postgres, row-level security |
+| Local demo | Browser storage and demo sign-in, no backend needed |
+| Android | Flutter shell in `mobile/` that loads the live site |
+| Hosting | [Render](render.yaml), auto-deploys `master` |
 
-**Priority:** Next.js website first. Flutter Play app in `mobile/` wraps the live site for Google Play.
-
-## Quick start
+## Run it locally
 
 ```bash
 git clone https://github.com/WejdanBa-CS/Givy.git
 cd Givy
 npm install
-cp .env.example .env.local   # optional — blank = local demo mode
+cp .env.example .env.local   # leave blank for local demo mode
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) → sign in → create a list → finalize & share.
+Open [localhost:3000](http://localhost:3000), sign in, create a list, then finalize and share it.
 
 ## Environment
 
-Copy `.env.example` → `.env.local`. Minimum for **cloud mode**:
+Copy `.env.example` to `.env.local`. The minimum for cloud mode:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -57,80 +65,63 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Optional: `OPENAI_API_KEY` (gift suggestions), `NEXT_PUBLIC_BETA_REQUIRE_INVITE=true` (closed beta).
+Optional: `OPENAI_API_KEY` for gift ideas, `NEXT_PUBLIC_BETA_REQUIRE_INVITE=true` for a closed beta.
 
-**Never commit** `.env.local` or secrets. Supabase **service role** keys must stay server-side only (not used in this app).
+Never commit `.env.local` or secrets. The Supabase service role key is not used by this app and must stay out of it.
 
 ## Supabase setup
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Run migrations **in order** in the SQL editor:
-   - `supabase/migrations/001_closed_beta.sql`
-   - `supabase/migrations/002_support_me.sql`
-   - `supabase/migrations/003_security_hardening.sql`
-   - `supabase/migrations/004_beta_invites_intentional_rls.sql`
-   - `supabase/migrations/006_beta_write_gate.sql`
-   - `supabase/migrations/007_purge_demo_invites.sql`
-   - `supabase/migrations/009_claim_notifications.sql`
-   - `supabase/migrations/010_item_enhancements.sql`
-   - `supabase/migrations/011_group_funding.sql`
-   - `supabase/migrations/012_owasp_hardening.sql`
-3. Enable Google (and optional Facebook) under Authentication → Providers
-4. Set Site URL + redirect URLs to `https://www.givy.gifts` and `https://www.givy.gifts/auth/callback` (keep the Render URL as a legacy redirect if needed)
-5. Create invite codes in SQL (see `BETA.md`) — do **not** reuse demo seeds from migrations in production
+1. Create a project at [supabase.com](https://supabase.com).
+2. Run every file in `supabase/migrations/` in the SQL editor, in numeric order (`001` through `014`).
+3. Enable Google, and optionally Facebook, under Authentication > Providers.
+4. Set the Site URL to `https://www.givy.gifts` and add `https://www.givy.gifts/auth/callback` to the redirect URLs.
+5. Create invite codes in SQL as described in [`BETA.md`](BETA.md). Don't reuse demo seeds in production.
 
-Full checklist: [`BETA.md`](BETA.md)
+## Deploy
 
-## Deploy (Render)
+Connect the repo to Render as a Blueprint using [`render.yaml`](render.yaml). It defines two services:
 
-1. Connect this repo → **Blueprint** or Web Service
-2. Set env vars from `.env.example` (Supabase URL + anon key required at **build** time)
-3. Deploy from `master`
+- `givy` deploys `master` to production.
+- `givy-staging` deploys the `staging` branch with its own Supabase project.
 
-Or use `render.yaml` as a starting blueprint.
+Supabase URL and anon key must be set at build time.
 
-### Affiliate commissions (Skimlinks) — optional, off by default
+The Google Play build steps are in [`mobile/docs/RELEASE_PLAY.md`](mobile/docs/RELEASE_PLAY.md).
 
-Do **not** enable until `www.givy.gifts` is approved in Skimlinks. An unapproved
-publisher ID rewrites shop links into broken redirects (browsers may download).
+### Affiliate links (off by default)
 
-1. Approve the site in your [Skimlinks](https://skimlinks.com) publisher account
-2. On Render set BOTH:
-   - `NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID`
-   - `NEXT_PUBLIC_SKIMLINKS_ENABLED=true`
-3. Redeploy and verify “View product” / “Shop link” open the retailer (no download)
+Don't enable Skimlinks until `www.givy.gifts` is approved in your publisher account. An unapproved ID turns shop links into broken redirects.
+
+1. Get the site approved in [Skimlinks](https://skimlinks.com).
+2. On Render, set both `NEXT_PUBLIC_SKIMLINKS_PUBLISHER_ID` and `NEXT_PUBLIC_SKIMLINKS_ENABLED=true`.
+3. Redeploy and check that "View product" opens the retailer.
 
 ## Scripts
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `npm run dev` | Dev server (Turbopack) |
+| `npm run dev` | Dev server with Turbopack |
 | `npm run build` | Production build |
-| `npm run start` | Serve production build |
-| `npm test` | Vitest (security + gift-suggest helpers) |
-| `npm run test:e2e:security` | Playwright security smoke |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest unit tests |
+| `npm run test:e2e:security` | Playwright security smoke tests |
 
 ## Project layout
 
 ```
-src/app/          Next.js routes (landing, /app, /g/[code], API)
-src/components/   UI, motion, panels
-src/lib/          API, security, store, Supabase client
+src/app/          Routes: landing, /app, /g/[code], API
+src/components/   UI and panels
+src/lib/          API, security, local store, Supabase client
 supabase/         SQL migrations
 e2e/              Playwright tests
-mobile/           Flutter Google Play shell (loads www.givy.gifts)
+mobile/           Flutter Google Play shell
 ```
 
-## License & copyright
+## License
 
 Copyright © 2026 Wejdan Al Amri. All rights reserved.
 
-Source is published for transparency and portfolio use. See [`LICENSE`](LICENSE) — you may not copy, redistribute, or run a competing commercial service from this code without permission.
+The source is published for transparency and portfolio use. See [`LICENSE`](LICENSE). You may not copy, redistribute, or run a competing service from this code without permission.
 
-## Security
-
-Report issues responsibly — see [`SECURITY.md`](SECURITY.md).
-
-## Contact
-
-Questions: [hello@givy.gifts](mailto:hello@givy.gifts)
+Please report security issues privately as described in [`SECURITY.md`](SECURITY.md).
