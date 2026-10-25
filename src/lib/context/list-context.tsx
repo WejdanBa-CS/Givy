@@ -209,8 +209,9 @@ export function ListProvider({ children }: { children: ReactNode }) {
           try {
             const remote = await fetchPublicList(code);
             if (remote) return remote;
-          } catch {
-            // Fall through to local demo data when a cloud lookup is unavailable.
+          } catch (err) {
+            // Guests may hold a local demo list; everyone else should see the error.
+            if (!localSession) throw err;
           }
         }
         return localSession ? getPublicListByShareCode(code) : null;
